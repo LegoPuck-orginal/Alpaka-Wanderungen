@@ -20,6 +20,8 @@ class AlpakaWebsite {
     this.setupSecurityMeasures();
     this.initializeCookieBanner();
     this.setupCookieFunctions();
+    this.initializeTourFilter();
+    this.setupTourDetailsModal();
     
     // Stelle sicher, dass alle Inhalte sofort sichtbar sind
     this.showAllSections();
@@ -814,5 +816,200 @@ if (document.readyState === 'loading') {
     }
   });
 } else if (!window.alpakaWebsite) {
-  window.alpakaWebsite = new AlpakaWebsite();
-}
+  window.alpakaWebsite = new AlpakaWebsite();  }
+
+  // === TOUR FILTER FUNKTIONALITÄT ===
+  initializeTourFilter() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const tourCards = document.querySelectorAll('.tour-card');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Entferne active von allen Buttons
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        // Füge active zum geklickten Button hinzu
+        button.classList.add('active');
+
+        const filter = button.getAttribute('data-filter');
+
+        tourCards.forEach(card => {
+          if (filter === 'all' || card.getAttribute('data-category') === filter) {
+            card.style.display = 'block';
+            setTimeout(() => {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            }, 100);
+          } else {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+              card.style.display = 'none';
+            }, 300);
+          }
+        });
+      });
+    });  }
+
+  // === TOUR DETAILS MODAL ===
+  setupTourDetailsModal() {
+    const tourDetails = {
+      'familie': {
+        title: '👨‍👩‍👧‍👦 Familien-Tour',
+        duration: '2 Stunden',
+        price: '25€ pro Person',
+        description: 'Die perfekte Tour für die ganze Familie! Unsere kinderlieben Alpakas sorgen für unvergessliche Momente.',
+        includes: [
+          '✅ Erfahrener Guide',
+          '✅ Kleine Gruppe (max. 8 Personen)',
+          '✅ Picknick mit regionalen Produkten',
+          '✅ Fotoshooting mit den Alpakas',
+          '✅ Sicherheitsausrüstung',
+          '✅ Alpaka-Diplom für Kinder'
+        ],
+        route: 'Wiesenwege → Waldpfad → Alpaka-Gehege → Picknickplatz',
+        difficulty: 'Leicht',
+        distance: '3 km'
+      },
+      'abenteuer': {
+        title: '🥾 Abenteuer-Tour',
+        duration: '4 Stunden',
+        price: '45€ pro Person',
+        description: 'Für echte Naturliebhaber! Entdecken Sie mit unseren Alpakas die schönsten Wanderwege der Region.',
+        includes: [
+          '✅ Professioneller Bergführer',
+          '✅ Kleine Gruppe (max. 6 Personen)',
+          '✅ Gipfelpicknick mit Panoramablick',
+          '✅ Fotoshooting an besonderen Orten',
+          '✅ Wanderstöcke bei Bedarf',
+          '✅ Energie-Snacks und Getränke'
+        ],
+        route: 'Bergpfad → Aussichtspunkt → Gipfel → Abstieg durch Wälder',
+        difficulty: 'Mittel',
+        distance: '8 km'
+      },
+      'sonnenaufgang': {
+        title: '🌅 Sonnenaufgang-Tour',
+        duration: '3 Stunden',
+        price: '35€ pro Person',
+        description: 'Magische Momente erleben! Starten Sie früh am Morgen und genießen Sie den Sonnenaufgang mit unseren Alpakas.',
+        includes: [
+          '✅ Frühaufsteher-Guide',
+          '✅ Exklusive kleine Gruppe (max. 6 Personen)',
+          '✅ Romantisches Frühstück bei Sonnenaufgang',
+          '✅ Warme Decken und heißer Kaffee',
+          '✅ Professionelle Sonnenaufgang-Fotos',
+          '✅ Sonnenaufgang-Garantie*'
+        ],
+        route: 'Frühmorgendlicher Aufstieg → Aussichtspunkt → Frühstücksplatz',
+        difficulty: 'Leicht-Mittel',
+        distance: '4 km'
+      }
+    };
+
+    window.showTourDetails = (tourId) => {
+      const tour = tourDetails[tourId];
+      if (!tour) return;
+
+      // Erstelle Modal HTML
+      const modalHTML = `
+        <div class="tour-modal-overlay" onclick="closeTourModal()">
+          <div class="tour-modal" onclick="event.stopPropagation()">
+            <div class="tour-modal-header">
+              <h2>${tour.title}</h2>
+              <button class="tour-modal-close" onclick="closeTourModal()">×</button>
+            </div>
+            <div class="tour-modal-body">
+              <div class="tour-info-grid">
+                <div class="tour-info-item">
+                  <strong>⏰ Dauer:</strong> ${tour.duration}
+                </div>
+                <div class="tour-info-item">
+                  <strong>💰 Preis:</strong> ${tour.price}
+                </div>
+                <div class="tour-info-item">
+                  <strong>📍 Schwierigkeit:</strong> ${tour.difficulty}
+                </div>
+                <div class="tour-info-item">
+                  <strong>🚶‍♀️ Strecke:</strong> ${tour.distance}
+                </div>
+              </div>
+              
+              <div class="tour-description">
+                <h3>Beschreibung</h3>
+                <p>${tour.description}</p>
+              </div>
+              
+              <div class="tour-includes">
+                <h3>Im Preis enthalten</h3>
+                <div class="includes-list">
+                  ${tour.includes.map(item => `<div class="include-item">${item}</div>`).join('')}
+                </div>
+              </div>
+              
+              <div class="tour-route">
+                <h3>Route</h3>
+                <p>${tour.route}</p>
+              </div>
+            </div>
+            <div class="tour-modal-footer">
+              <button class="btn btn-secondary" onclick="closeTourModal()">Schließen</button>
+              <a href="#kontakt" class="btn btn-primary" data-tour="${tourId}" onclick="closeTourModal(); selectTour('${tourId}')">
+                Jetzt buchen
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Füge Modal zum DOM hinzu
+      const existingModal = document.querySelector('.tour-modal-overlay');
+      if (existingModal) {
+        existingModal.remove();
+      }
+
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeTourModal = () => {
+      const modal = document.querySelector('.tour-modal-overlay');
+      if (modal) {
+        modal.remove();
+        document.body.style.overflow = 'auto';
+      }
+    };
+
+    window.selectTour = (tourId) => {
+      // Automatische Tour-Auswahl im Kontaktformular
+      setTimeout(() => {
+        const tourSelect = document.getElementById('tour');
+        if (tourSelect) {
+          tourSelect.value = tourId;
+          // Trigger change event für Preisberechnung
+          tourSelect.dispatchEvent(new Event('change'));
+        }
+      }, 500);
+    };  }
+
+  // === SMOOTH SCROLLING VERBESSERUNGEN ===
+  enhancedNavigateToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    // Berechne Offset für feste Navigation
+    const navHeight = document.querySelector('.nav-container').offsetHeight;
+    const sectionTop = section.offsetTop - navHeight - 20;
+
+    // Smooth scroll
+    window.scrollTo({
+      top: sectionTop,
+      behavior: 'smooth'
+    });
+
+    // Aktualisiere aktive Navigation
+    this.currentSection = sectionId;
+    this.updateActiveNavigation();
+
+    // Schließe mobiles Menü falls offen
+    this.closeMobileMenu();
+  }

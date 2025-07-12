@@ -50,23 +50,44 @@
       
       <ul class="nav-menu">
         <li class="nav-item">
-          <a href="#hero" class="nav-link" data-action="navigate" data-value="hero">Start</a>
+          <a href="#hero" class="nav-link" data-action="navigate" data-value="hero">
+            <span class="nav-icon">🏠</span>
+            <span>Start</span>
+          </a>
         </li>
         <li class="nav-item">
-          <a href="#touren" class="nav-link" data-action="navigate" data-value="touren">Touren</a>
+          <a href="#touren" class="nav-link" data-action="navigate" data-value="touren">
+            <span class="nav-icon">🌟</span>
+            <span>Touren</span>
+          </a>
         </li>
         <li class="nav-item">
-          <a href="#ueber-uns" class="nav-link" data-action="navigate" data-value="ueber-uns">Über uns</a>
+          <a href="#ueber-uns" class="nav-link" data-action="navigate" data-value="ueber-uns">
+            <span class="nav-icon">❤️</span>
+            <span>Über uns</span>
+          </a>
         </li>
         <li class="nav-item">
-          <a href="#galerie" class="nav-link" data-action="navigate" data-value="galerie">Galerie</a>
+          <a href="#galerie" class="nav-link" data-action="navigate" data-value="galerie">
+            <span class="nav-icon">📸</span>
+            <span>Galerie</span>
+          </a>
         </li>
         <li class="nav-item">
-          <a href="#kontakt" class="nav-link" data-action="navigate" data-value="kontakt">Kontakt</a>
+          <a href="#kontakt" class="nav-link" data-action="navigate" data-value="kontakt">
+            <span class="nav-icon">📞</span>
+            <span>Buchen</span>
+          </a>
         </li>
       </ul>
       
       <div class="nav-actions">
+        <div class="quick-contact">
+          <a href="tel:+491234567890" class="quick-phone" title="Sofort anrufen">
+            <span class="phone-icon">📞</span>
+            <span class="phone-text">Jetzt anrufen</span>
+          </a>
+        </div>
         <button class="btn btn-secondary" data-action="toggle-dark-mode" title="Dark Mode umschalten">
           <span class="btn-icon">🌙</span>
         </button>
@@ -88,18 +109,62 @@
     <div class="hero-float-3">🌄</div>
     
     <div class="hero-content">
-      <h1 class="hero-title">Alpaka Wanderungen</h1>
+      <div class="hero-badge">
+        <span class="badge-icon">⭐</span>
+        <span>Deutschlands beliebteste Alpaka-Touren</span>
+      </div>
+      
+      <h1 class="hero-title">Unvergessliche Alpaka-Wanderungen</h1>
       <p class="hero-subtitle">
-        Erleben Sie unvergessliche Momente mit unseren sanftmütigen Alpakas
-        in der wunderschönen Natur Deutschlands
+        Entdecken Sie die Natur mit unseren freundlichen Alpakas. 
+        <strong>Perfekt für Familien, Paare und Abenteurer!</strong>
       </p>
+      
+      <div class="hero-highlights">
+        <div class="highlight-item">
+          <span class="highlight-icon">👨‍👩‍👧‍👦</span>
+          <span>Familienfreundlich</span>
+        </div>
+        <div class="highlight-item">
+          <span class="highlight-icon">🌱</span>
+          <span>100% Naturerlebnis</span>
+        </div>
+        <div class="highlight-item">
+          <span class="highlight-icon">🏆</span>
+          <span>5⭐ Bewertungen</span>
+        </div>
+      </div>
+      
       <div class="hero-buttons">
-        <a href="#touren" class="btn btn-primary" data-action="navigate" data-value="touren">
+        <a href="#touren" class="btn btn-primary hero-btn-main" data-action="navigate" data-value="touren">
+          <span class="btn-icon">🌟</span>
           Touren entdecken
+          <span class="btn-hint">ab 25€ pro Person</span>
         </a>
-        <a href="#kontakt" class="btn btn-secondary" data-action="navigate" data-value="kontakt">
-          Jetzt buchen
+        <a href="#kontakt" class="btn btn-secondary hero-btn-secondary" data-action="navigate" data-value="kontakt">
+          <span class="btn-icon">📞</span>
+          Sofort buchen
         </a>
+      </div>
+      
+      <div class="hero-trust">
+        <div class="trust-item">
+          <span class="trust-number" data-count="1500">0</span>
+          <span class="trust-label">Glückliche Besucher</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-number" data-count="15">0</span>
+          <span class="trust-label">Liebevolle Alpakas</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-number" data-count="10">0</span>
+          <span class="trust-label">Jahre Erfahrung</span>
+        </div>
+      </div>
+      
+      <div class="hero-scroll-hint">
+        <span>Mehr erfahren</span>
+        <div class="scroll-arrow">↓</div>
       </div>
     </div>
   </section>
@@ -108,49 +173,140 @@
   <section id="touren" class="section">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">Unsere Touren</h2>
+        <div class="section-badge">
+          <span class="badge-icon">🌟</span>
+          <span>Beliebteste Erlebnisse</span>
+        </div>
+        <h2 class="section-title">Wählen Sie Ihr Alpaka-Abenteuer</h2>
         <p class="section-subtitle">
-          Entdecken Sie unsere verschiedenen Alpaka-Wanderungen für jeden Geschmack und jede Altersgruppe
+          Für jeden das richtige Erlebnis - von entspannten Familienwanderungen bis zu aufregenden Abenteuer-Touren
         </p>
+        <div class="tour-filter">
+          <button class="filter-btn active" data-filter="all">Alle Touren</button>
+          <button class="filter-btn" data-filter="familie">👨‍👩‍👧‍👦 Familie</button>
+          <button class="filter-btn" data-filter="abenteuer">🥾 Abenteuer</button>
+          <button class="filter-btn" data-filter="romantisch">💕 Romantisch</button>
+        </div>
       </div>
       
       <div class="cards-grid">
-        <div class="card fade-in">
-          <span class="card-icon">👨‍👩‍👧‍👦</span>
+        <div class="card tour-card featured fade-in" data-category="familie">
+          <div class="card-badge popular">Beliebt</div>
+          <div class="card-header">
+            <span class="card-icon">👨‍👩‍👧‍👦</span>
+            <div class="card-rating">
+              <span class="stars">⭐⭐⭐⭐⭐</span>
+              <span class="rating-text">(127 Bewertungen)</span>
+            </div>
+          </div>
           <h3 class="card-title">Familien-Tour</h3>
           <p class="card-description">
-            Perfekt für Familien mit Kindern. Eine entspannte 2-stündige Wanderung durch 
-            malerische Wiesen und Wälder. Unsere Alpakas sind besonders kinderlieb.
+            <strong>Perfekt für Familien!</strong> Eine entspannte Wanderung durch malerische Wiesen. 
+            Unsere kinderlieben Alpakas sorgen für unvergessliche Momente.
           </p>
+          <div class="card-highlights">
+            <span class="highlight">✅ Kinderfreundlich ab 6 Jahren</span>
+            <span class="highlight">✅ Kleine Gruppen (max. 8 Personen)</span>
+            <span class="highlight">✅ Picknick inklusive</span>
+          </div>
           <div class="card-details">
             <div class="detail-item">
-              <strong>Dauer:</strong> 2 Stunden
+              <strong>⏰ Dauer:</strong> 2 Stunden
+            </div>
+            <div class="detail-item price-highlight">
+              <strong>💰 Preis:</strong> <span class="price">25€</span> pro Person
             </div>
             <div class="detail-item">
-              <strong>Preis:</strong> 25€ pro Person
+              <strong>👶 Alter:</strong> Ab 6 Jahren
             </div>
-            <div class="detail-item">
-              <strong>Alter:</strong> Ab 6 Jahren
-            </div>
+          </div>
+          <div class="card-actions">
+            <a href="#kontakt" class="btn btn-primary btn-small" data-tour="familie">
+              Jetzt buchen
+            </a>
+            <button class="btn btn-secondary btn-small" onclick="showTourDetails('familie')">
+              Mehr erfahren
+            </button>
           </div>
         </div>
         
-        <div class="card fade-in">
-          <span class="card-icon">🥾</span>
+        <div class="card tour-card fade-in" data-category="abenteuer">
+          <div class="card-badge adventure">Abenteuer</div>
+          <div class="card-header">
+            <span class="card-icon">🥾</span>
+            <div class="card-rating">
+              <span class="stars">⭐⭐⭐⭐⭐</span>
+              <span class="rating-text">(89 Bewertungen)</span>
+            </div>
+          </div>
           <h3 class="card-title">Abenteuer-Tour</h3>
           <p class="card-description">
-            Für Wanderfreunde und Naturliebhaber. Eine ausgedehnte 4-stündige Tour 
-            durch abwechslungsreiche Landschaften mit spektakulären Ausblicken.
+            <strong>Für echte Naturliebhaber!</strong> Ausgedehnte Wanderung durch abwechslungsreiche 
+            Landschaften mit spektakulären Ausblicken.
           </p>
+          <div class="card-highlights">
+            <span class="highlight">✅ Bergpfade & Waldwege</span>
+            <span class="highlight">✅ Fotoshooting mit Alpakas</span>
+            <span class="highlight">✅ Gipfelpicknick mit Aussicht</span>
+          </div>
           <div class="card-details">
             <div class="detail-item">
-              <strong>Dauer:</strong> 4 Stunden
+              <strong>⏰ Dauer:</strong> 4 Stunden
+            </div>
+            <div class="detail-item price-highlight">
+              <strong>💰 Preis:</strong> <span class="price">45€</span> pro Person
             </div>
             <div class="detail-item">
-              <strong>Preis:</strong> 45€ pro Person
+              <strong>👨‍👩‍👧‍👦 Alter:</strong> Ab 12 Jahren
+            </div>
+          </div>
+          <div class="card-actions">
+            <a href="#kontakt" class="btn btn-primary btn-small" data-tour="abenteuer">
+              Jetzt buchen
+            </a>
+            <button class="btn btn-secondary btn-small" onclick="showTourDetails('abenteuer')">
+              Mehr erfahren
+            </button>
+          </div>
+        </div>
+        
+        <div class="card tour-card fade-in" data-category="romantisch">
+          <div class="card-badge romantic">Romantisch</div>
+          <div class="card-header">
+            <span class="card-icon">🌅</span>
+            <div class="card-rating">
+              <span class="stars">⭐⭐⭐⭐⭐</span>
+              <span class="rating-text">(156 Bewertungen)</span>
+            </div>
+          </div>
+          <h3 class="card-title">Sonnenaufgang-Tour</h3>
+          <p class="card-description">
+            <strong>Magische Momente zu zweit!</strong> Erleben Sie den Sonnenaufgang in Begleitung 
+            unserer Alpakas. Perfekt für Paare und besondere Anlässe.
+          </p>
+          <div class="card-highlights">
+            <span class="highlight">✅ Romantisches Frühstück</span>
+            <span class="highlight">✅ Sonnenaufgang-Garantie</span>
+            <span class="highlight">✅ Kleine Gruppen (max. 6 Personen)</span>
+          </div>
+          <div class="card-details">
+            <div class="detail-item">
+              <strong>⏰ Dauer:</strong> 3 Stunden
+            </div>
+            <div class="detail-item price-highlight">
+              <strong>💰 Preis:</strong> <span class="price">35€</span> pro Person
             </div>
             <div class="detail-item">
-              <strong>Alter:</strong> Ab 12 Jahren
+              <strong>🌅 Start:</strong> 6:00 Uhr
+            </div>
+          </div>
+          <div class="card-actions">
+            <a href="#kontakt" class="btn btn-primary btn-small" data-tour="sonnenaufgang">
+              Jetzt buchen
+            </a>
+            <button class="btn btn-secondary btn-small" onclick="showTourDetails('sonnenaufgang')">
+              Mehr erfahren
+            </button>
             </div>
           </div>
         </div>
