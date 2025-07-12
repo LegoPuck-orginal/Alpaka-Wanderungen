@@ -40,6 +40,12 @@
             </a>
           </li>
           <li class="nav-item">
+            <a href="#user-management" class="nav-link" data-section="user-management">
+              <span class="nav-icon">👥</span>
+              Benutzer
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="#statistiken" class="nav-link" data-section="statistiken">
               <span class="nav-icon">📈</span>
               Statistiken
@@ -57,6 +63,10 @@
           <span class="admin-name">Astrid Mustermann</span>
           <span class="admin-role">Administrator</span>
         </div>
+        <button class="logout-btn" onclick="logout()">
+          <span class="nav-icon">🚪</span>
+          Abmelden
+        </button>
       </div>
     </aside>
 
@@ -250,6 +260,25 @@
         </div>
       </section>
 
+      <!-- User Management Section -->
+      <section id="user-management" class="content-section">
+        <div class="section-header">
+          <h2>Benutzer verwalten</h2>
+          <div class="section-actions">
+            <button class="primary-btn" onclick="showAddUserModal()">
+              <span class="btn-icon">👤</span>
+              Neuer Benutzer
+            </button>
+          </div>
+        </div>
+
+        <div class="users-container">
+          <div class="users-grid" id="users-grid">
+            <!-- User cards werden hier durch JavaScript eingefügt -->
+          </div>
+        </div>
+      </section>
+
       <!-- Statistiken Section -->
       <section id="statistiken" class="content-section">
         <div class="section-header">
@@ -266,23 +295,23 @@
 
         <div class="charts-grid">
           <div class="chart-card">
-            <h3>Buchungen pro Monat</h3>
+            <h3>Anrufe der letzten 7 Tage</h3>
             <div class="chart-placeholder">
-              <canvas id="bookings-chart"></canvas>
+              <canvas id="calls-chart" width="400" height="200"></canvas>
+            </div>
+          </div>
+          
+          <div class="chart-card">
+            <h3>Buchungen-Entwicklung</h3>
+            <div class="chart-placeholder">
+              <canvas id="bookings-chart" width="400" height="200"></canvas>
             </div>
           </div>
           
           <div class="chart-card">
             <h3>Umsatz-Entwicklung</h3>
             <div class="chart-placeholder">
-              <canvas id="revenue-chart"></canvas>
-            </div>
-          </div>
-          
-          <div class="chart-card">
-            <h3>Beliebteste Zeiten</h3>
-            <div class="chart-placeholder">
-              <canvas id="time-chart"></canvas>
+              <canvas id="revenue-chart" width="400" height="200"></canvas>
             </div>
           </div>
         </div>
@@ -307,10 +336,62 @@
     </div>
   </div>
 
+  <!-- Modal für User hinzufügen/bearbeiten -->
+  <div id="user-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="user-modal-title">Neuer Benutzer</h3>
+        <button class="modal-close" onclick="closeModal('user-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="user-form">
+          <div class="form-row">
+            <div>
+              <label for="user-username">Benutzername</label>
+              <input type="text" id="user-username" required>
+            </div>
+            <div>
+              <label for="user-name">Vollständiger Name</label>
+              <input type="text" id="user-name" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="user-email">E-Mail</label>
+              <input type="email" id="user-email" required>
+            </div>
+            <div>
+              <label for="user-role">Rolle</label>
+              <select id="user-role">
+                <option value="user">Benutzer</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="user-password">Passwort</label>
+              <input type="password" id="user-password" required>
+            </div>
+            <div>
+              <label for="user-password-confirm">Passwort bestätigen</label>
+              <input type="password" id="user-password-confirm" required>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary-btn" onclick="closeModal('user-modal')">Abbrechen</button>
+        <button class="primary-btn" onclick="saveUser()">Speichern</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notifications -->
   <div id="toast-container"></div>
 
-  <script src="../admin-data.js"></script>
+  <script src="../admin-system.js"></script>
   <script src="../admin-script.js"></script>
 </body>
 </html>
