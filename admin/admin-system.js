@@ -57,28 +57,70 @@ class AdminSystem {
 
   // Daten-Management
   loadData() {
-    // Lade gespeicherte Daten aus localStorage
-    const savedRequests = localStorage.getItem('alpaka_requests');
-    const savedBookings = localStorage.getItem('alpaka_bookings');
-    const savedUsers = localStorage.getItem('alpaka_users');
-    const savedStats = localStorage.getItem('alpaka_statistics');
+    try {
+      // Lade Kontaktanfragen von der Website
+      const savedContactRequests = localStorage.getItem('alpaka_contact_requests');
+      const savedRequests = localStorage.getItem('alpaka_requests');
+      const savedBookings = localStorage.getItem('alpaka_bookings');
+      const savedUsers = localStorage.getItem('alpaka_users');
+      const savedStats = localStorage.getItem('alpaka_statistics');
 
-    this.requests = savedRequests ? JSON.parse(savedRequests) : [];
-    this.bookings = savedBookings ? JSON.parse(savedBookings) : [];
-    this.users = savedUsers ? JSON.parse(savedUsers) : {};
-    this.statistics = savedStats ? JSON.parse(savedStats) : {
+      // Kombiniere Website-Kontaktanfragen mit Admin-Anfragen
+      const contactRequests = savedContactRequests ? JSON.parse(savedContactRequests) : [];
+      const adminRequests = savedRequests ? JSON.parse(savedRequests) : [];
+      
+      this.requests = [...contactRequests, ...adminRequests];
+      this.bookings = savedBookings ? JSON.parse(savedBookings) : [];
+      this.users = savedUsers ? JSON.parse(savedUsers) : {};
+      this.statistics = savedStats ? JSON.parse(savedStats) : {
+        callCount: 0,
+        lastWeekCalls: this.generateLastWeekData(),
+        totalRevenue: 0,
+        totalBookings: 0,
+        dailyCalls: {}
+      };
+    } catch (error) {
+      console.error('Fehler beim Laden der Daten:', error);
+      this.initializeEmptyData();
+    }
+  }
+
+  initializeEmptyData() {
+    this.requests = [];
+    this.bookings = [];
+    this.users = {};
+    this.statistics = {
       callCount: 0,
-      lastWeekCalls: [],
+      lastWeekCalls: this.generateLastWeekData(),
       totalRevenue: 0,
-      totalBookings: 0
+      totalBookings: 0,
+      dailyCalls: {}
     };
   }
 
+  generateLastWeekData() {
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      data.push({
+        date: date.toISOString().split('T')[0],
+        calls: Math.floor(Math.random() * 10) + 1,
+        label: date.toLocaleDateString('de-DE', { weekday: 'short' })
+      });
+    }
+    return data;
+  }
+
   saveData() {
-    localStorage.setItem('alpaka_requests', JSON.stringify(this.requests));
-    localStorage.setItem('alpaka_bookings', JSON.stringify(this.bookings));
-    localStorage.setItem('alpaka_users', JSON.stringify(this.users));
-    localStorage.setItem('alpaka_statistics', JSON.stringify(this.statistics));
+    try {
+      localStorage.setItem('alpaka_requests', JSON.stringify(this.requests.filter(r => r.source !== 'contact')));
+      localStorage.setItem('alpaka_bookings', JSON.stringify(this.bookings));
+      localStorage.setItem('alpaka_users', JSON.stringify(this.users));
+      localStorage.setItem('alpaka_statistics', JSON.stringify(this.statistics));
+    } catch (error) {
+      console.error('Fehler beim Speichern der Daten:', error);
+    }
   }
 
   initializeDefaultData() {
@@ -127,12 +169,13 @@ class AdminSystem {
   // Kontaktanfragen-Management
   addRequest(requestData) {
     const request = {
-      id: Date.now(),
+      id: Date.now().toString(),
       ...requestData,
-      status: 'new',
-      timestamp: new Date().toISOString(),
-      unread: true,
-      handledBy: null
+      status: requestData.status || 'new',
+      timestamp: requestData.timestamp || new Date().toISOString(),
+      isRead: false,
+      handledBy: null,
+      source: requestData.source || 'contact'
     };
     
     this.requests.unshift(request);
@@ -141,37 +184,40 @@ class AdminSystem {
     return request;
   }
 
-  updateRequestStatus(requestId, status) {
-    const request = this.requests.find(r => r.id === requestId);
-    if (request) {
-      request.status = status;
-      request.handledBy = this.currentUser.username;
-      request.updatedAt = new Date().toISOString();
-      this.saveData();
-      return true;
-    }
-    return false;
+  getUnreadRequestsCount() {
+    return this.requests.filter(r => !r.isRead).length;
   }
 
   markRequestAsRead(requestId) {
     const request = this.requests.find(r => r.id === requestId);
     if (request) {
-      request.unread = false;
+      request.isRead = !request.isRead; // Toggle read status
       this.saveData();
       return true;
     }
     return false;
   }
 
-  markAllRequestsAsRead() {
-    this.requests.forEach(request => {
-      request.unread = false;
-    });
-    this.saveData();
+  deleteRequest(requestId) {
+    const index = this.requests.findIndex(r => r.id === requestId);
+    if (index !== -1) {
+      this.requests.splice(index, 1);
+      this.saveData();
+      return true;
+    }
+    return false;
   }
 
-  getUnreadRequestsCount() {
-    return this.requests.filter(r => r.unread).length;
+  updateRequestStatus(requestId, status) {
+    const request = this.requests.find(r => r.id === requestId);
+    if (request) {
+      request.status = status;
+      request.handledBy = this.currentUser ? this.currentUser.username : 'admin';
+      request.updatedAt = new Date().toISOString();
+      this.saveData();
+      return true;
+    }
+    return false;
   }
 
   // Buchungs-Management

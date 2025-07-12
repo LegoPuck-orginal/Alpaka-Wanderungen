@@ -6,6 +6,34 @@
   <title>Admin Panel - Alpaka Wanderungen</title>
   <link rel="stylesheet" href="../admin-styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Sofortige Authentifizierungs-Prüfung -->
+  <script>
+    // Prüfe Authentifizierung VOR dem Laden der Seite
+    (function() {
+      const userData = sessionStorage.getItem('alpaka_admin_user');
+      if (!userData) {
+        console.warn('❌ Keine Authentifizierung - Weiterleitung zum Login');
+        window.location.replace('login.html');
+        return;
+      }
+      
+      try {
+        const user = JSON.parse(userData);
+        console.log('✅ Benutzer authentifiziert:', user.name);
+        
+        // Lade Dark Mode Einstellung
+        const darkMode = localStorage.getItem('alpaka_admin_dark_mode');
+        if (darkMode === 'true') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (error) {
+        console.error('❌ Fehler beim Parsen der Benutzerdaten:', error);
+        sessionStorage.removeItem('alpaka_admin_user');
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
 </head>
 <body>
   <div class="admin-container">
@@ -108,7 +136,7 @@
             <div class="stat-card">
               <div class="stat-icon">📧</div>
               <div class="stat-content">
-                <div class="stat-number">24</div>
+                <div class="stat-number" id="stat-requests">0</div>
                 <div class="stat-label">Neue Anfragen</div>
                 <div class="stat-change positive">+15%</div>
               </div>
@@ -117,7 +145,7 @@
             <div class="stat-card">
               <div class="stat-icon">🗓️</div>
               <div class="stat-content">
-                <div class="stat-number">12</div>
+                <div class="stat-number" id="stat-bookings">0</div>
                 <div class="stat-label">Heute Buchungen</div>
                 <div class="stat-change positive">+8%</div>
               </div>
@@ -126,7 +154,7 @@
             <div class="stat-card">
               <div class="stat-icon">💰</div>
               <div class="stat-content">
-                <div class="stat-number">1,240€</div>
+                <div class="stat-number" id="stat-revenue">0€</div>
                 <div class="stat-label">Heute Umsatz</div>
                 <div class="stat-change positive">+22%</div>
               </div>
@@ -158,9 +186,9 @@
                 <span class="action-icon">📊</span>
                 <span class="action-text">Report erstellen</span>
               </button>
-              <button class="quick-action-btn" onclick="sendNewsletter()">
-                <span class="action-icon">📨</span>
-                <span class="action-text">Newsletter</span>
+              <button class="quick-action-btn" onclick="simulateNewRequest()">
+                <span class="action-icon">🎯</span>
+                <span class="action-text">Test-Anfrage</span>
               </button>
             </div>
           </div>
@@ -168,8 +196,20 @@
           <!-- Recent Activity -->
           <div class="recent-activity">
             <h3>Letzte Aktivitäten</h3>
-            <div class="activity-list">
-              <div class="activity-item">
+            <div class="activity-list" id="activity-list">
+              <!-- Wird durch JavaScript gefüllt -->
+            </div>
+          </div>
+          
+          <!-- 7-Tage Statistik Chart -->
+          <div class="chart-section">
+            <h3>Anrufe der letzten 7 Tage</h3>
+            <div class="chart-container">
+              <canvas id="calls-chart" width="400" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
                 <div class="activity-icon">📧</div>
                 <div class="activity-content">
                   <div class="activity-title">Neue Kontaktanfrage</div>
