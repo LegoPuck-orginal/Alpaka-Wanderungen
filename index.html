@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="./css/navigation.css">
   <link rel="stylesheet" href="./css/sections.css">
   <link rel="stylesheet" href="./css/contact.css">
+  <link rel="stylesheet" href="./css/cookies.css">
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="./assets/alpacker-logo.png">
@@ -448,13 +449,74 @@
       <div class="footer-bottom">
         <p>&copy; 2025 Alpaka Wanderungen. Alle Rechte vorbehalten.</p>
         <div class="footer-links">
-          <a href="#datenschutz">Datenschutz</a>
-          <a href="#impressum">Impressum</a>
-          <a href="#agb">AGB</a>
+          <a href="datenschutz.html">Datenschutz</a>
+          <a href="impressum.html">Impressum</a>
+          <a href="agb.html">AGB</a>
         </div>
       </div>
     </div>
   </footer>
+
+  <!-- Cookie Banner -->
+  <div id="cookie-banner" class="cookie-banner">
+    <div class="cookie-content">
+      <div class="cookie-text">
+        <h3>🍪 Wir verwenden Cookies</h3>
+        <p>Diese Website verwendet Cookies, um Ihnen das bestmögliche Erlebnis zu bieten. Weitere Informationen finden Sie in unserer <a href="#datenschutz" style="color: var(--alpaka-creme); text-decoration: underline;">Datenschutzerklärung</a>.</p>
+      </div>
+      <div class="cookie-actions">
+        <button class="cookie-btn accept" onclick="acceptCookies()">Alle akzeptieren</button>
+        <button class="cookie-btn settings" onclick="showPrivacyModal()">Einstellungen</button>
+        <button class="cookie-btn decline" onclick="declineCookies()">Ablehnen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Datenschutz Modal -->
+  <div id="privacy-modal" class="privacy-modal">
+    <div class="privacy-content">
+      <div class="privacy-header">
+        <h2>🛡️ Datenschutz & Cookie-Einstellungen</h2>
+        <button class="privacy-close" onclick="closePrivacyModal()">×</button>
+      </div>
+      <div class="privacy-body">
+        <h3>Verwendung von Cookies</h3>
+        <p>Wir verwenden verschiedene Arten von Cookies, um unsere Website zu betreiben und zu verbessern:</p>
+        
+        <div class="cookie-category">
+          <h4>🔧 Technisch notwendige Cookies</h4>
+          <p>Diese Cookies sind für das Funktionieren der Website erforderlich und können nicht deaktiviert werden.</p>
+          <label class="cookie-switch">
+            <input type="checkbox" checked disabled>
+            <span class="slider">Immer aktiv</span>
+          </label>
+        </div>
+        
+        <div class="cookie-category">
+          <h4>📊 Analyse Cookies</h4>
+          <p>Diese Cookies helfen uns zu verstehen, wie Besucher mit unserer Website interagieren.</p>
+          <label class="cookie-switch">
+            <input type="checkbox" id="analytics-cookies">
+            <span class="slider">Optional</span>
+          </label>
+        </div>
+        
+        <div class="cookie-category">
+          <h4>🎯 Marketing Cookies</h4>
+          <p>Diese Cookies werden verwendet, um Ihnen relevante Werbung anzuzeigen.</p>
+          <label class="cookie-switch">
+            <input type="checkbox" id="marketing-cookies">
+            <span class="slider">Optional</span>
+          </label>
+        </div>
+        
+        <div class="privacy-actions">
+          <button class="cookie-btn accept" onclick="savePreferences()">Einstellungen speichern</button>
+          <button class="cookie-btn settings" onclick="closePrivacyModal()">Abbrechen</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="./js/main.js"></script>

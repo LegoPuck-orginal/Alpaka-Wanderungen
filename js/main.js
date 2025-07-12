@@ -18,6 +18,8 @@ class AlpakaWebsite {
     this.initializeContactForm();
     this.initializeDarkMode();
     this.setupSecurityMeasures();
+    this.initializeCookieBanner();
+    this.setupCookieFunctions();
     
     // Stelle sicher, dass alle Inhalte sofort sichtbar sind
     this.showAllSections();
@@ -630,6 +632,76 @@ class AlpakaWebsite {
     tourSelect.addEventListener('change', updateBookingSummary);
     personsSelect.addEventListener('change', updateBookingSummary);
     dateInput.addEventListener('change', updateBookingSummary);
+  }
+
+  // === COOKIE MANAGEMENT ===
+  initializeCookieBanner() {
+    // Prüfe ob bereits entschieden wurde
+    const cookieConsent = localStorage.getItem('alpaka_cookie_consent');
+    if (!cookieConsent) {
+      setTimeout(() => {
+        document.getElementById('cookie-banner').classList.add('show');
+      }, 2000); // 2 Sekunden nach Seitenload
+    }
+  }
+  
+  // Global Cookie Functions
+  setupCookieFunctions() {
+    window.acceptCookies = () => {
+      localStorage.setItem('alpaka_cookie_consent', JSON.stringify({
+        necessary: true,
+        analytics: true,
+        marketing: true,
+        timestamp: new Date().toISOString()
+      }));
+      this.hideCookieBanner();
+      console.log('✅ Alle Cookies akzeptiert');
+    };
+    
+    window.declineCookies = () => {
+      localStorage.setItem('alpaka_cookie_consent', JSON.stringify({
+        necessary: true,
+        analytics: false,
+        marketing: false,
+        timestamp: new Date().toISOString()
+      }));
+      this.hideCookieBanner();
+      console.log('❌ Optionale Cookies abgelehnt');
+    };
+    
+    window.showPrivacyModal = () => {
+      document.getElementById('privacy-modal').classList.add('show');
+    };
+    
+    window.closePrivacyModal = () => {
+      document.getElementById('privacy-modal').classList.remove('show');
+    };
+    
+    window.savePreferences = () => {
+      const analytics = document.getElementById('analytics-cookies').checked;
+      const marketing = document.getElementById('marketing-cookies').checked;
+      
+      localStorage.setItem('alpaka_cookie_consent', JSON.stringify({
+        necessary: true,
+        analytics: analytics,
+        marketing: marketing,
+        timestamp: new Date().toISOString()
+      }));
+      
+      this.hideCookieBanner();
+      window.closePrivacyModal();
+      console.log('💾 Cookie-Einstellungen gespeichert:', { analytics, marketing });
+    };
+  }
+  
+  hideCookieBanner() {
+    const banner = document.getElementById('cookie-banner');
+    if (banner) {
+      banner.classList.remove('show');
+      setTimeout(() => {
+        banner.style.display = 'none';
+      }, 500);
+    }
   }
 
   // === UTILITY FUNCTIONS ===

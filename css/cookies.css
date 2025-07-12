@@ -1,0 +1,231 @@
+/* === COOKIE BANNER === */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, var(--schatten-grau), rgba(31, 47, 47, 0.95));
+  color: white;
+  padding: 20px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  transform: translateY(100%);
+  transition: transform 0.5s ease-out;
+}
+
+.cookie-banner.show {
+  transform: translateY(0);
+}
+
+.cookie-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cookie-text {
+  flex: 1;
+  min-width: 300px;
+}
+
+.cookie-text h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--alpaka-creme);
+}
+
+.cookie-text p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cookie-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.cookie-btn.accept {
+  background: var(--gras-gruen);
+  color: white;
+}
+
+.cookie-btn.accept:hover {
+  background: var(--wiesen-gruen);
+  transform: translateY(-1px);
+}
+
+.cookie-btn.settings {
+  background: transparent;
+  color: var(--alpaka-creme);
+  border: 1px solid var(--alpaka-creme);
+}
+
+.cookie-btn.settings:hover {
+  background: rgba(230, 230, 205, 0.1);
+}
+
+.cookie-btn.decline {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+}
+
+.cookie-btn.decline:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* === DATENSCHUTZ MODAL === */
+.privacy-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 20px;
+}
+
+.privacy-modal.show {
+  display: flex;
+}
+
+.privacy-content {
+  background: white;
+  border-radius: var(--radius-lg);
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 30px;
+}
+
+.privacy-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.privacy-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 5px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.privacy-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* === COOKIE SWITCHES === */
+.cookie-category {
+  background: var(--bg-primary);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  margin: 15px 0;
+  border: 1px solid var(--border-color);
+}
+
+.cookie-category h4 {
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.cookie-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.cookie-switch input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--gras-gruen);
+}
+
+.cookie-switch input[type="checkbox"]:disabled {
+  opacity: 0.6;
+}
+
+.privacy-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* === COOKIE BANNER ANIMATION === */
+@keyframes cookieSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.cookie-banner.show {
+  animation: cookieSlideUp 0.5s ease-out;
+}
+
+/* === DATENSCHUTZ LINK IM BANNER === */
+.cookie-text a {
+  color: var(--alpaka-creme);
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.cookie-text a:hover {
+  color: white;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .cookie-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .cookie-actions {
+    justify-content: center;
+  }
+  
+  .privacy-content {
+    margin: 10px;
+    padding: 20px;
+    max-height: 90vh;
+  }
+}
