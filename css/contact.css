@@ -195,29 +195,238 @@
   height: 300px;
 }
 
-/* Success Message */
+/* === ERWEITERTE FORMULAR STYLES === */
 .form-success {
-  background: linear-gradient(45deg, #10b981, #059669);
-  color: white;
-  padding: 20px;
-  border-radius: var(--radius-md);
-  margin-top: 20px;
-  text-align: center;
-  font-weight: 600;
   display: none;
-  animation: slideIn 0.5s ease;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 25px;
+  border-radius: var(--radius-lg);
+  margin-top: 20px;
+  box-shadow: var(--shadow-lg);
+  animation: slideInUp 0.5s ease-out;
 }
 
 .form-success.show {
   display: block;
 }
 
-/* CSRF Protection (versteckt) */
-.csrf-token {
+.success-content {
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.success-content h4 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.success-content p {
+  margin-bottom: 10px;
+  opacity: 0.95;
+}
+
+.success-actions {
+  margin-top: 20px;
+}
+
+.success-actions .btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+
+.success-actions .btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Buchungsbestätigung Animation */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Verbesserte Formular-Validierung */
+.form-input:invalid:not(:focus) {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-input:valid:not(:focus) {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 5px;
+  display: none;
+}
+
+.form-error.show {
+  display: block;
+}
+
+/* Tour-spezifische Styling */
+.form-select option[value="familie"] {
+  background-color: #fef3c7;
+}
+
+.form-select option[value="abenteuer"] {
+  background-color: #ddd6fe;
+}
+
+.form-select option[value="sonnenaufgang"] {
+  background-color: #fed7aa;
+}
+
+/* Loading States */
+.submit-btn:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  position: relative;
+}
+
+.submit-btn:disabled::after {
+  content: '';
   position: absolute;
-  left: -9999px;
-  opacity: 0;
-  pointer-events: none;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* === BUCHUNGSÜBERSICHT === */
+.booking-summary {
+  background: linear-gradient(135deg, rgba(122, 155, 40, 0.1), rgba(90, 155, 204, 0.1));
+  border: 2px solid rgba(122, 155, 40, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 25px;
+  margin: 25px 0;
+  animation: slideInUp 0.5s ease-out;
+}
+
+.booking-summary h4 {
+  color: var(--gras-gruen);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(122, 155, 40, 0.2);
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0 0 0;
+  margin-top: 10px;
+  border-top: 2px solid var(--gras-gruen);
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--gras-gruen);
+}
+
+.summary-note {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  margin-top: 15px;
+  color: #856404;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.tour-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 15px;
+  background: rgba(122, 155, 40, 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(122, 155, 40, 0.2);
+}
+
+.tour-icon {
+  font-size: 1.5rem;
+}
+
+.tour-text {
+  flex: 1;
+}
+
+.tour-text strong {
+  color: var(--gras-gruen);
+}
+
+.tour-text small {
+  color: var(--text-secondary);
+}
+
+/* === RESPONSIVE BUCHUNGSÜBERSICHT === */
+@media (max-width: 768px) {
+  .booking-summary {
+    padding: 20px;
+    margin: 20px 0;
+  }
+  
+  .summary-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .summary-total {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .tour-details {
+    flex-direction: column;
+    text-align: center;
+  }
 }
 
 /* === RESPONSIVE === */

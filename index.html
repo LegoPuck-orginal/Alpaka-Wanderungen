@@ -376,11 +376,12 @@
               <label for="tour" class="form-label">Gewünschte Tour</label>
               <select id="tour" name="tour" class="form-select">
                 <option value="">Tour wählen</option>
-                <option value="familie">Familien-Tour (2h)</option>
-                <option value="abenteuer">Abenteuer-Tour (4h)</option>
-                <option value="sonnenaufgang">Sonnenaufgang-Tour (3h)</option>
-                <option value="individuell">Individuelle Tour</option>
+                <option value="familie">🧑‍👧‍👦 Familien-Tour (2h) - 25€/Person</option>
+                <option value="abenteuer">🥾 Abenteuer-Tour (4h) - 45€/Person</option>
+                <option value="sonnenaufgang">🌅 Sonnenaufgang-Tour (3h) - 35€/Person</option>
+                <option value="individuell">⭐ Individuelle Tour - Preis nach Absprache</option>
               </select>
+              <div class="tour-info" id="tour-info"></div>
             </div>
             
             <div class="form-group">
@@ -397,6 +398,13 @@
                       placeholder="Teilen Sie uns Ihre Wünsche, Fragen oder besondere Anforderungen mit..."
                       maxlength="1000"></textarea>
             <div class="form-error"></div>
+          </div>
+          
+          <div class="booking-summary" id="booking-summary" style="display: none;">
+            <h4>📋 Buchungsübersicht</h4>
+            <div class="summary-content" id="summary-content">
+              <!-- Wird dynamisch gefüllt -->
+            </div>
           </div>
           
           <button type="submit" class="submit-btn">

@@ -19,8 +19,27 @@ class AlpakaWebsite {
     this.initializeDarkMode();
     this.setupSecurityMeasures();
     
+    // Stelle sicher, dass alle Inhalte sofort sichtbar sind
+    this.showAllSections();
+    
+    // Lade Testdaten für Demo
+    this.addTestBookings();
+    
     this.isInitialized = true;
     console.log('🦙 Alpaka Website initialized securely');
+  }
+  
+  // === SEKTION SICHTBARKEIT ===
+  showAllSections() {
+    // Mache alle Sektionen sofort sichtbar
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+      section.classList.add('active', 'visible');
+    });
+    
+    // Markiere Hero als aktuellen Bereich
+    this.currentSection = 'hero';
+    this.updateActiveNavigation();
   }
 
   // === SICHERHEITSMASSNAHMEN ===
@@ -210,7 +229,7 @@ class AlpakaWebsite {
     this.observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+          entry.target.classList.add('visible', 'active');
           
           // Update current section
           if (entry.target.id) {
@@ -271,6 +290,7 @@ class AlpakaWebsite {
 
     this.setupFormValidation(form);
     this.setupFormSubmission(form);
+    this.initializeTourCalculation();
   }
 
   setupFormValidation(form) {
@@ -449,11 +469,27 @@ class AlpakaWebsite {
 
   showSuccessMessage() {
     const successElement = document.getElementById('form-success') || this.createSuccessElement();
+    
+    // Verbesserte Erfolgsmeldung mit Buchungsdetails
+    successElement.innerHTML = `
+      <div class="success-content">
+        <span class="success-icon">🎉</span>
+        <h4>Buchungsanfrage erfolgreich gesendet!</h4>
+        <p>Vielen Dank! Ihre Anfrage wurde erfolgreich übermittelt.</p>
+        <p><strong>Buchungs-ID:</strong> #${Date.now().toString().slice(-6)}</p>
+        <p>Wir melden uns innerhalb von 24 Stunden bei Ihnen zurück.</p>
+        <div class="success-actions">
+          <button class="btn btn-secondary" onclick="this.closest('.form-success').classList.remove('show')">Verstanden</button>
+        </div>
+      </div>
+    `;
+    
     successElement.classList.add('show');
     
+    // Automatically hide after 8 seconds
     setTimeout(() => {
       successElement.classList.remove('show');
-    }, 5000);
+    }, 8000);
   }
 
   createSuccessElement() {
@@ -510,6 +546,92 @@ class AlpakaWebsite {
     }
   }
 
+  // === BUCHUNGSSYSTEM ERWEITERT ===
+  initializeTourCalculation() {
+    const tourSelect = document.getElementById('tour');
+    const personsSelect = document.getElementById('persons');
+    const dateInput = document.getElementById('date');
+    const tourInfo = document.getElementById('tour-info');
+    const bookingSummary = document.getElementById('booking-summary');
+    const summaryContent = document.getElementById('summary-content');
+
+    if (!tourSelect || !personsSelect) return;
+
+    const tourPrices = {
+      'familie': { price: 25, name: 'Familien-Tour', duration: '2 Stunden', icon: '🧑‍👧‍👦' },
+      'abenteuer': { price: 45, name: 'Abenteuer-Tour', duration: '4 Stunden', icon: '🥾' },
+      'sonnenaufgang': { price: 35, name: 'Sonnenaufgang-Tour', duration: '3 Stunden', icon: '🌅' },
+      'individuell': { price: 0, name: 'Individuelle Tour', duration: 'Nach Absprache', icon: '⭐' }
+    };
+
+    const updateBookingSummary = () => {
+      const selectedTour = tourSelect.value;
+      const selectedPersons = parseInt(personsSelect.value) || 0;
+      const selectedDate = dateInput.value;
+
+      if (selectedTour && selectedPersons && tourPrices[selectedTour]) {
+        const tour = tourPrices[selectedTour];
+        const totalPrice = tour.price * selectedPersons;
+
+        tourInfo.innerHTML = `
+          <div class="tour-details">
+            <span class="tour-icon">${tour.icon}</span>
+            <div class="tour-text">
+              <strong>${tour.name}</strong><br>
+              <small>Dauer: ${tour.duration}</small>
+            </div>
+          </div>
+        `;
+
+        if (selectedTour !== 'individuell') {
+          summaryContent.innerHTML = `
+            <div class="summary-item">
+              <span>Tour:</span>
+              <span>${tour.icon} ${tour.name}</span>
+            </div>
+            <div class="summary-item">
+              <span>Teilnehmer:</span>
+              <span>${selectedPersons} Person${selectedPersons > 1 ? 'en' : ''}</span>
+            </div>
+            <div class="summary-item">
+              <span>Preis pro Person:</span>
+              <span>${tour.price}€</span>
+            </div>
+            ${selectedDate ? `<div class="summary-item"><span>Datum:</span><span>${new Date(selectedDate).toLocaleDateString('de-DE')}</span></div>` : ''}
+            <div class="summary-total">
+              <span>Gesamtpreis:</span>
+              <span>${totalPrice}€</span>
+            </div>
+          `;
+        } else {
+          summaryContent.innerHTML = `
+            <div class="summary-item">
+              <span>Tour:</span>
+              <span>${tour.icon} ${tour.name}</span>
+            </div>
+            <div class="summary-item">
+              <span>Teilnehmer:</span>
+              <span>${selectedPersons} Person${selectedPersons > 1 ? 'en' : ''}</span>
+            </div>
+            ${selectedDate ? `<div class="summary-item"><span>Datum:</span><span>${new Date(selectedDate).toLocaleDateString('de-DE')}</span></div>` : ''}
+            <div class="summary-note">
+              <span>💡 Preis wird individuell nach Ihren Wünschen berechnet</span>
+            </div>
+          `;
+        }
+
+        bookingSummary.style.display = 'block';
+      } else {
+        bookingSummary.style.display = 'none';
+        tourInfo.innerHTML = '';
+      }
+    };
+
+    tourSelect.addEventListener('change', updateBookingSummary);
+    personsSelect.addEventListener('change', updateBookingSummary);
+    dateInput.addEventListener('change', updateBookingSummary);
+  }
+
   // === UTILITY FUNCTIONS ===
   throttle(func, limit) {
     let inThrottle;
@@ -552,6 +674,58 @@ class AlpakaWebsite {
     if (window.innerWidth > 768) {
       this.closeMobileMenu();
     }
+ }
+
+  // === TESTDATEN FÜR BUCHUNGSSYSTEM ===
+  addTestBookings() {
+    const testBookings = [
+      {
+        id: 'booking_001',
+        name: 'Familie Mustermann',
+        email: 'familie@mustermann.de',
+        phone: '+49 123 456 789',
+        persons: 4,
+        tour: 'familie',
+        date: '2025-07-20',
+        message: 'Wir freuen uns sehr auf die Familien-Tour mit unseren zwei Kindern (8 und 12 Jahre).',
+        timestamp: new Date('2025-07-10T10:30:00').toISOString(),
+        status: 'confirmed',
+        isRead: true
+      },
+      {
+        id: 'booking_002', 
+        name: 'Sarah Schmidt',
+        email: 'sarah.schmidt@email.de',
+        phone: '+49 987 654 321',
+        persons: 2,
+        tour: 'sonnenaufgang',
+        date: '2025-07-25',
+        message: 'Sonnenaufgang-Tour für mich und meinen Partner. Können wir vegetarisches Frühstück bekommen?',
+        timestamp: new Date('2025-07-11T14:15:00').toISOString(),
+        status: 'new',
+        isRead: false
+      },
+      {
+        id: 'booking_003',
+        name: 'Michael Weber',
+        email: 'm.weber@outdoor.com', 
+        phone: '+49 555 123 456',
+        persons: 6,
+        tour: 'abenteuer',
+        date: '2025-08-05',
+        message: 'Abenteuer-Tour für unsere Wandergruppe. Alle sind erfahrene Wanderer.',
+        timestamp: new Date('2025-07-12T09:45:00').toISOString(),
+        status: 'pending',
+        isRead: false
+      }
+    ];
+
+    // Füge Testbuchungen zu localStorage hinzu
+    const existingRequests = JSON.parse(localStorage.getItem('alpaka_contact_requests') || '[]');
+    const combinedRequests = [...existingRequests, ...testBookings];
+    localStorage.setItem('alpaka_contact_requests', JSON.stringify(combinedRequests));
+    
+    console.log('✅ Test-Buchungen hinzugefügt:', testBookings.length);
   }
 }
 
