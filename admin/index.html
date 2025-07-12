@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Alpaka Wanderungen</title>
+  <link rel="stylesheet" href="../admin-styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">🦙</span>
+          <h2>Alpaka Admin</h2>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <ul>
+          <li class="nav-item active">
+            <a href="#dashboard" class="nav-link" data-section="dashboard">
+              <span class="nav-icon">📊</span>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#kontaktanfragen" class="nav-link" data-section="kontaktanfragen">
+              <span class="nav-icon">📧</span>
+              Kontaktanfragen
+              <span class="badge" id="unread-count">3</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#buchungen" class="nav-link" data-section="buchungen">
+              <span class="nav-icon">🗓️</span>
+              Buchungen
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#statistiken" class="nav-link" data-section="statistiken">
+              <span class="nav-icon">📈</span>
+              Statistiken
+            </a>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="../index.html" class="back-to-site">
+          <span class="nav-icon">🌐</span>
+          Zurück zur Website
+        </a>
+        <div class="admin-info">
+          <span class="admin-name">Astrid Mustermann</span>
+          <span class="admin-role">Administrator</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="admin-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <h1 id="page-title">Dashboard</h1>
+        </div>
+        
+        <div class="header-right">
+          <div class="header-actions">
+            <button class="action-btn" id="refresh-btn" title="Aktualisieren">
+              <span class="btn-icon">🔄</span>
+            </button>
+            <button class="action-btn" id="export-btn" title="Exportieren">
+              <span class="btn-icon">📥</span>
+            </button>
+            <button class="action-btn dark-mode-toggle" id="dark-mode-toggle" title="Dark Mode">
+              <span class="btn-icon">🌙</span>
+            </button>
+          </div>
+          
+          <div class="current-time" id="current-time"></div>
+        </div>
+      </header>
+
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="content-section active">
+        <div class="dashboard-grid">
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">📧</div>
+              <div class="stat-content">
+                <div class="stat-number">24</div>
+                <div class="stat-label">Neue Anfragen</div>
+                <div class="stat-change positive">+15%</div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">🗓️</div>
+              <div class="stat-content">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Heute Buchungen</div>
+                <div class="stat-change positive">+8%</div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div class="stat-content">
+                <div class="stat-number">1,240€</div>
+                <div class="stat-label">Heute Umsatz</div>
+                <div class="stat-change positive">+22%</div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">⭐</div>
+              <div class="stat-content">
+                <div class="stat-number">4.9</div>
+                <div class="stat-label">Bewertung</div>
+                <div class="stat-change neutral">±0%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="quick-actions">
+            <h3>Schnellaktionen</h3>
+            <div class="action-grid">
+              <button class="quick-action-btn" onclick="showSection('kontaktanfragen')">
+                <span class="action-icon">📧</span>
+                <span class="action-text">Neue Anfragen</span>
+              </button>
+              <button class="quick-action-btn" onclick="showSection('buchungen')">
+                <span class="action-icon">➕</span>
+                <span class="action-text">Buchung hinzufügen</span>
+              </button>
+              <button class="quick-action-btn" onclick="exportData()">
+                <span class="action-icon">📊</span>
+                <span class="action-text">Report erstellen</span>
+              </button>
+              <button class="quick-action-btn" onclick="sendNewsletter()">
+                <span class="action-icon">📨</span>
+                <span class="action-text">Newsletter</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="recent-activity">
+            <h3>Letzte Aktivitäten</h3>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon">📧</div>
+                <div class="activity-content">
+                  <div class="activity-title">Neue Kontaktanfrage</div>
+                  <div class="activity-desc">Maria Schmidt - Familientour für 6 Personen</div>
+                  <div class="activity-time">vor 5 Minuten</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">✅</div>
+                <div class="activity-content">
+                  <div class="activity-title">Buchung bestätigt</div>
+                  <div class="activity-desc">Peter Wagner - 15.07.2025, 10:00 Uhr</div>
+                  <div class="activity-time">vor 12 Minuten</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon">💰</div>
+                <div class="activity-content">
+                  <div class="activity-title">Zahlung erhalten</div>
+                  <div class="activity-desc">120€ für Alpaka-Tour (4 Personen)</div>
+                  <div class="activity-time">vor 1 Stunde</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kontaktanfragen Section -->
+      <section id="kontaktanfragen" class="content-section">
+        <div class="section-header">
+          <h2>Kontaktanfragen verwalten</h2>
+          <div class="section-actions">
+            <div class="filter-group">
+              <select id="status-filter" class="filter-select">
+                <option value="all">Alle Status</option>
+                <option value="new">Neu</option>
+                <option value="in-progress">In Bearbeitung</option>
+                <option value="completed">Abgeschlossen</option>
+              </select>
+              <select id="date-filter" class="filter-select">
+                <option value="all">Alle Zeiträume</option>
+                <option value="today">Heute</option>
+                <option value="week">Diese Woche</option>
+                <option value="month">Dieser Monat</option>
+              </select>
+            </div>
+            <button class="primary-btn" onclick="markAllRead()">
+              <span class="btn-icon">✓</span>
+              Alle als gelesen markieren
+            </button>
+          </div>
+        </div>
+
+        <div class="requests-container">
+          <!-- Kontaktanfrage Cards werden hier durch JavaScript eingefügt -->
+        </div>
+      </section>
+
+      <!-- Buchungen Section -->
+      <section id="buchungen" class="content-section">
+        <div class="section-header">
+          <h2>Buchungen verwalten</h2>
+          <div class="section-actions">
+            <button class="primary-btn" onclick="addBooking()">
+              <span class="btn-icon">➕</span>
+              Neue Buchung
+            </button>
+          </div>
+        </div>
+
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <button class="calendar-nav" id="prev-month">‹</button>
+            <h3 id="current-month">Juli 2025</h3>
+            <button class="calendar-nav" id="next-month">›</button>
+          </div>
+          <div class="calendar-grid" id="calendar">
+            <!-- Kalender wird durch JavaScript generiert -->
+          </div>
+        </div>
+
+        <div class="booking-list">
+          <h3>Heutige Buchungen</h3>
+          <div class="booking-items">
+            <!-- Buchungen werden hier durch JavaScript eingefügt -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Statistiken Section -->
+      <section id="statistiken" class="content-section">
+        <div class="section-header">
+          <h2>Statistiken & Analytics</h2>
+          <div class="section-actions">
+            <select class="filter-select">
+              <option value="7days">Letzte 7 Tage</option>
+              <option value="30days">Letzte 30 Tage</option>
+              <option value="90days">Letzte 90 Tage</option>
+              <option value="year">Dieses Jahr</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Buchungen pro Monat</h3>
+            <div class="chart-placeholder">
+              <canvas id="bookings-chart"></canvas>
+            </div>
+          </div>
+          
+          <div class="chart-card">
+            <h3>Umsatz-Entwicklung</h3>
+            <div class="chart-placeholder">
+              <canvas id="revenue-chart"></canvas>
+            </div>
+          </div>
+          
+          <div class="chart-card">
+            <h3>Beliebteste Zeiten</h3>
+            <div class="chart-placeholder">
+              <canvas id="time-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal für Anfrage Details -->
+  <div id="request-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Anfrage Details</h3>
+        <button class="modal-close" onclick="closeModal('request-modal')">×</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- Content wird durch JavaScript eingefügt -->
+      </div>
+      <div class="modal-footer">
+        <button class="secondary-btn" onclick="closeModal('request-modal')">Schließen</button>
+        <button class="primary-btn" onclick="respondToRequest()">Antworten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container"></div>
+
+  <script src="../admin-data.js"></script>
+  <script src="../admin-script.js"></script>
+</body>
+</html>
