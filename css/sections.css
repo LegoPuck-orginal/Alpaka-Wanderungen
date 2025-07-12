@@ -555,6 +555,214 @@
   background: var(--wiesen-gruen);
 }
 
+/* === TOUR MODAL STYLES === */
+.tour-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.tour-modal {
+  background: white;
+  border-radius: 15px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.tour-modal-header {
+  padding: 25px 30px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: white;
+  border-radius: 15px 15px 0 0;
+}
+
+.tour-modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.tour-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+  padding: 5px;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.tour-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tour-modal-body {
+  padding: 25px 30px;
+}
+
+.tour-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.tour-info-item {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  border-radius: 8px;
+  text-align: center;
+  border-left: 4px solid #4a90e2;
+  font-size: 0.9rem;
+}
+
+.tour-info-item strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #4a90e2;
+}
+
+.tour-description, .tour-includes, .tour-route {
+  margin-bottom: 25px;
+}
+
+.tour-description h3, .tour-includes h3, .tour-route h3 {
+  color: #2c5282;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+.tour-description p, .tour-route p {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.includes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 8px;
+}
+
+.include-item {
+  background: #f0f8ff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border-left: 3px solid #4a90e2;
+}
+
+.tour-modal-footer {
+  padding: 20px 30px 25px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  background: #f8f9fa;
+  border-radius: 0 0 15px 15px;
+}
+
+.tour-modal-footer .btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  flex: 1;
+}
+
+.tour-modal-footer .btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.tour-modal-footer .btn-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.tour-modal-footer .btn-primary {
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+  color: white;
+}
+
+.tour-modal-footer .btn-primary:hover {
+  background: linear-gradient(135deg, #357abd, #2563eb);
+  transform: translateY(-1px);
+}
+
+/* Responsive Design für Modal */
+@media (max-width: 768px) {
+  .tour-modal-overlay {
+    padding: 10px;
+  }
+  
+  .tour-modal {
+    max-height: 95vh;
+  }
+  
+  .tour-modal-header, .tour-modal-body, .tour-modal-footer {
+    padding: 20px;
+  }
+  
+  .tour-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .includes-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .tour-modal-footer {
+    flex-direction: column;
+  }
+  
+  .tour-modal-header h2 {
+    font-size: 1.2rem;
+  }
+}
+
 /* === RESPONSIVE ERGÄNZUNGEN === */
 @media (max-width: 968px) {
   .about-content {

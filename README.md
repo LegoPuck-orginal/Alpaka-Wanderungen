@@ -1,6 +1,75 @@
-# 🦙 Alpaka Wanderungen Website
+# Alpaka-Wanderungen 🦙
 
-Eine moderne, sichere Website für Alpaka-Wanderungen mit vollständigem Admin-System.
+Premium Alpaka-Wanderungen Website mit modernem Node.js Backend
+
+## 🚀 Features
+
+### Frontend
+- **Responsive Design** - Mobile-First Ansatz
+- **Interactive UI** - Tour Filter, Modals, Smooth Scrolling
+- **Modern CSS** - CSS Grid, Flexbox, Animationen
+- **Progressive Enhancement** - Funktioniert auch ohne JavaScript
+
+### Backend (Node.js/Express)
+- **RESTful API** - Saubere API Endpoints
+- **JWT Authentication** - Sichere Admin-Authentifizierung
+- **Email Integration** - Nodemailer für Buchungsbestätigungen
+- **Data Persistence** - JSON-basierte Datenspeicherung
+- **Security** - Helmet.js, CORS, Input Validation
+
+### Development Tools
+- **Webpack** - Module Bundling
+- **Babel** - ES6+ Transpilation
+- **PostCSS** - CSS Preprocessing
+- **ESLint** - Code Linting
+- **Prettier** - Code Formatting
+- **Nodemon** - Auto-Restart Development
+
+## 📋 Voraussetzungen
+
+- Node.js >= 16.0.0
+- npm >= 8.0.0
+
+## 🛠 Installation
+
+```bash
+# Dependencies installieren
+npm install
+
+# Environment konfigurieren
+cp .env.example .env
+```
+
+## 🚀 Entwicklung
+
+```bash
+# Development Server starten
+npm run dev
+
+# Produktions-Build erstellen  
+npm run build
+
+# Code formatieren
+npm run format
+
+# Code linting
+npm run lint
+```
+
+## 📝 Verfügbare Scripts
+
+- `npm start` - Produktions-Server starten
+- `npm run dev` - Development Server mit Auto-Reload
+- `npm run build` - Produktions-Build erstellen
+- `npm run watch` - CSS/JS im Watch-Modus
+- `npm run lint` - Code Linting
+- `npm run format` - Code formatieren
+
+## 🔐 Admin Panel
+
+**Standard Login:**
+- Benutzername: `admin`
+- Passwort: `admin123`
 
 ## 📁 Projektstruktur
 
