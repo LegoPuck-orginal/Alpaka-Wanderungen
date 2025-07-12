@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()">
   <title>Alpaka Wanderungen</title>
   <style>
     /* === DUNKLERE NATÜRLICHE FARBPALETTE === */
@@ -971,6 +972,338 @@
     body.dark #nav-toggle span {
       background: #E8E6E3;
     }
+
+    /* === COOKIE BANNER === */
+    #cookie-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #2A3E0A 0%, #3D4F1F 50%, #4A5E2A 100%);
+      color: #F0F0E8;
+      padding: 1.5rem 1rem;
+      box-shadow: 0 -8px 32px rgba(35, 77, 54, 0.4);
+      z-index: 10002;
+      transform: translateY(100%);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      border-top: 4px solid #7A9B28;
+      backdrop-filter: blur(15px);
+      border-top-left-radius: 25px;
+      border-top-right-radius: 25px;
+    }
+
+    #cookie-banner.show {
+      transform: translateY(0);
+      animation: cookieSlideUpBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .cookie-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .cookie-icon {
+      font-size: 2.5rem;
+      margin-right: 1rem;
+      animation: cookieFloat 3s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes cookieFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    .cookie-text {
+      flex: 1 1 400px;
+      font-size: 1rem;
+      line-height: 1.7;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+    }
+
+    .cookie-text-content {
+      flex: 1;
+    }
+
+    .cookie-text strong {
+      color: #9ACD32;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .cookie-text a {
+      color: #9ACD32;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+    }
+
+    .cookie-text a:hover {
+      color: #BFFF00;
+      border-bottom-color: #BFFF00;
+      text-shadow: 0 0 8px rgba(191, 255, 0, 0.3);
+    }
+
+    .cookie-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .cookie-btn {
+      padding: 0.8rem 1.6rem;
+      border: none;
+      border-radius: 30px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 0.95rem;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 120px;
+    }
+
+    .cookie-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .cookie-btn:hover::before {
+      left: 100%;
+    }
+
+    .cookie-btn.accept {
+      background: linear-gradient(45deg, #7A9B28 0%, #9ACD32 50%, #BFFF00 100%);
+      color: #1F2F2F;
+      box-shadow: 0 4px 20px rgba(122, 155, 40, 0.4);
+      border: 3px solid transparent;
+      font-weight: 800;
+    }
+
+    .cookie-btn.accept:hover {
+      background: linear-gradient(45deg, #9ACD32 0%, #BFFF00 50%, #7A9B28 100%);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 30px rgba(122, 155, 40, 0.6);
+      text-shadow: 0 0 10px rgba(31, 47, 47, 0.5);
+    }
+
+    .cookie-btn.decline {
+      background: linear-gradient(45deg, transparent 0%, rgba(240, 240, 232, 0.1) 100%);
+      color: #F0F0E8;
+      border: 3px solid rgba(240, 240, 232, 0.5);
+    }
+
+    .cookie-btn.decline:hover {
+      background: linear-gradient(45deg, rgba(240, 240, 232, 0.2) 0%, rgba(240, 240, 232, 0.3) 100%);
+      border-color: rgba(240, 240, 232, 0.8);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(240, 240, 232, 0.3);
+    }
+
+    .cookie-btn.settings {
+      background: linear-gradient(45deg, rgba(122, 155, 40, 0.3) 0%, rgba(122, 155, 40, 0.5) 100%);
+      color: #F0F0E8;
+      border: 3px solid rgba(122, 155, 40, 0.6);
+    }
+
+    .cookie-btn.settings:hover {
+      background: linear-gradient(45deg, rgba(122, 155, 40, 0.5) 0%, rgba(122, 155, 40, 0.7) 100%);
+      border-color: rgba(122, 155, 40, 0.9);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(122, 155, 40, 0.4);
+    }
+
+    /* Dark Mode Cookie Banner */
+    body.dark #cookie-banner {
+      background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+      border-top-color: #4A5E2A;
+      color: #E8E6E3;
+    }
+
+    body.dark .cookie-text a {
+      color: #7A9B28;
+    }
+
+    body.dark .cookie-text a:hover {
+      color: #9ACD32;
+    }
+
+    body.dark .cookie-btn.accept {
+      background: linear-gradient(45deg, #4A5E2A, #7A9B28);
+      color: #E8E6E3;
+    }
+
+    body.dark .cookie-btn.accept:hover {
+      background: linear-gradient(45deg, #7A9B28, #4A5E2A);
+    }
+
+    body.dark .cookie-btn.decline {
+      color: #E8E6E3;
+      border-color: rgba(232, 230, 227, 0.3);
+    }
+
+    body.dark .cookie-btn.decline:hover {
+      background: rgba(232, 230, 227, 0.1);
+      border-color: rgba(232, 230, 227, 0.6);
+    }
+
+    body.dark .cookie-btn.settings {
+      background: rgba(74, 94, 42, 0.2);
+      color: #E8E6E3;
+      border-color: rgba(74, 94, 42, 0.4);
+    }
+
+    body.dark .cookie-btn.settings:hover {
+      background: rgba(74, 94, 42, 0.3);
+      border-color: rgba(74, 94, 42, 0.6);
+    }
+
+    /* Mobile Cookie Banner */
+    @media (max-width: 768px) {
+      #cookie-banner {
+        padding: 1.5rem 1.2rem;
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
+      }
+
+      .cookie-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+        align-items: center;
+      }
+
+      .cookie-text {
+        font-size: 0.95rem;
+        text-align: center;
+        line-height: 1.7;
+        flex-direction: column;
+      }
+
+      .cookie-icon {
+        font-size: 3rem;
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+      }
+
+      .cookie-buttons {
+        justify-content: center;
+        width: 100%;
+        gap: 0.8rem;
+      }
+
+      .cookie-btn {
+        flex: 1 1 auto;
+        min-width: 110px;
+        max-width: 150px;
+        padding: 0.9rem 1.2rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #cookie-banner {
+        padding: 1.2rem 1rem;
+      }
+
+      .cookie-content {
+        gap: 1.2rem;
+      }
+
+      .cookie-text {
+        font-size: 0.9rem;
+      }
+
+      .cookie-icon {
+        font-size: 2.5rem;
+      }
+
+      .cookie-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 1rem;
+      }
+
+      .cookie-btn {
+        width: 100%;
+        max-width: 300px;
+        padding: 1rem 1.5rem;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Cookie Banner Animationen */
+    @keyframes cookieSlideUpBounce {
+      0% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      60% {
+        transform: translateY(-10px);
+        opacity: 1;
+      }
+      80% {
+        transform: translateY(5px);
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInFromRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutToRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    #cookie-banner.show {
+      animation: cookieSlideUpBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
   </style>
 </head>
 <body>
@@ -1236,6 +1569,25 @@
     </p>
   </footer>
 
+  <!-- Cookie Banner -->
+  <div id="cookie-banner">
+    <div class="cookie-content">
+      <div class="cookie-text">
+        <div class="cookie-icon">🍪</div>
+        <div class="cookie-text-content">
+          <strong>Cookie-Hinweis:</strong> Diese Website verwendet nur technisch notwendige Cookies für Grundfunktionen wie die Dark-Mode-Einstellung. 
+          Wir verwenden keine Tracking-Cookies oder externe Dienste und respektieren Ihre Privatsphäre vollständig. 
+          <a href="#" onclick="showSection('datenschutz'); hideCookieBanner();">→ Weitere Details in unserer Datenschutzerklärung</a>
+        </div>
+      </div>
+      <div class="cookie-buttons">
+        <button class="cookie-btn accept" onclick="acceptCookies()">✓ Akzeptieren</button>
+        <button class="cookie-btn settings" onclick="showSection('datenschutz'); hideCookieBanner();">📋 Details</button>
+        <button class="cookie-btn decline" onclick="declineCookies()">✗ Ablehnen</button>
+      </div>
+    </div>
+  </div>
+
   <script>
   // Scroll-Animationen
   function observeScrollAnimations() {
@@ -1492,7 +1844,116 @@
         }
       });
     }
+
+    // Cookie Banner initialisieren
+    initializeCookieBanner();
   });
+
+  // === COOKIE BANNER FUNKTIONEN === 
+  function initializeCookieBanner() {
+    const banner = document.getElementById('cookie-banner');
+    const cookieConsent = localStorage.getItem('cookieConsent');
+    
+    // Zeige Banner nur wenn noch keine Einwilligung gegeben wurde
+    if (!cookieConsent) {
+      setTimeout(() => {
+        banner.classList.add('show');
+        // Füge Puls-Animation zum Akzeptieren-Button hinzu
+        setTimeout(() => {
+          const acceptBtn = banner.querySelector('.cookie-btn.accept');
+          if (acceptBtn) {
+            acceptBtn.style.animation = 'pulse 2s infinite';
+          }
+        }, 1000);
+      }, 2500); // Länger warten für bessere UX
+    }
+  }
+
+  function acceptCookies() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    localStorage.setItem('cookieTimestamp', new Date().toISOString());
+    hideCookieBanner();
+    
+    // Zeige kurze Bestätigung
+    showCookieConfirmation('🎉 Perfekt! Cookie-Einstellungen wurden gespeichert');
+  }
+
+  function declineCookies() {
+    localStorage.setItem('cookieConsent', 'declined');
+    localStorage.setItem('cookieTimestamp', new Date().toISOString());
+    
+    // Entferne Dark Mode Präferenz wenn Cookies abgelehnt
+    localStorage.removeItem('darkMode');
+    
+    hideCookieBanner();
+    showCookieConfirmation('ℹ️ Cookies abgelehnt - Dark Mode wird nicht gespeichert');
+  }
+
+  function hideCookieBanner() {
+    const banner = document.getElementById('cookie-banner');
+    banner.classList.remove('show');
+    
+    setTimeout(() => {
+      banner.style.display = 'none';
+    }, 500);
+  }
+
+  function showCookieConfirmation(message) {
+    // Erstelle temporäre Bestätigungsnachricht
+    const confirmation = document.createElement('div');
+    confirmation.style.cssText = `
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(45deg, #7A9B28, #9ACD32);
+      color: #F0F0E8;
+      padding: 1rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      box-shadow: 0 6px 20px rgba(122, 155, 40, 0.4);
+      z-index: 10003;
+      max-width: 350px;
+      font-size: 0.9rem;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      animation: slideInFromRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    `;
+    confirmation.textContent = message;
+    
+    document.body.appendChild(confirmation);
+    
+    // Entferne nach 4 Sekunden
+    setTimeout(() => {
+      confirmation.style.animation = 'slideOutToRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+      setTimeout(() => {
+        if (document.body.contains(confirmation)) {
+          document.body.removeChild(confirmation);
+        }
+      }, 500);
+    }, 4000);
+  }
+
+  // Verbesserte Dark Mode Toggle-Funktion
+  function toggleDarkMode() {
+    const body = document.body;
+    const button = document.querySelector('[onclick="toggleDarkMode()"]');
+    
+    // Toggle Dark Mode mit Animation
+    body.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+    body.classList.toggle('dark');
+    
+    // Speichere Präferenz im localStorage
+    if (body.classList.contains('dark')) {
+      localStorage.setItem('darkMode', 'true');
+      if (button) button.innerHTML = '☀️';
+      if (button) button.setAttribute('title', 'Zu hellem Modus wechseln');
+    } else {
+      localStorage.setItem('darkMode', 'false');
+      if (button) button.innerHTML = '🌙';
+      if (button) button.setAttribute('title', 'Zu dunklem Modus wechseln');
+    }
+  }
   </script>
 </body>
 </html>
