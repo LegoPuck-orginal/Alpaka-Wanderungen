@@ -816,10 +816,11 @@ if (document.readyState === 'loading') {
     }
   });
 } else if (!window.alpakaWebsite) {
-  window.alpakaWebsite = new AlpakaWebsite();  }
+  window.alpakaWebsite = new AlpakaWebsite();
+}
 
-  // === TOUR FILTER FUNKTIONALITÄT ===
-  initializeTourFilter() {
+// === TOUR FILTER FUNKTIONALITÄT ===
+initializeTourFilter() {
     const filterButtons = document.querySelectorAll('.filter-btn');
     const tourCards = document.querySelectorAll('.tour-card');
 
@@ -1013,3 +1014,4 @@ if (document.readyState === 'loading') {
     // Schließe mobiles Menü falls offen
     this.closeMobileMenu();
   }
+}
