@@ -31,8 +31,25 @@ function initializeApp() {
     // Formulare initialisieren
     initForms();
     
+    // Tour Cards Event Listener
+    initTourCards();
+    
     // Mindestdatum für Buchungen setzen
     setMinimumDate();
+}
+
+// Tour Cards initialisieren
+function initTourCards() {
+    // Tour Card Event Listener hinzufügen
+    const tourCards = document.querySelectorAll('.tour-card');
+    tourCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const tourName = this.querySelector('.tour-title').textContent;
+            const priceText = this.querySelector('.tour-price').textContent;
+            const price = parseInt(priceText.match(/\d+/)[0]);
+            showBookingForm(tourName, price);
+        });
+    });
 }
 
 // Mobile Navigation
