@@ -488,9 +488,9 @@ app.delete('/api/discount-codes/:id', authenticateToken, async (req, res) => {
 
 // === ADMIN PANEL ===
 
-// Admin Panel Route - Serve the new simple admin panel
+// Admin Panel Route - Serve the new admin panel
 app.get('/admin/new', (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin', 'simple-admin.html'));
+  res.sendFile(path.join(__dirname, 'admin-panel', 'index.html'));
 });
 
 // Legacy admin route - redirect to new
