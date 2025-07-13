@@ -36,13 +36,23 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('.'));
 
 // === EMAIL SETUP ===
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+let transporter = null;
+
+// Nur E-Mail-Transporter erstellen wenn Credentials verfügbar sind
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS && 
+    process.env.EMAIL_USER !== 'demo@alpaka-wanderungen.de') {
+  try {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+  } catch (error) {
+    console.warn('⚠️ E-Mail-Transporter konnte nicht initialisiert werden:', error.message);
   }
-});
+}
 
 // === HELPER FUNCTIONS ===
 async function ensureDataDir() {
@@ -193,55 +203,61 @@ app.post('/api/bookings', async (req, res) => {
     bookings.push(booking);
     await writeJsonFile('bookings.json', bookings);
 
-    // Bestätigungs-Email senden
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: `Buchungsanfrage erhalten - ${tour}`,
-        html: `
-          <h2>🦙 Vielen Dank für Ihre Buchungsanfrage!</h2>
-          <p>Hallo ${name},</p>
-          <p>wir haben Ihre Buchungsanfrage erhalten und werden uns schnellstmöglich bei Ihnen melden.</p>
-          
-          <h3>📋 Ihre Anfrage im Überblick:</h3>
-          <ul>
-            <li><strong>Tour:</strong> ${tour}</li>
-            <li><strong>Wunschtermin:</strong> ${date}</li>
-            <li><strong>Teilnehmer:</strong> ${participants} Person(en)</li>
-            <li><strong>Preis:</strong> ${finalPrice}€</li>
-            ${discount > 0 ? `<li><strong>Ersparnis:</strong> ${discount}€</li>` : ''}
-            ${message ? `<li><strong>Nachricht:</strong> ${message}</li>` : ''}
-          </ul>
-          
-          <p>Wir werden Ihnen innerhalb von 24 Stunden alle weiteren Details und die Bestätigung Ihrer Buchung zusenden.</p>
-          
-          <p>Mit alpakigen Grüßen,<br>
-          Ihr Alpaka-Wanderungen Team</p>
-        `
-      });
+    // Bestätigungs-Email senden (nur wenn Transporter verfügbar)
+    if (transporter) {
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: `Buchungsanfrage erhalten - ${tour}`,
+          html: `
+            <h2>🦙 Vielen Dank für Ihre Buchungsanfrage!</h2>
+            <p>Hallo ${name},</p>
+            <p>wir haben Ihre Buchungsanfrage erhalten und werden uns schnellstmöglich bei Ihnen melden.</p>
+            
+            <h3>📋 Ihre Anfrage im Überblick:</h3>
+            <ul>
+              <li><strong>Tour:</strong> ${tour}</li>
+              <li><strong>Wunschtermin:</strong> ${date}</li>
+              <li><strong>Teilnehmer:</strong> ${participants} Person(en)</li>
+              <li><strong>Preis:</strong> ${finalPrice}€</li>
+              ${discount > 0 ? `<li><strong>Ersparnis:</strong> ${discount}€</li>` : ''}
+              ${message ? `<li><strong>Nachricht:</strong> ${message}</li>` : ''}
+            </ul>
+            
+            <p>Wir werden Ihnen innerhalb von 24 Stunden alle weiteren Details und die Bestätigung Ihrer Buchung zusenden.</p>
+            
+            <p>Mit alpakigen Grüßen,<br>
+            Ihr Alpaka-Wanderungen Team</p>
+          `
+        });
 
-      // Admin-Benachrichtigung
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER,
-        subject: `🦙 Neue Buchungsanfrage von ${name}`,
-        html: `
-          <h2>Neue Buchungsanfrage eingegangen!</h2>
-          <ul>
-            <li><strong>Name:</strong> ${name}</li>
-            <li><strong>E-Mail:</strong> ${email}</li>
-            <li><strong>Telefon:</strong> ${phone || 'Nicht angegeben'}</li>
-            <li><strong>Tour:</strong> ${tour}</li>
-            <li><strong>Datum:</strong> ${date}</li>
-            <li><strong>Teilnehmer:</strong> ${participants}</li>
-            <li><strong>Preis:</strong> ${finalPrice}€</li>
-            <li><strong>Nachricht:</strong> ${message || 'Keine'}</li>
-          </ul>
-        `
-      });
-    } catch (emailError) {
-      console.error('Email error:', emailError);
+        // Admin-Benachrichtigung
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: process.env.EMAIL_USER,
+          subject: `🦙 Neue Buchungsanfrage von ${name}`,
+          html: `
+            <h2>Neue Buchungsanfrage eingegangen!</h2>
+            <ul>
+              <li><strong>Name:</strong> ${name}</li>
+              <li><strong>E-Mail:</strong> ${email}</li>
+              <li><strong>Telefon:</strong> ${phone || 'Nicht angegeben'}</li>
+              <li><strong>Tour:</strong> ${tour}</li>
+              <li><strong>Datum:</strong> ${date}</li>
+              <li><strong>Teilnehmer:</strong> ${participants}</li>
+              <li><strong>Preis:</strong> ${finalPrice}€</li>
+              <li><strong>Nachricht:</strong> ${message || 'Keine'}</li>
+            </ul>
+          `
+        });
+        
+        console.log('📧 Buchungs-E-Mails erfolgreich gesendet');
+      } catch (emailError) {
+        console.warn('⚠️ Buchungs-E-Mail konnte nicht gesendet werden:', emailError.message);
+      }
+    } else {
+      console.log('📝 Buchungsanfrage erhalten (E-Mail-Versand deaktiviert):', booking);
     }
 
     res.json({ 
@@ -562,33 +578,44 @@ app.post('/api/contact', async (req, res) => {
       return res.status(400).json({ error: 'Ungültige E-Mail-Adresse' });
     }
 
-    // Email senden
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: `🦙 Kontaktanfrage: ${subject}`,
-      html: `
-        <h2>Neue Kontaktanfrage</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>E-Mail:</strong> ${email}</p>
-        <p><strong>Betreff:</strong> ${subject}</p>
-        <p><strong>Nachricht:</strong></p>
-        <p>${message}</p>
-      `
-    });
+    // E-Mail-Funktion (nur wenn Transporter verfügbar)
+    if (transporter) {
+      try {
+        // Email an Admin senden
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: process.env.EMAIL_USER,
+          subject: `🦙 Kontaktanfrage: ${subject}`,
+          html: `
+            <h2>Neue Kontaktanfrage</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>E-Mail:</strong> ${email}</p>
+            <p><strong>Betreff:</strong> ${subject}</p>
+            <p><strong>Nachricht:</strong></p>
+            <p>${message}</p>
+          `
+        });
 
-    // Bestätigung an Absender
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Ihre Kontaktanfrage wurde empfangen',
-      html: `
-        <h2>🦙 Vielen Dank für Ihre Nachricht!</h2>
-        <p>Hallo ${name},</p>
-        <p>wir haben Ihre Nachricht erhalten und werden uns schnellstmöglich bei Ihnen melden.</p>
-        <p>Mit alpakigen Grüßen,<br>Ihr Alpaka-Wanderungen Team</p>
-      `
-    });
+        // Bestätigung an Absender
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: 'Ihre Kontaktanfrage wurde empfangen',
+          html: `
+            <h2>🦙 Vielen Dank für Ihre Nachricht!</h2>
+            <p>Hallo ${name},</p>
+            <p>wir haben Ihre Nachricht erhalten und werden uns schnellstmöglich bei Ihnen melden.</p>
+            <p>Mit alpakigen Grüßen,<br>Ihr Alpaka-Wanderungen Team</p>
+          `
+        });
+        
+        console.log('📧 Kontakt-E-Mails erfolgreich gesendet');
+      } catch (emailError) {
+        console.warn('⚠️ E-Mail konnte nicht gesendet werden:', emailError.message);
+      }
+    } else {
+      console.log('📝 Kontaktanfrage erhalten (E-Mail-Versand deaktiviert):', { name, email, subject });
+    }
 
     res.json({ success: true, message: 'Nachricht erfolgreich gesendet!' });
   } catch (error) {
