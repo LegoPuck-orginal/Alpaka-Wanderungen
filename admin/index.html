@@ -455,11 +455,23 @@
                         <p>Aktive Codes</p>
                     </div>
                 </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Kontaktanfragen</h3>
+                        <div class="card-icon">📧</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-number" id="totalContacts">0</div>
+                        <p>Neue Anfragen: <span id="newContacts">0</span></p>
+                    </div>
+                </div>
             </div>
 
             <!-- Tabs -->
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('bookings')">📋 Buchungen</button>
+                <button class="tab" onclick="switchTab('contacts')">📧 Kontaktanfragen</button>
                 <button class="tab" onclick="switchTab('vouchers')">🎁 Gutscheine</button>
                 <button class="tab" onclick="switchTab('discounts')">💸 Rabattcodes</button>
             </div>
@@ -491,6 +503,35 @@
                                 <tr>
                                     <td colspan="9" style="text-align: center; padding: 2rem;">Laden...</td>
                                 </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacts Tab -->
+            <div id="contactsTab" class="tab-content">
+                <div class="table-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2>📧 Kontaktanfragen</h2>
+                        <button class="btn" onclick="refreshContacts()">🔄 Aktualisieren</button>
+                    </div>
+                    <div id="contactsAlert"></div>
+                    <div style="overflow-x: auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>Name</th>
+                                    <th>E-Mail</th>
+                                    <th>Betreff</th>
+                                    <th>Nachricht</th>
+                                    <th>Status</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contactsTable">
+                                <!-- Wird dynamisch gefüllt -->
                             </tbody>
                         </table>
                     </div>

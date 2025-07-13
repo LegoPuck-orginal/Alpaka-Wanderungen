@@ -29,6 +29,7 @@ function showDashboard() {
     logoutBtn.style.display = 'block';
     loadStatistics();
     loadBookings();
+    loadContacts();
     loadVouchers();
     loadDiscountCodes();
 }
@@ -105,6 +106,8 @@ async function loadStatistics() {
             document.getElementById('totalRevenue').textContent = stats.totalRevenue + '€';
             document.getElementById('totalVouchers').textContent = stats.totalVouchers;
             document.getElementById('totalDiscountCodes').textContent = stats.activeDiscountCodes;
+            document.getElementById('totalContacts').textContent = stats.totalContacts;
+            document.getElementById('newContacts').textContent = stats.newContacts;
         }
     } catch (error) {
         console.error('Statistics loading error:', error);
@@ -477,6 +480,109 @@ function showAlert(elementId, message, type) {
     setTimeout(() => {
         alertElement.innerHTML = '';
     }, 5000);
+}
+
+// === KONTAKT MANAGEMENT ===
+async function loadContacts() {
+    try {
+        const response = await fetch('/api/contacts', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load contacts');
+        
+        const contacts = await response.json();
+        displayContacts(contacts);
+    } catch (error) {
+        console.error('Error loading contacts:', error);
+        showAlert('contactsAlert', 'Fehler beim Laden der Kontaktanfragen', 'error');
+    }
+}
+
+function displayContacts(contacts) {
+    const tbody = document.getElementById('contactsTable');
+    tbody.innerHTML = '';
+    
+    contacts.forEach(contact => {
+        const row = document.createElement('tr');
+        
+        const date = new Date(contact.timestamp).toLocaleDateString('de-DE');
+        const statusBadge = getStatusBadge(contact.status, contact.replied);
+        
+        row.innerHTML = `
+            <td>${date}</td>
+            <td>${contact.name}</td>
+            <td><a href="mailto:${contact.email}">${contact.email}</a></td>
+            <td>${contact.subject}</td>
+            <td title="${contact.message}">${contact.message.length > 50 ? contact.message.substring(0, 50) + '...' : contact.message}</td>
+            <td>${statusBadge}</td>
+            <td>
+                <button class="btn btn-success" onclick="markAsReplied('${contact.id}')" ${contact.replied ? 'disabled' : ''}>
+                    ${contact.replied ? '✅ Beantwortet' : '📧 Als beantwortet markieren'}
+                </button>
+                <button class="btn btn-danger" onclick="deleteContact('${contact.id}')">🗑️ Löschen</button>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+function getStatusBadge(status, replied) {
+    if (replied) {
+        return '<span style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em;">✅ Beantwortet</span>';
+    } else if (status === 'new') {
+        return '<span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em;">🆕 Neu</span>';
+    } else {
+        return '<span style="background: #ffc107; color: black; padding: 4px 8px; border-radius: 4px; font-size: 0.8em;">📖 In Bearbeitung</span>';
+    }
+}
+
+async function markAsReplied(contactId) {
+    try {
+        const response = await fetch(`/api/contacts/${contactId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ replied: true, status: 'completed' })
+        });
+        
+        if (!response.ok) throw new Error('Failed to update contact');
+        
+        showAlert('contactsAlert', 'Kontaktanfrage als beantwortet markiert', 'success');
+        loadContacts();
+        loadStatistics();
+    } catch (error) {
+        console.error('Error updating contact:', error);
+        showAlert('contactsAlert', 'Fehler beim Aktualisieren der Kontaktanfrage', 'error');
+    }
+}
+
+async function deleteContact(contactId) {
+    if (!confirm('Möchten Sie diese Kontaktanfrage wirklich löschen?')) return;
+    
+    try {
+        const response = await fetch(`/api/contacts/${contactId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete contact');
+        
+        showAlert('contactsAlert', 'Kontaktanfrage gelöscht', 'success');
+        loadContacts();
+        loadStatistics();
+    } catch (error) {
+        console.error('Error deleting contact:', error);
+        showAlert('contactsAlert', 'Fehler beim Löschen der Kontaktanfrage', 'error');
+    }
+}
+
+function refreshContacts() {
+    loadContacts();
+    showAlert('contactsAlert', 'Kontaktanfragen aktualisiert', 'success');
 }
 
 // Close modals when clicking outside

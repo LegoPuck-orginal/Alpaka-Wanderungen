@@ -578,6 +578,22 @@ app.post('/api/contact', async (req, res) => {
       return res.status(400).json({ error: 'Ungültige E-Mail-Adresse' });
     }
 
+    // Kontaktanfrage in Datenbank speichern
+    const contacts = await readJsonFile('contacts.json');
+    const contact = {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      name: validator.escape(name),
+      email: validator.normalizeEmail(email),
+      subject: validator.escape(subject),
+      message: validator.escape(message),
+      status: 'new',
+      replied: false
+    };
+
+    contacts.push(contact);
+    await writeJsonFile('contacts.json', contacts);
+
     // E-Mail-Funktion (nur wenn Transporter verfügbar)
     if (transporter) {
       try {
@@ -624,12 +640,66 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// === KONTAKT API ===
+app.get('/api/contacts', authenticateToken, async (req, res) => {
+  try {
+    const contacts = await readJsonFile('contacts.json');
+    res.json(contacts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+  } catch (error) {
+    console.error('Contacts fetch error:', error);
+    res.status(500).json({ error: 'Fehler beim Laden der Kontaktanfragen' });
+  }
+});
+
+app.patch('/api/contacts/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, replied } = req.body;
+    
+    const contacts = await readJsonFile('contacts.json');
+    const contactIndex = contacts.findIndex(c => c.id === id);
+    
+    if (contactIndex === -1) {
+      return res.status(404).json({ error: 'Kontaktanfrage nicht gefunden' });
+    }
+    
+    if (status) contacts[contactIndex].status = status;
+    if (replied !== undefined) contacts[contactIndex].replied = replied;
+    
+    await writeJsonFile('contacts.json', contacts);
+    res.json({ success: true, contact: contacts[contactIndex] });
+  } catch (error) {
+    console.error('Contact update error:', error);
+    res.status(500).json({ error: 'Fehler beim Aktualisieren der Kontaktanfrage' });
+  }
+});
+
+app.delete('/api/contacts/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const contacts = await readJsonFile('contacts.json');
+    const filteredContacts = contacts.filter(c => c.id !== id);
+    
+    if (contacts.length === filteredContacts.length) {
+      return res.status(404).json({ error: 'Kontaktanfrage nicht gefunden' });
+    }
+    
+    await writeJsonFile('contacts.json', filteredContacts);
+    res.json({ success: true, message: 'Kontaktanfrage gelöscht' });
+  } catch (error) {
+    console.error('Contact delete error:', error);
+    res.status(500).json({ error: 'Fehler beim Löschen der Kontaktanfrage' });
+  }
+});
+
 // === STATISTICS API ===
 app.get('/api/statistics', authenticateToken, async (req, res) => {
   try {
     const bookings = await readJsonFile('bookings.json');
     const vouchers = await readJsonFile('vouchers.json');
     const discountCodes = await readJsonFile('discount-codes.json');
+    const contacts = await readJsonFile('contacts.json');
 
     const stats = {
       totalBookings: bookings.length,
@@ -639,7 +709,10 @@ app.get('/api/statistics', authenticateToken, async (req, res) => {
       totalVouchers: vouchers.length,
       redeemedVouchers: vouchers.filter(v => v.isRedeemed).length,
       totalDiscountCodes: discountCodes.length,
-      activeDiscountCodes: discountCodes.filter(c => c.isActive).length
+      activeDiscountCodes: discountCodes.filter(c => c.isActive).length,
+      totalContacts: contacts.length,
+      newContacts: contacts.filter(c => c.status === 'new').length,
+      repliedContacts: contacts.filter(c => c.replied === true).length
     };
 
     res.json(stats);
