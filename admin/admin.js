@@ -1,20 +1,77 @@
 // Admin Panel JavaScript
 let authToken = localStorage.getItem('alpaka_admin_token');
 
+// Debug function
+function debugStatus() {
+    console.log('Auth Token:', authToken ? 'exists' : 'not found');
+    console.log('Login Section Display:', loginSection ? loginSection.style.display : 'element not found');
+    console.log('Dashboard Section Display:', dashboardSection ? dashboardSection.style.display : 'element not found');
+}
+
 // DOM Elements
-const loginSection = document.getElementById('loginSection');
-const dashboardSection = document.getElementById('dashboardSection');
-const loginForm = document.getElementById('loginForm');
-const logoutBtn = document.getElementById('logoutBtn');
+let loginSection, dashboardSection, loginForm, logoutBtn;
 
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('Admin Panel initializing...');
+    
+    // Get DOM elements after page load
+    loginSection = document.getElementById('loginSection');
+    dashboardSection = document.getElementById('dashboardSection');
+    loginForm = document.getElementById('loginForm');
+    logoutBtn = document.getElementById('logoutBtn');
+    
+    debugStatus();
+    
+    // Check if required elements exist
+    if (!loginSection || !dashboardSection || !loginForm) {
+        console.error('Required DOM elements not found');
+        return;
+    }
+    
     if (authToken) {
-        showDashboard();
+        console.log('Found existing token, validating...');
+        // Validate token before showing dashboard
+        const isValid = await validateToken();
+        if (isValid) {
+            console.log('Token valid, showing dashboard');
+            showDashboard();
+        } else {
+            console.log('Token invalid, removing and showing login');
+            // Token is invalid, remove it and show login
+            localStorage.removeItem('alpaka_admin_token');
+            authToken = null;
+            showLogin();
+        }
     } else {
+        console.log('No token found, showing login');
         showLogin();
     }
+    
+    // Add event listeners after DOM is loaded
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
 });
+
+// Token validation
+async function validateToken() {
+    try {
+        const response = await fetch('/api/statistics', {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Token validation error:', error);
+        return false;
+    }
+}
 
 // Authentication
 function showLogin() {
@@ -41,11 +98,27 @@ function logout() {
 }
 
 // Login Form Handler
-loginForm.addEventListener('submit', async function(e) {
+async function handleLogin(e) {
     e.preventDefault();
     
     const password = document.getElementById('password').value;
     const loginAlert = document.getElementById('loginAlert');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    // Clear previous alerts
+    if (loginAlert) loginAlert.innerHTML = '';
+    
+    if (!password) {
+        showAlert('loginAlert', 'Bitte geben Sie ein Passwort ein', 'error');
+        return;
+    }
+    
+    // Show loading state
+    if (submitBtn) {
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Anmelden...';
+        submitBtn.disabled = true;
+    }
     
     try {
         const response = await fetch('/api/admin/login', {
@@ -58,18 +131,28 @@ loginForm.addEventListener('submit', async function(e) {
         
         const data = await response.json();
         
-        if (data.success) {
+        if (response.ok && data.success) {
             authToken = data.token;
             localStorage.setItem('alpaka_admin_token', authToken);
-            showDashboard();
             showAlert('loginAlert', 'Erfolgreich angemeldet!', 'success');
+            // Small delay to show success message
+            setTimeout(() => {
+                showDashboard();
+            }, 1000);
         } else {
             showAlert('loginAlert', data.error || 'Anmeldung fehlgeschlagen', 'error');
         }
     } catch (error) {
-        showAlert('loginAlert', 'Verbindungsfehler', 'error');
+        console.error('Login error:', error);
+        showAlert('loginAlert', 'Verbindungsfehler. Bitte versuchen Sie es erneut.', 'error');
+    } finally {
+        // Reset button state
+        if (submitBtn) {
+            submitBtn.textContent = 'Anmelden';
+            submitBtn.disabled = false;
+        }
     }
-});
+}
 
 // Tab Switching
 function switchTab(tabName) {

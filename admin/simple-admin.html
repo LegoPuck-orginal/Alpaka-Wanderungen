@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦙 Alpaka-Wanderungen - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f9e6cf 0%, #f6ca9f 100%);
+            min-height: 100vh;
+            color: #134c4c;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(19, 76, 76, 0.1);
+            text-align: center;
+            border: 2px solid rgba(51, 152, 75, 0.1);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #33984b, #1e6f50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #1e6f50;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* Login Section */
+        .login-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 15px 35px rgba(19, 76, 76, 0.1);
+            border: 2px solid rgba(51, 152, 75, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #134c4c;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(51, 152, 75, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(249, 230, 207, 0.3);
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #33984b;
+            box-shadow: 0 0 0 3px rgba(51, 152, 75, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #33984b, #1e6f50);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(51, 152, 75, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Dashboard Section */
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .logout-btn {
+            padding: 0.75rem 1.5rem;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid rgba(51, 152, 75, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #134c4c;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #33984b, #1e6f50);
+            color: white;
+            border-color: #33984b;
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(19, 76, 76, 0.1);
+            border: 2px solid rgba(51, 152, 75, 0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .contact-item {
+            background: rgba(249, 230, 207, 0.3);
+            border: 1px solid rgba(51, 152, 75, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info h3 {
+            color: #33984b;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .btn-reply {
+            background: #33984b;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(249, 230, 207, 0.3);
+            border: 2px solid rgba(51, 152, 75, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #33984b;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #134c4c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🦙 Alpaka-Wanderungen</h1>
+            <p class="subtitle">Admin Panel</p>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #33984b;">Admin-Anmeldung</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="password">Passwort:</label>
+                    <input type="password" id="password" placeholder="Admin-Passwort eingeben">
+                </div>
+                <button type="submit" class="btn">Anmelden</button>
+            </form>
+            <div id="loginAlert"></div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="dashboard-section">
+            <div class="dashboard-header">
+                <h2 style="color: #33984b;">Dashboard</h2>
+                <button id="logoutBtn" class="logout-btn">Abmelden</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('statistics')">📊 Statistiken</div>
+                <div class="tab" onclick="switchTab('contacts')">📧 Kontakte</div>
+                <div class="tab" onclick="switchTab('bookings')">📅 Buchungen</div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div id="statisticsTab" class="tab-content active">
+                <h3 style="margin-bottom: 2rem; color: #33984b;">📊 Übersicht</h3>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalBookings">-</div>
+                        <div class="stat-label">Buchungen</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalContacts">-</div>
+                        <div class="stat-label">Kontakte</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalVouchers">-</div>
+                        <div class="stat-label">Gutscheine</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacts Tab -->
+            <div id="contactsTab" class="tab-content">
+                <h3 style="margin-bottom: 2rem; color: #33984b;">📧 Kontaktanfragen</h3>
+                <div id="contactsList">
+                    <p>Lade Kontakte...</p>
+                </div>
+            </div>
+
+            <!-- Bookings Tab -->
+            <div id="bookingsTab" class="tab-content">
+                <h3 style="margin-bottom: 2rem; color: #33984b;">📅 Buchungen</h3>
+                <div id="bookingsList">
+                    <p>Lade Buchungen...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let authToken = localStorage.getItem('alpaka_admin_token');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Admin Panel wird geladen...');
+            
+            if (authToken) {
+                console.log('Token gefunden, validiere...');
+                validateAndShowDashboard();
+            } else {
+                console.log('Kein Token gefunden, zeige Login');
+                showLogin();
+            }
+            
+            // Event Listeners
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+
+        async function validateAndShowDashboard() {
+            try {
+                const response = await fetch('/api/statistics', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    console.log('Token gültig, zeige Dashboard');
+                    showDashboard();
+                } else {
+                    console.log('Token ungültig, lösche und zeige Login');
+                    localStorage.removeItem('alpaka_admin_token');
+                    authToken = null;
+                    showLogin();
+                }
+            } catch (error) {
+                console.error('Token-Validierung fehlgeschlagen:', error);
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('dashboardSection').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashboardSection').style.display = 'block';
+            loadStatistics();
+            loadContacts();
+            loadBookings();
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const alertDiv = document.getElementById('loginAlert');
+            
+            if (!password) {
+                showAlert(alertDiv, 'Bitte geben Sie ein Passwort ein', 'error');
+                return;
+            }
+            
+            // Loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Anmelden...';
+            
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('alpaka_admin_token', authToken);
+                    showAlert(alertDiv, 'Erfolgreich angemeldet!', 'success');
+                    setTimeout(showDashboard, 1000);
+                } else {
+                    showAlert(alertDiv, data.error || 'Anmeldung fehlgeschlagen', 'error');
+                }
+            } catch (error) {
+                console.error('Login-Fehler:', error);
+                showAlert(alertDiv, 'Verbindungsfehler', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Anmelden';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('alpaka_admin_token');
+            authToken = null;
+            showLogin();
+        }
+
+        function switchTab(tabName) {
+            // Remove active from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active to clicked tab and corresponding content
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/statistics', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('totalBookings').textContent = stats.totalBookings || 0;
+                    document.getElementById('totalContacts').textContent = stats.totalContacts || 0;
+                    document.getElementById('totalVouchers').textContent = stats.totalVouchers || 0;
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Statistiken:', error);
+            }
+        }
+
+        async function loadContacts() {
+            try {
+                const response = await fetch('/api/contacts', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const contacts = await response.json();
+                    displayContacts(contacts);
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Kontakte:', error);
+                document.getElementById('contactsList').innerHTML = '<p>Fehler beim Laden der Kontakte</p>';
+            }
+        }
+
+        function displayContacts(contacts) {
+            const container = document.getElementById('contactsList');
+            
+            if (contacts.length === 0) {
+                container.innerHTML = '<p>Keine Kontakte vorhanden</p>';
+                return;
+            }
+            
+            container.innerHTML = contacts.map(contact => `
+                <div class="contact-item">
+                    <div class="contact-header">
+                        <div class="contact-info">
+                            <h3>${contact.name}</h3>
+                            <div class="contact-meta">
+                                📧 ${contact.email} | 📅 ${new Date(contact.timestamp).toLocaleString('de-DE')}
+                            </div>
+                            <strong>Betreff:</strong> ${contact.subject}
+                        </div>
+                        <div class="contact-actions">
+                            <button class="btn-small btn-reply" onclick="markAsReplied('${contact.id}')">
+                                ${contact.replied ? '✅ Beantwortet' : '📝 Als beantwortet markieren'}
+                            </button>
+                            <button class="btn-small btn-delete" onclick="deleteContact('${contact.id}')">🗑️ Löschen</button>
+                        </div>
+                    </div>
+                    <p><strong>Nachricht:</strong></p>
+                    <p>${contact.message}</p>
+                </div>
+            `).join('');
+        }
+
+        async function markAsReplied(contactId) {
+            try {
+                const response = await fetch(`/api/contacts/${contactId}/reply`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    loadContacts(); // Reload contacts
+                }
+            } catch (error) {
+                console.error('Fehler beim Markieren als beantwortet:', error);
+            }
+        }
+
+        async function deleteContact(contactId) {
+            if (!confirm('Kontakt wirklich löschen?')) return;
+            
+            try {
+                const response = await fetch(`/api/contacts/${contactId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    loadContacts(); // Reload contacts
+                }
+            } catch (error) {
+                console.error('Fehler beim Löschen des Kontakts:', error);
+            }
+        }
+
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/bookings', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const bookings = await response.json();
+                    displayBookings(bookings);
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Buchungen:', error);
+                document.getElementById('bookingsList').innerHTML = '<p>Fehler beim Laden der Buchungen</p>';
+            }
+        }
+
+        function displayBookings(bookings) {
+            const container = document.getElementById('bookingsList');
+            
+            if (bookings.length === 0) {
+                container.innerHTML = '<p>Keine Buchungen vorhanden</p>';
+                return;
+            }
+            
+            container.innerHTML = bookings.map(booking => `
+                <div class="contact-item">
+                    <h3>${booking.name}</h3>
+                    <p><strong>E-Mail:</strong> ${booking.email}</p>
+                    <p><strong>Tour:</strong> ${booking.tour}</p>
+                    <p><strong>Datum:</strong> ${booking.date}</p>
+                    <p><strong>Personen:</strong> ${booking.participants}</p>
+                    <p><strong>Buchungsdatum:</strong> ${new Date(booking.timestamp).toLocaleString('de-DE')}</p>
+                </div>
+            `).join('');
+        }
+
+        function showAlert(container, message, type) {
+            container.innerHTML = `<div class="alert ${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+    </script>
+</body>
+</html>

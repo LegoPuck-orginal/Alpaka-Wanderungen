@@ -487,6 +487,21 @@ app.delete('/api/discount-codes/:id', authenticateToken, async (req, res) => {
 });
 
 // === ADMIN PANEL ===
+
+// Admin Panel Route - Serve the new simple admin panel
+app.get('/admin/new', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin', 'simple-admin.html'));
+});
+
+// Legacy admin route - redirect to new
+app.get('/admin/', (req, res) => {
+  res.redirect('/admin/new');
+});
+
+app.get('/admin', (req, res) => {
+  res.redirect('/admin/new');
+});
+
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { password } = req.body;

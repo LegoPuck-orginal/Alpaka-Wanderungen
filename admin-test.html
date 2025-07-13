@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦙 Admin-Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9e6cf;
+            margin: 0;
+            padding: 20px;
+            color: #134c4c;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #33984b;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #33984b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #1e6f50;
+        }
+        
+        .alert {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦙 Admin Panel Test</h1>
+        
+        <div class="status">
+            <strong>Status:</strong> <span id="status">Bereit</span><br>
+            <strong>Server:</strong> <span id="serverStatus">Prüfung...</span><br>
+            <strong>Token:</strong> <span id="tokenStatus">Prüfung...</span>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">Admin-Passwort:</label>
+                <input type="password" id="password" placeholder="admin123" value="admin123">
+            </div>
+            <button type="submit">Anmelden</button>
+        </form>
+        
+        <div id="result"></div>
+        
+        <div style="margin-top: 2rem;">
+            <button onclick="testServer()">Server testen</button>
+            <button onclick="clearToken()">Token löschen</button>
+            <button onclick="goToAdmin()">Zum Admin Panel</button>
+        </div>
+    </div>
+
+    <script>
+        // Check initial status
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerStatus();
+            checkTokenStatus();
+        });
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: 'test' })
+                });
+                document.getElementById('serverStatus').textContent = response.status === 401 ? '✅ Online' : '❌ Fehler';
+            } catch (error) {
+                document.getElementById('serverStatus').textContent = '❌ Offline';
+            }
+        }
+
+        function checkTokenStatus() {
+            const token = localStorage.getItem('alpaka_admin_token');
+            document.getElementById('tokenStatus').textContent = token ? '✅ Vorhanden' : '❌ Nicht vorhanden';
+        }
+
+        function showResult(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.innerHTML = `<div class="alert ${type}">${message}</div>`;
+        }
+
+        async function testServer() {
+            document.getElementById('status').textContent = 'Server wird getestet...';
+            try {
+                const response = await fetch('/');
+                const ok = response.ok;
+                showResult(`Server Test: ${ok ? '✅ OK' : '❌ Fehler'}`, ok ? 'success' : 'error');
+                document.getElementById('status').textContent = ok ? 'Server OK' : 'Server Fehler';
+            } catch (error) {
+                showResult('❌ Server nicht erreichbar', 'error');
+                document.getElementById('status').textContent = 'Server offline';
+            }
+        }
+
+        function clearToken() {
+            localStorage.removeItem('alpaka_admin_token');
+            checkTokenStatus();
+            showResult('Token gelöscht', 'success');
+        }
+
+        function goToAdmin() {
+            window.location.href = '/admin/';
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            if (!password) {
+                showResult('Bitte Passwort eingeben', 'error');
+                return;
+            }
+            
+            // Show loading
+            submitBtn.textContent = 'Anmeldung läuft...';
+            submitBtn.disabled = true;
+            document.getElementById('status').textContent = 'Anmeldung...';
+            
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await response.json();
+                console.log('Login Response:', data);
+                
+                if (response.ok && data.success) {
+                    localStorage.setItem('alpaka_admin_token', data.token);
+                    showResult('✅ Login erfolgreich! Weiterleitung...', 'success');
+                    document.getElementById('status').textContent = 'Angemeldet';
+                    checkTokenStatus();
+                    
+                    setTimeout(() => {
+                        window.location.href = '/admin/';
+                    }, 2000);
+                } else {
+                    showResult(`❌ Login fehlgeschlagen: ${data.error || 'Unbekannter Fehler'}`, 'error');
+                    document.getElementById('status').textContent = 'Login fehlgeschlagen';
+                }
+            } catch (error) {
+                console.error('Login Error:', error);
+                showResult(`❌ Verbindungsfehler: ${error.message}`, 'error');
+                document.getElementById('status').textContent = 'Verbindungsfehler';
+            } finally {
+                submitBtn.textContent = 'Anmelden';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
