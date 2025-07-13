@@ -393,18 +393,8 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Service Worker für bessere Performance (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-                console.log('ServiceWorker registriert: ', registration.scope);
-            })
-            .catch(function(error) {
-                console.log('ServiceWorker Registrierung fehlgeschlagen: ', error);
-            });
-    });
-}
+// Service Worker wurde entfernt um 404-Fehler zu vermeiden
+// Falls gewünscht, kann später ein Service Worker erstellt werden
 
 // Lazy Loading für Bilder
 function lazyLoadImages() {
