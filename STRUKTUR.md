@@ -1,6 +1,8 @@
-# 🦙 Alpaka-Wanderungen - Ordnerstruktur
+# 🦙 Alpaka-Wanderungen - Aufgeräumte Projektstruktur ✨
 
-## 📁 Projektstruktur
+## Neue Ordnerstruktur
+
+Das Projekt wurde komplett neu organisiert für bessere Übersichtlichkeit und Wartbarkeit:
 
 ```
 Alpaka-Wanderungen/

@@ -1,20 +1,18 @@
-/* === DUNKLERE NATÜRLICHE FARBPALETTE === */
+/* === CSS VARIABLEN === */
 :root {
-  /* Dunklere Erdtöne und Naturtöne */
-  --alpaka-braun: #6B2D0C;
-  --alpaka-creme: #E6E6CD;
-  --alpaka-beige: #C4976A;
-  --wiesen-gruen: #1C6B1C;
-  --wald-gruen: #3D4F1F;
-  --himmel-blau: #5A9BCC;
-  --erde-braun: #7A3B18;
+  /* Natur-inspirierte Farbpalette */
+  --alpaka-creme: #F9E6CF;
+  --alpaka-beige: #F6CA9F;
   --gras-gruen: #7A9B28;
+  --wald-gruen: #3D4F1F;
   --stein-grau: #556B70;
-  --sonnen-gelb: #CC9900;
+  --schatten-grau: #2F3F3F;
   --natur-weiss: #F0F0E8;
-  --schatten-grau: #1F2F2F;
+  --himmel-blau: #5A9BCC;
+  --erde-braun: #A87C5A;
+  --sonnen-gelb: #E6C446;
   
-  /* Sicherheitsvariablen */
+  /* Zusätzliche Farben */
   --primary-color: #7A9B28;
   --secondary-color: #C4976A;
   --accent-color: #5A9BCC;

@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🦙 Alpaka-Wanderungen - Naturerlebnisse</title>
+    <meta name="description" content="Erleben Sie unvergessliche Alpaka-Wanderungen in wunderschöner Natur. Buchen Sie jetzt Ihre Traumtour!">
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/styles.css">
-    <link rel="icon" type="image/png" href="public/images/alpacker-logo.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/navigation.css">
+    <link rel="stylesheet" href="src/css/sections.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/alpacker-logo.png">
 </head>
 <body>
     <!-- Navigation -->
@@ -20,10 +29,9 @@
             <ul class="nav-menu">
                 <li><a href="#hero" class="nav-link">Start</a></li>
                 <li><a href="#touren" class="nav-link">Touren</a></li>
-                <li><a href="#gutscheine" class="nav-link">🎁 Gutscheine</a></li>
                 <li><a href="#ueber-uns" class="nav-link">Über uns</a></li>
                 <li><a href="#kontakt" class="nav-link">Kontakt</a></li>
-                <li><a href="admin" class="nav-link admin-link">Admin</a></li>
+                <li><a href="src/admin/index.html" class="nav-link admin-link">Admin</a></li>
             </ul>
             
             <button class="mobile-menu-btn">☰</button>
@@ -43,184 +51,7 @@
             </div>
         </div>
         <div class="hero-image">
-            <img src="assets/alpacker-logo.png" alt="Alpaka" class="hero-alpaka">
-        </div>
-    </section>
-
-    <!-- Gutschein Section -->
-    <section id="gutscheine" class="section gutschein-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">🎁 Gutscheine bestellen</h2>
-                <p class="section-subtitle">
-                    Verschenken Sie unvergessliche Alpaka-Erlebnisse oder gönnen Sie sich selbst eine Auszeit in der Natur
-                </p>
-            </div>
-            
-            <div class="gutschein-container">
-                <div class="gutschein-info">
-                    <h3>Warum Alpaka-Gutscheine?</h3>
-                    <ul class="gutschein-benefits">
-                        <li>✨ Perfekt für jeden Anlass</li>
-                        <li>🎯 Individuell wählbare Beträge</li>
-                        <li>📅 3 Jahre gültig</li>
-                        <li>🚚 Kostenloser Versand</li>
-                        <li>💌 Persönliche Grußkarte möglich</li>
-                    </ul>
-                </div>
-                
-                <div class="gutschein-form-container">
-                    <form id="gutscheinForm" class="gutschein-form">
-                        <h3>Gutschein bestellen</h3>
-                        
-                        <!-- Gutschein-Typ -->
-                        <div class="form-group">
-                            <label>Gutschein-Typ:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="gutscheinTyp" value="betrag" checked>
-                                    <span class="radio-custom"></span>
-                                    Wertgutschein (beliebiger Betrag)
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="gutscheinTyp" value="tour">
-                                    <span class="radio-custom"></span>
-                                    Tour-Gutschein (spezifische Tour)
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Betrag/Tour Auswahl -->
-                        <div class="form-group" id="betragGruppe">
-                            <label for="gutscheinBetrag">Gutschein-Wert (€):</label>
-                            <select id="gutscheinBetrag" name="gutscheinBetrag" required>
-                                <option value="">Betrag wählen</option>
-                                <option value="25">25 € - Kleine Freude</option>
-                                <option value="50">50 € - Alpaka-Kennenlern-Tour</option>
-                                <option value="75">75 € - Entspannte Wanderung</option>
-                                <option value="100">100 € - Premium-Erlebnis</option>
-                                <option value="150">150 € - Komplettes Alpaka-Abenteuer</option>
-                                <option value="custom">Anderer Betrag</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" id="customBetragGruppe" style="display: none;">
-                            <label for="customBetrag">Gewünschter Betrag (€):</label>
-                            <input type="number" id="customBetrag" name="customBetrag" min="10" max="500" placeholder="z.B. 80">
-                        </div>
-
-                        <div class="form-group" id="tourGruppe" style="display: none;">
-                            <label for="gutscheinTour">Tour auswählen:</label>
-                            <select id="gutscheinTour" name="gutscheinTour">
-                                <option value="">Tour wählen</option>
-                                <option value="kennenlern-tour">Alpaka-Kennenlern-Tour (1h) - 45€</option>
-                                <option value="entspannte-wanderung">Entspannte Wanderung (2h) - 65€</option>
-                                <option value="natur-abenteuer">Natur-Abenteuer (3h) - 85€</option>
-                                <option value="sonnenuntergang">Sonnenuntergang-Tour (2.5h) - 75€</option>
-                            </select>
-                        </div>
-
-                        <!-- Empfänger-Informationen -->
-                        <div class="form-group">
-                            <label>Gutschein ist für:</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="empfaengerTyp" value="selbst" checked>
-                                    <span class="radio-custom"></span>
-                                    Mich selbst
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="empfaengerTyp" value="geschenk">
-                                    <span class="radio-custom"></span>
-                                    Als Geschenk für jemand anderen
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Käufer-Daten -->
-                        <div class="form-section">
-                            <h4>Ihre Daten (Käufer)</h4>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="kaeuferVorname">Vorname *</label>
-                                    <input type="text" id="kaeuferVorname" name="kaeuferVorname" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="kaeuferNachname">Nachname *</label>
-                                    <input type="text" id="kaeuferNachname" name="kaeuferNachname" required>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="kaeuferEmail">E-Mail *</label>
-                                <input type="email" id="kaeuferEmail" name="kaeuferEmail" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="kaeuferTelefon">Telefon</label>
-                                <input type="tel" id="kaeuferTelefon" name="kaeuferTelefon" placeholder="Optional">
-                            </div>
-                        </div>
-
-                        <!-- Empfänger-Daten (nur bei Geschenk) -->
-                        <div class="form-section" id="empfaengerDaten" style="display: none;">
-                            <h4>Daten des Beschenkten</h4>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="empfaengerVorname">Vorname des Beschenkten *</label>
-                                    <input type="text" id="empfaengerVorname" name="empfaengerVorname">
-                                </div>
-                                <div class="form-group">
-                                    <label for="empfaengerNachname">Nachname des Beschenkten *</label>
-                                    <input type="text" id="empfaengerNachname" name="empfaengerNachname">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="empfaengerEmail">E-Mail des Beschenkten</label>
-                                <input type="email" id="empfaengerEmail" name="empfaengerEmail" placeholder="Optional - für direkte Zusendung">
-                            </div>
-                        </div>
-
-                        <!-- Versand-Adresse -->
-                        <div class="form-section">
-                            <h4>Versand-Adresse</h4>
-                            <div class="form-group">
-                                <label for="versandStrasse">Straße & Hausnummer *</label>
-                                <input type="text" id="versandStrasse" name="versandStrasse" required>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="versandPlz">PLZ *</label>
-                                    <input type="text" id="versandPlz" name="versandPlz" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="versandOrt">Ort *</label>
-                                    <input type="text" id="versandOrt" name="versandOrt" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Persönliche Nachricht -->
-                        <div class="form-group">
-                            <label for="gutscheinNachricht">Persönliche Grußnachricht (optional)</label>
-                            <textarea id="gutscheinNachricht" name="gutscheinNachricht" rows="3" placeholder="Ihre persönliche Nachricht für den Gutschein..."></textarea>
-                        </div>
-
-                        <!-- Besondere Wünsche -->
-                        <div class="form-group">
-                            <label for="besondereWuensche">Besondere Wünsche oder Anmerkungen</label>
-                            <textarea id="besondereWuensche" name="besondereWuensche" rows="2" placeholder="Z.B. Liefertermin, besondere Verpackung..."></textarea>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary btn-large">
-                            🎁 Gutschein bestellen
-                        </button>
-                        
-                        <div class="form-note">
-                            <small>* Pflichtfelder. Nach der Bestellung erhalten Sie eine Bestätigung per E-Mail mit den Zahlungsinformationen.</small>
-                        </div>
-                    </form>
-                </div>
-            </div>
+            <img src="assets/images/alpacker-logo.png" alt="Alpaka" class="hero-alpaka">
         </div>
     </section>
 
@@ -234,50 +65,50 @@
             
             <div class="tour-grid">
                 <!-- Familien-Tour -->
-                <div class="tour-card" data-tour="familien-tour">
+                <div class="tour-card" data-tour="Entspannte Alpaka-Wanderung" data-price="25">
                     <div class="tour-info">
-                        <h3 class="tour-title">Entspannte Familien-Wanderung</h3>
+                        <h3 class="tour-title">Entspannte Alpaka-Wanderung</h3>
                         <p class="tour-description">
-                            Perfect für Familien mit Kindern. Eine entspannte 2-stündige Wanderung durch malerische Landschaften mit kinderfreundlichen Alpakas.
+                            Perfect für Familien mit Kindern. Eine entspannte 2-stündige Wanderung durch malerische Landschaften.
                         </p>
                         <div class="tour-price">25€ <span class="price-per">pro Person</span></div>
                         <div class="tour-duration">⏰ 2 Stunden</div>
-                        <button class="btn btn-primary tour-book-btn" onclick="openBookingModal('familien-tour')">
-                            📅 Jetzt buchen
-                        </button>
                     </div>
                 </div>
 
                 <!-- Abenteuer-Tour -->
-                <div class="tour-card" data-tour="abenteuer-tour">
+                <div class="tour-card" data-tour="Alpaka-Abenteuer für die ganze Familie" data-price="35">
                     <div class="tour-info">
                         <h3 class="tour-title">Alpaka-Abenteuer</h3>
                         <p class="tour-description">
-                            Ein aufregendes 4-stündiges Abenteuer mit Picknick, Alpaka-Training und vielen spannenden Aktivitäten für Abenteuerlustige.
+                            Ein aufregendes 4-stündiges Abenteuer für die ganze Familie mit Picknick und vielen Aktivitäten.
                         </p>
                         <div class="tour-price">35€ <span class="price-per">pro Person</span></div>
                         <div class="tour-duration">⏰ 4 Stunden</div>
-                        <button class="btn btn-primary tour-book-btn" onclick="openBookingModal('abenteuer-tour')">
-                            📅 Jetzt buchen
-                        </button>
                     </div>
                 </div>
 
                 <!-- Romantische Tour -->
-                <div class="tour-card" data-tour="romantik-tour">
+                <div class="tour-card" data-tour="Romantische Alpaka-Wanderung für Paare" data-price="45">
                     <div class="tour-info">
                         <h3 class="tour-title">Romantische Paare-Tour</h3>
                         <p class="tour-description">
-                            Eine romantische 3-stündige Tour für Paare mit Sonnenaufgang, Alpaka-Kuschelzeit und gemütlichem Frühstück zu zweit.
+                            Eine romantische 3-stündige Tour für Paare mit Sonnenaufgang und gemütlichem Frühstück.
                         </p>
                         <div class="tour-price">45€ <span class="price-per">pro Person</span></div>
                         <div class="tour-duration">⏰ 3 Stunden</div>
-                        <button class="btn btn-primary tour-book-btn" onclick="openBookingModal('romantik-tour')">
-                            📅 Jetzt buchen
-                        </button>
                     </div>
                 </div>
-            </div>
+
+                <!-- Yoga Tour -->
+                <div class="tour-card" data-tour="Alpaka-Yoga & Meditation" data-price="40">
+                    <div class="tour-info">
+                        <h3 class="tour-title">Alpaka-Yoga & Meditation</h3>
+                        <p class="tour-description">
+                            Entspannung pur mit Yoga-Session und Meditation in Begleitung unserer ruhigen Alpakas.
+                        </p>
+                        <div class="tour-price">40€ <span class="price-per">pro Person</span></div>
+                        <div class="tour-duration">⏰ 2.5 Stunden</div>
                     </div>
                 </div>
 
@@ -423,7 +254,10 @@
                         <li><a href="#touren">Touren</a></li>
                         <li><a href="#ueber-uns">Über uns</a></li>
                         <li><a href="#kontakt">Kontakt</a></li>
-                        <li><a href="admin">Admin</a></li>
+                        <li><a href="src/admin/index.html">Admin</a></li>
+                        <li><a href="src/pages/impressum.html">Impressum</a></li>
+                        <li><a href="src/pages/datenschutz.html">Datenschutz</a></li>
+                        <li><a href="src/pages/agb.html">AGB</a></li>
                     </ul>
                 </div>
                 
@@ -535,6 +369,6 @@
         </div>
     </div>
 
-    <script src="public/js/main.js"></script>
+    <script src="src/js/main.js"></script>
 </body>
 </html>
