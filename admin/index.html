@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🦙 Alpaka-Wanderungen - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../assets/alpacker-logo.png">
     <style>
+        /* Alpaka-Wanderungen Admin Panel - Farben: #33984b #1e6f50 #134c4c #f6ca9f #f9e6cf */
+        
         * {
             margin: 0;
             padding: 0;
@@ -13,9 +17,9 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f9e6cf 0%, #f6ca9f 100%);
             min-height: 100vh;
-            color: #333;
+            color: #134c4c;
         }
 
         .admin-container {
@@ -27,33 +31,38 @@
         .admin-header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(19, 76, 76, 0.1);
             text-align: center;
+            border: 2px solid rgba(51, 152, 75, 0.1);
         }
 
         .admin-title {
             font-size: 2.5rem;
             font-weight: 800;
-            color: #667eea;
+            background: linear-gradient(135deg, #33984b, #1e6f50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 0.5rem;
         }
 
         .admin-subtitle {
-            color: #666;
+            color: #1e6f50;
             font-size: 1.1rem;
         }
 
         .login-form {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 3rem;
             max-width: 400px;
             margin: 2rem auto;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(19, 76, 76, 0.1);
+            border: 2px solid rgba(51, 152, 75, 0.1);
         }
 
         .admin-dashboard {
@@ -70,15 +79,16 @@
         .dashboard-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 30px rgba(19, 76, 76, 0.1);
+            border: 2px solid rgba(51, 152, 75, 0.1);
+            transition: all 0.3s ease;
         }
 
         .dashboard-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(19, 76, 76, 0.15);
         }
 
         .card-header {
@@ -90,6 +100,8 @@
 
         .card-title {
             font-size: 1.3rem;
+            color: #134c4c;
+            font-weight: 700;
             font-weight: 700;
             color: #333;
         }
@@ -110,38 +122,44 @@
         }
 
         .btn {
-            background: #667eea;
-            color: white;
+            background: linear-gradient(135deg, #33984b, #1e6f50);
+            color: #f9e6cf;
             border: none;
             padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
             margin: 5px;
+            box-shadow: 0 4px 15px rgba(51, 152, 75, 0.3);
         }
 
         .btn:hover {
-            background: #5a6fd8;
+            background: linear-gradient(135deg, #1e6f50, #134c4c);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(51, 152, 75, 0.4);
         }
 
         .btn-danger {
-            background: #e53e3e;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
         }
 
         .btn-danger:hover {
-            background: #c53030;
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
         }
 
         .btn-success {
-            background: #38a169;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
 
         .btn-success:hover {
-            background: #2f855a;
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
 
         .form-group {
