@@ -55,7 +55,7 @@
             
             <div class="tour-grid">
                 <!-- Familien-Tour -->
-                <div class="tour-card" onclick="showBookingForm('Entspannte Alpaka-Wanderung', 25)">
+                <div class="tour-card" data-tour="Entspannte Alpaka-Wanderung" data-price="25">
                     <div class="tour-info">
                         <h3 class="tour-title">Entspannte Alpaka-Wanderung</h3>
                         <p class="tour-description">
@@ -67,7 +67,7 @@
                 </div>
 
                 <!-- Abenteuer-Tour -->
-                <div class="tour-card" onclick="showBookingForm('Alpaka-Abenteuer für die ganze Familie', 35)">
+                <div class="tour-card" data-tour="Alpaka-Abenteuer für die ganze Familie" data-price="35">
                     <div class="tour-info">
                         <h3 class="tour-title">Alpaka-Abenteuer</h3>
                         <p class="tour-description">
@@ -79,7 +79,7 @@
                 </div>
 
                 <!-- Romantische Tour -->
-                <div class="tour-card" onclick="showBookingForm('Romantische Alpaka-Wanderung für Paare', 45)">
+                <div class="tour-card" data-tour="Romantische Alpaka-Wanderung für Paare" data-price="45">
                     <div class="tour-info">
                         <h3 class="tour-title">Romantische Paare-Tour</h3>
                         <p class="tour-description">
@@ -91,7 +91,7 @@
                 </div>
 
                 <!-- Yoga Tour -->
-                <div class="tour-card" onclick="showBookingForm('Alpaka-Yoga & Meditation', 40)">
+                <div class="tour-card" data-tour="Alpaka-Yoga & Meditation" data-price="40">
                     <div class="tour-info">
                         <h3 class="tour-title">Alpaka-Yoga & Meditation</h3>
                         <p class="tour-description">
@@ -103,7 +103,7 @@
                 </div>
 
                 <!-- Fotoshooting -->
-                <div class="tour-card" onclick="showBookingForm('Alpaka-Fotoshooting Experience', 50)">
+                <div class="tour-card" data-tour="Alpaka-Fotoshooting Experience" data-price="50">
                     <div class="tour-info">
                         <h3 class="tour-title">Fotoshooting Experience</h3>
                         <p class="tour-description">
@@ -115,7 +115,7 @@
                 </div>
 
                 <!-- Picknick Tour -->
-                <div class="tour-card" onclick="showBookingForm('Alpaka-Wanderung mit Picknick', 55)">
+                <div class="tour-card" data-tour="Alpaka-Wanderung mit Picknick" data-price="55">
                     <div class="tour-info">
                         <h3 class="tour-title">Picknick-Wanderung</h3>
                         <p class="tour-description">
@@ -266,7 +266,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">🦙 Buchungsanfrage</h3>
-                <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
             </div>
             
             <div id="bookingAlert"></div>
@@ -316,7 +316,7 @@
                     <label>Gutscheincode (optional)</label>
                     <div class="input-with-button">
                         <input type="text" id="bookingVoucher" placeholder="GUTSCHEIN-CODE">
-                        <button type="button" onclick="checkVoucher()">Prüfen</button>
+                        <button type="button" id="checkVoucherBtn">Prüfen</button>
                     </div>
                 </div>
                 
@@ -324,7 +324,7 @@
                     <label>Rabattcode (optional)</label>
                     <div class="input-with-button">
                         <input type="text" id="bookingDiscount" placeholder="RABATT-CODE">
-                        <button type="button" onclick="checkDiscount()">Prüfen</button>
+                        <button type="button" id="checkDiscountBtn">Prüfen</button>
                     </div>
                 </div>
                 
