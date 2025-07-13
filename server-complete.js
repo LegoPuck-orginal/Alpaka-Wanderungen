@@ -36,7 +36,7 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('.'));
 
 // === EMAIL SETUP ===
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransporter({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,

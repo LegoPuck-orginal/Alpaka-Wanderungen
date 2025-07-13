@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦙 Alpaka-Wanderungen - Naturerlebnisse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#hero" class="nav-logo">
+                <span class="logo-icon">🦙</span>
+                <span>Alpaka-Wanderungen</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="#hero" class="nav-link">Start</a></li>
+                <li><a href="#touren" class="nav-link">Touren</a></li>
+                <li><a href="#ueber-uns" class="nav-link">Über uns</a></li>
+                <li><a href="#kontakt" class="nav-link">Kontakt</a></li>
+                <li><a href="admin" class="nav-link admin-link">Admin</a></li>
+            </ul>
+            
+            <button class="mobile-menu-btn">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Unvergessliche Alpaka-Wanderungen</h1>
+            <p class="hero-subtitle">
+                Erleben Sie magische Momente mit unseren freundlichen Alpakas in der wunderschönen Natur
+            </p>
+            <div class="hero-buttons">
+                <a href="#touren" class="btn btn-primary">Touren entdecken</a>
+                <a href="#kontakt" class="btn btn-outline">Jetzt buchen</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="alpacker-logo.png" alt="Alpaka" class="hero-alpaka">
+        </div>
+    </section>
+
+    <!-- Touren Section -->
+    <section id="touren" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Unsere Touren</h2>
+                <p class="section-subtitle">Wählen Sie Ihr perfektes Alpaka-Abenteuer</p>
+            </div>
+            
+            <div class="tour-grid">
+                <!-- Familien-Tour -->
+                <div class="tour-card" onclick="showBookingForm('Entspannte Alpaka-Wanderung', 25)">
+                    <div class="tour-info">
+                        <h3 class="tour-title">Entspannte Alpaka-Wanderung</h3>
+                        <p class="tour-description">
+                            Perfect für Familien mit Kindern. Eine entspannte 2-stündige Wanderung durch malerische Landschaften.
+                        </p>
+                        <div class="tour-price">25€ <span class="price-per">pro Person</span></div>
+                        <div class="tour-duration">⏰ 2 Stunden</div>
+                    </div>
+                </div>
+
+                <!-- Abenteuer-Tour -->
+                <div class="tour-card" onclick="showBookingForm('Alpaka-Abenteuer für die ganze Familie', 35)">
+                    <div class="tour-info">
+                        <h3 class="tour-title">Alpaka-Abenteuer</h3>
+                        <p class="tour-description">
+                            Ein aufregendes 4-stündiges Abenteuer für die ganze Familie mit Picknick und vielen Aktivitäten.
+                        </p>
+                        <div class="tour-price">35€ <span class="price-per">pro Person</span></div>
+                        <div class="tour-duration">⏰ 4 Stunden</div>
+                    </div>
+                </div>
+
+                <!-- Romantische Tour -->
+                <div class="tour-card" onclick="showBookingForm('Romantische Alpaka-Wanderung für Paare', 45)">
+                    <div class="tour-info">
+                        <h3 class="tour-title">Romantische Paare-Tour</h3>
+                        <p class="tour-description">
+                            Eine romantische 3-stündige Tour für Paare mit Sonnenaufgang und gemütlichem Frühstück.
+                        </p>
+                        <div class="tour-price">45€ <span class="price-per">pro Person</span></div>
+                        <div class="tour-duration">⏰ 3 Stunden</div>
+                    </div>
+                </div>
+
+                <!-- Yoga Tour -->
+                <div class="tour-card" onclick="showBookingForm('Alpaka-Yoga & Meditation', 40)">
+                    <div class="tour-info">
+                        <h3 class="tour-title">Alpaka-Yoga & Meditation</h3>
+                        <p class="tour-description">
+                            Entspannung pur mit Yoga-Session und Meditation in Begleitung unserer ruhigen Alpakas.
+                        </p>
+                        <div class="tour-price">40€ <span class="price-per">pro Person</span></div>
+                        <div class="tour-duration">⏰ 2.5 Stunden</div>
+                    </div>
+                </div>
+
+                <!-- Fotoshooting -->
+                <div class="tour-card" onclick="showBookingForm('Alpaka-Fotoshooting Experience', 50)">
+                    <div class="tour-info">
+                        <h3 class="tour-title">Fotoshooting Experience</h3>
+                        <p class="tour-description">
+                            Professionelles Fotoshooting mit unseren Alpakas - perfekt für besondere Erinnerungen.
+                        </p>
+                        <div class="tour-price">50€ <span class="price-per">pro Person</span></div>
+                        <div class="tour-duration">⏰ 1.5 Stunden</div>
+                    </div>
+                </div>
+
+                <!-- Picknick Tour -->
+                <div class="tour-card" onclick="showBookingForm('Alpaka-Wanderung mit Picknick', 55)">
+                    <div class="tour-info">
+                        <h3 class="tour-title">Picknick-Wanderung</h3>
+                        <p class="tour-description">
+                            Eine genussvolle Tour mit leckerem Picknick an einem der schönsten Plätze der Region.
+                        </p>
+                        <div class="tour-price">55€ <span class="price-per">pro Person</span></div>
+                        <div class="tour-duration">⏰ 4 Stunden</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Über uns Section -->
+    <section id="ueber-uns" class="section section-alt">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Über uns</h2>
+                <p class="section-subtitle">Lernen Sie unser Team und unsere Philosophie kennen</p>
+            </div>
+            
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Unsere Mission</h3>
+                    <p>
+                        Seit über 10 Jahren bieten wir unvergessliche Alpaka-Erlebnisse in einer der schönsten 
+                        Landschaften Deutschlands. Unsere Mission ist es, Menschen die Ruhe und Freude zu vermitteln, 
+                        die diese wunderbaren Tiere ausstrahlen.
+                    </p>
+                    
+                    <h3>Unsere Alpakas</h3>
+                    <p>
+                        Unsere Herde besteht aus 15 liebevoll gepflegten Alpakas, jedes mit seinem eigenen Charakter. 
+                        Sie werden von unseren erfahrenen Guides betreut und leben in artgerechter Haltung auf unseren 
+                        weitläufigen Weiden.
+                    </p>
+                </div>
+                
+                <div class="about-stats">
+                    <div class="stat">
+                        <div class="stat-number">1000+</div>
+                        <div class="stat-text">Glückliche Besucher</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">15</div>
+                        <div class="stat-text">Freundliche Alpakas</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">10+</div>
+                        <div class="stat-text">Jahre Erfahrung</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kontakt Section -->
+    <section id="kontakt" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Kontakt & Anfahrt</h2>
+                <p class="section-subtitle">Haben Sie Fragen? Wir sind gerne für Sie da!</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <h3>📍 Adresse</h3>
+                        <p>Alpaka-Farm Sonnenhof<br>
+                        Wiesenweg 123<br>
+                        12345 Naturhausen</p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <h3>📞 Telefon</h3>
+                        <p>+49 123 456 789</p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <h3>📧 E-Mail</h3>
+                        <p>info@alpaka-wanderungen.de</p>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <h3>🕒 Öffnungszeiten</h3>
+                        <p>Täglich 9:00 - 18:00 Uhr<br>
+                        Termine nach Vereinbarung</p>
+                    </div>
+                </div>
+                
+                <div class="contact-form-container">
+                    <h3>Nachricht senden</h3>
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-group">
+                            <input type="text" id="contactName" placeholder="Ihr Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="contactEmail" placeholder="Ihre E-Mail" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="contactSubject" placeholder="Betreff" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="contactMessage" placeholder="Ihre Nachricht" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Nachricht senden</button>
+                    </form>
+                    <div id="contactAlert"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🦙 Alpaka-Wanderungen</h3>
+                    <p>Unvergessliche Naturerlebnisse mit unseren freundlichen Alpakas</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Schnelllinks</h4>
+                    <ul>
+                        <li><a href="#touren">Touren</a></li>
+                        <li><a href="#ueber-uns">Über uns</a></li>
+                        <li><a href="#kontakt">Kontakt</a></li>
+                        <li><a href="admin">Admin</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Kontakt</h4>
+                    <p>📞 +49 123 456 789</p>
+                    <p>📧 info@alpaka-wanderungen.de</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Alpaka-Wanderungen. Alle Rechte vorbehalten.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Buchungsformular Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">🦙 Buchungsanfrage</h3>
+                <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+            </div>
+            
+            <div id="bookingAlert"></div>
+            
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="bookingName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>E-Mail *</label>
+                    <input type="email" id="bookingEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Telefon</label>
+                    <input type="tel" id="bookingPhone">
+                </div>
+                
+                <div class="form-group">
+                    <label>Gewünschte Tour *</label>
+                    <input type="text" id="bookingTour" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>Wunschtermin *</label>
+                    <input type="date" id="bookingDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Anzahl Teilnehmer *</label>
+                    <select id="bookingParticipants" required>
+                        <option value="">Bitte wählen</option>
+                        <option value="1">1 Person</option>
+                        <option value="2">2 Personen</option>
+                        <option value="3">3 Personen</option>
+                        <option value="4">4 Personen</option>
+                        <option value="5">5 Personen</option>
+                        <option value="6">6 Personen</option>
+                        <option value="7">7 Personen</option>
+                        <option value="8">8 Personen</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Gutscheincode (optional)</label>
+                    <div class="input-with-button">
+                        <input type="text" id="bookingVoucher" placeholder="GUTSCHEIN-CODE">
+                        <button type="button" onclick="checkVoucher()">Prüfen</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Rabattcode (optional)</label>
+                    <div class="input-with-button">
+                        <input type="text" id="bookingDiscount" placeholder="RABATT-CODE">
+                        <button type="button" onclick="checkDiscount()">Prüfen</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Nachricht (optional)</label>
+                    <textarea id="bookingMessage" rows="3" placeholder="Besondere Wünsche oder Fragen..."></textarea>
+                </div>
+                
+                <div class="price-summary" id="priceSummary">
+                    <div class="price-row">
+                        <span>Grundpreis:</span>
+                        <span id="basePrice">0€</span>
+                    </div>
+                    <div class="price-row discount-row" id="discountRow">
+                        <span>Rabatt:</span>
+                        <span id="discountAmount">-0€</span>
+                    </div>
+                    <div class="price-row total-row">
+                        <span><strong>Gesamtpreis:</strong></span>
+                        <span id="totalPrice"><strong>0€</strong></span>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" onclick="closeBookingModal()" class="btn btn-secondary">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">📧 Anfrage senden</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

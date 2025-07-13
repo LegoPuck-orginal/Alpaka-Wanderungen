@@ -530,6 +530,278 @@
     </div>
   </div>
 
+  <!-- Buchungsformular Modal -->
+  <div id="bookingModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">🦙 Buchungsanfrage</h3>
+        <button class="modal-close" onclick="closeBookingModal()">&times;</button>
+      </div>
+      
+      <div id="bookingAlert"></div>
+      
+      <form id="bookingForm">
+        <div class="form-group">
+          <label for="bookingName">Name *</label>
+          <input type="text" id="bookingName" required placeholder="Ihr vollständiger Name">
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingEmail">E-Mail *</label>
+          <input type="email" id="bookingEmail" required placeholder="ihre.email@beispiel.de">
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingPhone">Telefon</label>
+          <input type="tel" id="bookingPhone" placeholder="+49 123 456 789">
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingTour">Gewünschte Tour *</label>
+          <input type="text" id="bookingTour" readonly style="background: #f5f5f5;">
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingDate">Wunschtermin *</label>
+          <input type="date" id="bookingDate" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingParticipants">Anzahl Teilnehmer *</label>
+          <select id="bookingParticipants" required>
+            <option value="">Bitte wählen</option>
+            <option value="1">1 Person</option>
+            <option value="2">2 Personen</option>
+            <option value="3">3 Personen</option>
+            <option value="4">4 Personen</option>
+            <option value="5">5 Personen</option>
+            <option value="6">6 Personen</option>
+            <option value="7">7 Personen</option>
+            <option value="8">8 Personen</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingVoucher">Gutscheincode (optional)</label>
+          <input type="text" id="bookingVoucher" placeholder="GUTSCHEIN-CODE" style="text-transform: uppercase;">
+          <button type="button" id="checkVoucherBtn" onclick="checkVoucher()">Prüfen</button>
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingDiscount">Rabattcode (optional)</label>
+          <input type="text" id="bookingDiscount" placeholder="RABATT-CODE" style="text-transform: uppercase;">
+          <button type="button" id="checkDiscountBtn" onclick="checkDiscount()">Prüfen</button>
+        </div>
+        
+        <div class="form-group">
+          <label for="bookingMessage">Nachricht (optional)</label>
+          <textarea id="bookingMessage" rows="3" placeholder="Besondere Wünsche oder Fragen..."></textarea>
+        </div>
+        
+        <div class="price-summary" id="priceSummary" style="display: none;">
+          <div class="price-row">
+            <span>Grundpreis:</span>
+            <span id="basePrice">0€</span>
+          </div>
+          <div class="price-row discount-row" id="discountRow" style="display: none;">
+            <span>Rabatt:</span>
+            <span id="discountAmount">-0€</span>
+          </div>
+          <div class="price-row total-row">
+            <span><strong>Gesamtpreis:</strong></span>
+            <span id="totalPrice"><strong>0€</strong></span>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" onclick="closeBookingModal()" class="btn btn-secondary">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">📧 Anfrage senden</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+    
+    .modal-close:hover {
+      background: #f5f5f5;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .price-summary {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    
+    .total-row {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .discount-row {
+      color: #38a169;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5a6fd8;
+    }
+    
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #cbd5e0;
+    }
+    
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    
+    .alert-success {
+      background: #f0fff4;
+      color: #38a169;
+      border: 1px solid #9ae6b4;
+    }
+    
+    .alert-error {
+      background: #fed7d7;
+      color: #e53e3e;
+      border: 1px solid #feb2b2;
+    }
+    
+    @media (max-width: 768px) {
+      .modal-content {
+        margin: 20px;
+        width: calc(100% - 40px);
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+
   <!-- Scripts -->
   <script src="./js/main.js"></script>
 </body>
