@@ -44,12 +44,33 @@ function initTourCards() {
     const tourCards = document.querySelectorAll('.tour-card');
     tourCards.forEach(card => {
         card.addEventListener('click', function() {
-            const tourName = this.querySelector('.tour-title').textContent;
-            const priceText = this.querySelector('.tour-price').textContent;
-            const price = parseInt(priceText.match(/\d+/)[0]);
+            const tourName = this.dataset.tour;
+            const price = parseInt(this.dataset.price);
             showBookingForm(tourName, price);
         });
     });
+    
+    // Modal Event Listener
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const cancelBookingBtn = document.getElementById('cancelBookingBtn');
+    const checkVoucherBtn = document.getElementById('checkVoucherBtn');
+    const checkDiscountBtn = document.getElementById('checkDiscountBtn');
+    
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', closeBookingModal);
+    }
+    
+    if (cancelBookingBtn) {
+        cancelBookingBtn.addEventListener('click', closeBookingModal);
+    }
+    
+    if (checkVoucherBtn) {
+        checkVoucherBtn.addEventListener('click', checkVoucher);
+    }
+    
+    if (checkDiscountBtn) {
+        checkDiscountBtn.addEventListener('click', checkDiscount);
+    }
 }
 
 // Mobile Navigation
