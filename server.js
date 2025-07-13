@@ -33,42 +33,62 @@ app.use(compression());
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.static('.'));
 
-// Static files
-app.use(express.static('.', {
-  maxAge: '1y',
-  etag: true,
-  lastModified: true
-}));
+// === EMAIL SETUP ===
+const transporter = nodemailer.createTransporter({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
-// === DATENBANK SIMULATION (JSON FILES) ===
-const DATA_DIR = path.join(__dirname, 'data');
-const BOOKINGS_FILE = path.join(DATA_DIR, 'bookings.json');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
-
-// Erstelle Data-Ordner falls nicht vorhanden
+// === HELPER FUNCTIONS ===
 async function ensureDataDir() {
+  const dataDir = path.join(__dirname, 'data');
   try {
-    await fs.access(DATA_DIR);
+    await fs.access(dataDir);
   } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.mkdir(dataDir, { recursive: true });
   }
 }
 
-// JSON Datei lesen
-async function readJsonFile(filePath, defaultData = []) {
+async function readJsonFile(filename) {
   try {
-    const data = await fs.readFile(filePath, 'utf8');
+    await ensureDataDir();
+    const data = await fs.readFile(path.join(__dirname, 'data', filename), 'utf8');
     return JSON.parse(data);
-  } catch {
-    return defaultData;
+  } catch (error) {
+    console.log(`File ${filename} not found, creating empty array`);
+    return [];
   }
 }
 
-// JSON Datei schreiben
-async function writeJsonFile(filePath, data) {
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+async function writeJsonFile(filename, data) {
+  await ensureDataDir();
+  await fs.writeFile(path.join(__dirname, 'data', filename), JSON.stringify(data, null, 2));
+}
+
+function generateCode(length = 8) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+function getTourPrice(tourName) {
+  const prices = {
+    'Entspannte Alpaka-Wanderung': 25,
+    'Alpaka-Abenteuer für die ganze Familie': 35,
+    'Romantische Alpaka-Wanderung für Paare': 45,
+    'Alpaka-Yoga & Meditation': 40,
+    'Alpaka-Fotoshooting Experience': 50,
+    'Alpaka-Wanderung mit Picknick': 55
+  };
+  return prices[tourName] || 30;
 }
 
 // === AUTHENTICATION MIDDLEWARE ===
@@ -89,283 +109,521 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// === EMAIL KONFIGURATION ===
-const emailTransporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER || 'demo@alpaka-wanderungen.de',
-    pass: process.env.SMTP_PASS || 'demo-password'
-  }
-});
-
-// === API ROUTES ===
-
-// Admin Login
-app.post('/api/admin/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password required' });
-    }
-
-    const users = await readJsonFile(USERS_FILE, [
-      { 
-        id: 1, 
-        username: 'admin', 
-        password: await bcrypt.hash('admin123', 10),
-        role: 'admin'
-      }
-    ]);
-
-    const user = users.find(u => u.username === username);
-    if (!user || !await bcrypt.compare(password, user.password)) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    res.json({ 
-      success: true, 
-      token,
-      user: { id: user.id, username: user.username, role: user.role }
-    });
-
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get all bookings
-app.get('/api/bookings', authenticateToken, async (req, res) => {
-  try {
-    const bookings = await readJsonFile(BOOKINGS_FILE);
-    res.json(bookings);
-  } catch (error) {
-    console.error('Get bookings error:', error);
-    res.status(500).json({ error: 'Failed to fetch bookings' });
-  }
-});
-
-// Create new booking
+// === BOOKING SYSTEM (KONTAKTFORMULAR-STIL) ===
 app.post('/api/bookings', async (req, res) => {
   try {
-    const { name, email, phone, date, time, tour, participants, message } = req.body;
-
-    // Validierung
-    if (!name || !email || !date || !tour) {
-      return res.status(400).json({ error: 'Required fields missing' });
+    const { name, email, phone, tour, date, participants, message, voucherCode, discountCode } = req.body;
+    
+    if (!name || !email || !tour || !date || !participants) {
+      return res.status(400).json({ error: 'Alle Pflichtfelder müssen ausgefüllt werden' });
     }
 
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ error: 'Invalid email format' });
+      return res.status(400).json({ error: 'Ungültige E-Mail-Adresse' });
     }
 
-    const bookings = await readJsonFile(BOOKINGS_FILE);
+    const bookings = await readJsonFile('bookings.json');
+    let totalPrice = getTourPrice(tour) * parseInt(participants);
+    let discount = 0;
+    let appliedVoucher = null;
+    let appliedDiscount = null;
     
-    const newBooking = {
+    // Gutschein einlösen
+    if (voucherCode) {
+      const vouchers = await readJsonFile('vouchers.json');
+      const voucher = vouchers.find(v => 
+        v.code === voucherCode && 
+        v.isActive && 
+        !v.isRedeemed &&
+        (!v.expiryDate || new Date(v.expiryDate) > new Date())
+      );
+      
+      if (voucher) {
+        discount += voucher.value;
+        voucher.isRedeemed = true;
+        voucher.redeemedAt = new Date().toISOString();
+        voucher.redeemedBy = email;
+        appliedVoucher = voucher.code;
+        await writeJsonFile('vouchers.json', vouchers);
+      }
+    }
+
+    // Rabattcode anwenden
+    if (discountCode) {
+      const discountCodes = await readJsonFile('discount-codes.json');
+      const code = discountCodes.find(c => 
+        c.code === discountCode && 
+        c.isActive &&
+        (!c.expiryDate || new Date(c.expiryDate) > new Date())
+      );
+      
+      if (code && (code.usageLimit === null || code.usedCount < code.usageLimit)) {
+        if (code.type === 'percentage') {
+          discount += (totalPrice * code.value) / 100;
+        } else {
+          discount += code.value;
+        }
+        code.usedCount = (code.usedCount || 0) + 1;
+        appliedDiscount = code.code;
+        await writeJsonFile('discount-codes.json', discountCodes);
+      }
+    }
+
+    const finalPrice = Math.max(0, totalPrice - discount);
+
+    const booking = {
       id: Date.now().toString(),
-      name: validator.escape(name),
-      email: validator.normalizeEmail(email),
-      phone: phone ? validator.escape(phone) : '',
-      date,
-      time: time || '10:00',
+      name,
+      email,
+      phone: phone || '',
       tour,
-      participants: parseInt(participants) || 1,
-      message: message ? validator.escape(message) : '',
+      date,
+      participants: parseInt(participants),
+      message: message || '',
+      totalPrice: finalPrice,
+      originalPrice: totalPrice,
+      discount,
+      appliedVoucher,
+      appliedDiscount,
       status: 'pending',
       createdAt: new Date().toISOString(),
-      totalPrice: calculateTourPrice(tour, parseInt(participants) || 1)
+      type: 'contact_form' // Markierung als Kontaktformular-Buchung
     };
 
-    bookings.push(newBooking);
-    await writeJsonFile(BOOKINGS_FILE, bookings);
+    bookings.push(booking);
+    await writeJsonFile('bookings.json', bookings);
 
-    // Send confirmation email
+    // Bestätigungs-Email senden
     try {
-      await sendBookingConfirmation(newBooking);
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: `Buchungsanfrage erhalten - ${tour}`,
+        html: `
+          <h2>🦙 Vielen Dank für Ihre Buchungsanfrage!</h2>
+          <p>Hallo ${name},</p>
+          <p>wir haben Ihre Buchungsanfrage erhalten und werden uns schnellstmöglich bei Ihnen melden.</p>
+          
+          <h3>📋 Ihre Anfrage im Überblick:</h3>
+          <ul>
+            <li><strong>Tour:</strong> ${tour}</li>
+            <li><strong>Wunschtermin:</strong> ${date}</li>
+            <li><strong>Teilnehmer:</strong> ${participants} Person(en)</li>
+            <li><strong>Preis:</strong> ${finalPrice}€</li>
+            ${discount > 0 ? `<li><strong>Ersparnis:</strong> ${discount}€</li>` : ''}
+            ${message ? `<li><strong>Nachricht:</strong> ${message}</li>` : ''}
+          </ul>
+          
+          <p>Wir werden Ihnen innerhalb von 24 Stunden alle weiteren Details und die Bestätigung Ihrer Buchung zusenden.</p>
+          
+          <p>Mit alpakigen Grüßen,<br>
+          Ihr Alpaka-Wanderungen Team</p>
+        `
+      });
+
+      // Admin-Benachrichtigung
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
+        subject: `🦙 Neue Buchungsanfrage von ${name}`,
+        html: `
+          <h2>Neue Buchungsanfrage eingegangen!</h2>
+          <ul>
+            <li><strong>Name:</strong> ${name}</li>
+            <li><strong>E-Mail:</strong> ${email}</li>
+            <li><strong>Telefon:</strong> ${phone || 'Nicht angegeben'}</li>
+            <li><strong>Tour:</strong> ${tour}</li>
+            <li><strong>Datum:</strong> ${date}</li>
+            <li><strong>Teilnehmer:</strong> ${participants}</li>
+            <li><strong>Preis:</strong> ${finalPrice}€</li>
+            <li><strong>Nachricht:</strong> ${message || 'Keine'}</li>
+          </ul>
+        `
+      });
     } catch (emailError) {
-      console.error('Email sending failed:', emailError);
-      // Continue anyway, booking was saved
+      console.error('Email error:', emailError);
     }
 
-    res.status(201).json({ 
+    res.json({ 
       success: true, 
-      booking: newBooking,
-      message: 'Booking created successfully' 
+      message: 'Buchungsanfrage erfolgreich gesendet! Sie erhalten bald eine Bestätigung.',
+      booking: { ...booking, email: undefined } // Email aus Antwort entfernen
     });
-
   } catch (error) {
-    console.error('Create booking error:', error);
-    res.status(500).json({ error: 'Failed to create booking' });
+    console.error('Booking error:', error);
+    res.status(500).json({ error: 'Server-Fehler bei der Buchungsanfrage' });
   }
 });
 
-// Update booking
+// === GUTSCHEIN SYSTEM ===
+app.post('/api/vouchers', authenticateToken, async (req, res) => {
+  try {
+    const { value, description, expiryDate } = req.body;
+    
+    if (!value || !description) {
+      return res.status(400).json({ error: 'Wert und Beschreibung sind erforderlich' });
+    }
+
+    const vouchers = await readJsonFile('vouchers.json');
+    const code = generateCode();
+
+    const voucher = {
+      id: Date.now().toString(),
+      code,
+      value: parseFloat(value),
+      description,
+      expiryDate: expiryDate || null,
+      isActive: true,
+      isRedeemed: false,
+      createdAt: new Date().toISOString(),
+      redeemedAt: null,
+      redeemedBy: null
+    };
+
+    vouchers.push(voucher);
+    await writeJsonFile('vouchers.json', vouchers);
+
+    res.json({ success: true, voucher });
+  } catch (error) {
+    console.error('Voucher creation error:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Gutscheins' });
+  }
+});
+
+app.get('/api/vouchers', authenticateToken, async (req, res) => {
+  try {
+    const vouchers = await readJsonFile('vouchers.json');
+    res.json(vouchers);
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Laden der Gutscheine' });
+  }
+});
+
+app.post('/api/vouchers/redeem', async (req, res) => {
+  try {
+    const { code } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({ error: 'Gutscheincode erforderlich' });
+    }
+
+    const vouchers = await readJsonFile('vouchers.json');
+    const voucher = vouchers.find(v => 
+      v.code === code && 
+      v.isActive && 
+      !v.isRedeemed &&
+      (!v.expiryDate || new Date(v.expiryDate) > new Date())
+    );
+
+    if (!voucher) {
+      return res.status(404).json({ error: 'Gutschein ungültig oder bereits eingelöst' });
+    }
+
+    res.json({ 
+      valid: true, 
+      value: voucher.value,
+      description: voucher.description 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Validieren des Gutscheins' });
+  }
+});
+
+app.delete('/api/vouchers/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vouchers = await readJsonFile('vouchers.json');
+    const filteredVouchers = vouchers.filter(v => v.id !== id);
+    
+    if (vouchers.length === filteredVouchers.length) {
+      return res.status(404).json({ error: 'Gutschein nicht gefunden' });
+    }
+    
+    await writeJsonFile('vouchers.json', filteredVouchers);
+    res.json({ success: true, message: 'Gutschein gelöscht' });
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Löschen des Gutscheins' });
+  }
+});
+
+// === RABATTCODE SYSTEM ===
+app.post('/api/discount-codes', authenticateToken, async (req, res) => {
+  try {
+    const { code, value, type, description, usageLimit, expiryDate } = req.body;
+    
+    if (!code || !value || !type || !description) {
+      return res.status(400).json({ error: 'Code, Wert, Typ und Beschreibung sind erforderlich' });
+    }
+
+    const discountCodes = await readJsonFile('discount-codes.json');
+    
+    // Prüfen ob Code bereits existiert
+    if (discountCodes.find(c => c.code === code)) {
+      return res.status(400).json({ error: 'Code bereits vorhanden' });
+    }
+
+    const discountCode = {
+      id: Date.now().toString(),
+      code: code.toUpperCase(),
+      value: parseFloat(value),
+      type, // 'percentage' oder 'fixed'
+      description,
+      usageLimit: usageLimit ? parseInt(usageLimit) : null,
+      usedCount: 0,
+      expiryDate: expiryDate || null,
+      isActive: true,
+      createdAt: new Date().toISOString()
+    };
+
+    discountCodes.push(discountCode);
+    await writeJsonFile('discount-codes.json', discountCodes);
+
+    res.json({ success: true, discountCode });
+  } catch (error) {
+    console.error('Discount code creation error:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Rabattcodes' });
+  }
+});
+
+app.get('/api/discount-codes', authenticateToken, async (req, res) => {
+  try {
+    const discountCodes = await readJsonFile('discount-codes.json');
+    res.json(discountCodes);
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Laden der Rabattcodes' });
+  }
+});
+
+app.post('/api/discount-codes/validate', async (req, res) => {
+  try {
+    const { code } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({ error: 'Rabattcode erforderlich' });
+    }
+
+    const discountCodes = await readJsonFile('discount-codes.json');
+    const discountCode = discountCodes.find(c => 
+      c.code === code.toUpperCase() && 
+      c.isActive &&
+      (!c.expiryDate || new Date(c.expiryDate) > new Date())
+    );
+
+    if (!discountCode) {
+      return res.status(404).json({ error: 'Rabattcode ungültig oder abgelaufen' });
+    }
+
+    if (discountCode.usageLimit !== null && discountCode.usedCount >= discountCode.usageLimit) {
+      return res.status(400).json({ error: 'Rabattcode-Limit erreicht' });
+    }
+
+    res.json({ 
+      valid: true, 
+      value: discountCode.value,
+      type: discountCode.type,
+      description: discountCode.description 
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Validieren des Rabattcodes' });
+  }
+});
+
+app.put('/api/discount-codes/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const discountCodes = await readJsonFile('discount-codes.json');
+    const codeIndex = discountCodes.findIndex(c => c.id === id);
+    
+    if (codeIndex === -1) {
+      return res.status(404).json({ error: 'Rabattcode nicht gefunden' });
+    }
+    
+    discountCodes[codeIndex] = { 
+      ...discountCodes[codeIndex], 
+      ...updateData, 
+      updatedAt: new Date().toISOString() 
+    };
+    await writeJsonFile('discount-codes.json', discountCodes);
+    
+    res.json({ success: true, discountCode: discountCodes[codeIndex] });
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Aktualisieren des Rabattcodes' });
+  }
+});
+
+app.delete('/api/discount-codes/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const discountCodes = await readJsonFile('discount-codes.json');
+    const filteredCodes = discountCodes.filter(c => c.id !== id);
+    
+    if (discountCodes.length === filteredCodes.length) {
+      return res.status(404).json({ error: 'Rabattcode nicht gefunden' });
+    }
+    
+    await writeJsonFile('discount-codes.json', filteredCodes);
+    res.json({ success: true, message: 'Rabattcode gelöscht' });
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Löschen des Rabattcodes' });
+  }
+});
+
+// === ADMIN PANEL ===
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { password } = req.body;
+    
+    if (!password) {
+      return res.status(400).json({ error: 'Passwort erforderlich' });
+    }
+
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    
+    if (password === adminPassword) {
+      const token = jwt.sign(
+        { userId: 'admin', role: 'admin' },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({ success: true, token });
+    } else {
+      res.status(401).json({ error: 'Ungültiges Passwort' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Login-Fehler' });
+  }
+});
+
+// === BUCHUNGEN ADMIN ===
+app.get('/api/bookings', authenticateToken, async (req, res) => {
+  try {
+    const bookings = await readJsonFile('bookings.json');
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Laden der Buchungen' });
+  }
+});
+
 app.put('/api/bookings/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-
-    const bookings = await readJsonFile(BOOKINGS_FILE);
+    
+    const bookings = await readJsonFile('bookings.json');
     const bookingIndex = bookings.findIndex(b => b.id === id);
-
+    
     if (bookingIndex === -1) {
-      return res.status(404).json({ error: 'Booking not found' });
+      return res.status(404).json({ error: 'Buchung nicht gefunden' });
     }
-
+    
     bookings[bookingIndex] = { 
       ...bookings[bookingIndex], 
       ...updateData, 
       updatedAt: new Date().toISOString() 
     };
-
-    await writeJsonFile(BOOKINGS_FILE, bookings);
-
-    res.json({ 
-      success: true, 
-      booking: bookings[bookingIndex] 
-    });
-
+    await writeJsonFile('bookings.json', bookings);
+    
+    res.json({ success: true, booking: bookings[bookingIndex] });
   } catch (error) {
-    console.error('Update booking error:', error);
-    res.status(500).json({ error: 'Failed to update booking' });
+    res.status(500).json({ error: 'Fehler beim Aktualisieren der Buchung' });
   }
 });
 
-// Delete booking
 app.delete('/api/bookings/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-
-    const bookings = await readJsonFile(BOOKINGS_FILE);
+    const bookings = await readJsonFile('bookings.json');
     const filteredBookings = bookings.filter(b => b.id !== id);
-
+    
     if (bookings.length === filteredBookings.length) {
-      return res.status(404).json({ error: 'Booking not found' });
+      return res.status(404).json({ error: 'Buchung nicht gefunden' });
     }
-
-    await writeJsonFile(BOOKINGS_FILE, filteredBookings);
-
-    res.json({ success: true, message: 'Booking deleted successfully' });
-
+    
+    await writeJsonFile('bookings.json', filteredBookings);
+    res.json({ success: true, message: 'Buchung gelöscht' });
   } catch (error) {
-    console.error('Delete booking error:', error);
-    res.status(500).json({ error: 'Failed to delete booking' });
+    res.status(500).json({ error: 'Fehler beim Löschen der Buchung' });
   }
 });
 
-// Contact form
+// === KONTAKT FORMULAR ===
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
-
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: 'Required fields missing' });
+    
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ error: 'Alle Felder sind erforderlich' });
     }
 
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ error: 'Invalid email format' });
+      return res.status(400).json({ error: 'Ungültige E-Mail-Adresse' });
     }
 
-    // Send contact email
-    await emailTransporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: process.env.CONTACT_EMAIL || 'info@alpaka-wanderungen.de',
-      subject: `Kontakt: ${subject || 'Neue Nachricht'}`,
+    // Email senden
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      subject: `🦙 Kontaktanfrage: ${subject}`,
       html: `
         <h2>Neue Kontaktanfrage</h2>
-        <p><strong>Name:</strong> ${validator.escape(name)}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Betreff:</strong> ${validator.escape(subject || 'Keine Angabe')}</p>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>E-Mail:</strong> ${email}</p>
+        <p><strong>Betreff:</strong> ${subject}</p>
         <p><strong>Nachricht:</strong></p>
-        <div style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
-          ${validator.escape(message).replace(/\n/g, '<br>')}
-        </div>
+        <p>${message}</p>
       `
     });
 
-    res.json({ success: true, message: 'Message sent successfully' });
+    // Bestätigung an Absender
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Ihre Kontaktanfrage wurde empfangen',
+      html: `
+        <h2>🦙 Vielen Dank für Ihre Nachricht!</h2>
+        <p>Hallo ${name},</p>
+        <p>wir haben Ihre Nachricht erhalten und werden uns schnellstmöglich bei Ihnen melden.</p>
+        <p>Mit alpakigen Grüßen,<br>Ihr Alpaka-Wanderungen Team</p>
+      `
+    });
 
+    res.json({ success: true, message: 'Nachricht erfolgreich gesendet!' });
   } catch (error) {
     console.error('Contact form error:', error);
-    res.status(500).json({ error: 'Failed to send message' });
+    res.status(500).json({ error: 'Fehler beim Senden der Nachricht' });
   }
 });
 
-// === HELPER FUNCTIONS ===
+// === STATISTICS API ===
+app.get('/api/statistics', authenticateToken, async (req, res) => {
+  try {
+    const bookings = await readJsonFile('bookings.json');
+    const vouchers = await readJsonFile('vouchers.json');
+    const discountCodes = await readJsonFile('discount-codes.json');
 
-function calculateTourPrice(tourType, participants) {
-  const prices = {
-    'familie': 25,
-    'abenteuer': 45,
-    'sonnenaufgang': 35
-  };
-  
-  const basePrice = prices[tourType] || 30;
-  return basePrice * participants;
-}
+    const stats = {
+      totalBookings: bookings.length,
+      pendingBookings: bookings.filter(b => b.status === 'pending').length,
+      confirmedBookings: bookings.filter(b => b.status === 'confirmed').length,
+      totalRevenue: bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0),
+      totalVouchers: vouchers.length,
+      redeemedVouchers: vouchers.filter(v => v.isRedeemed).length,
+      totalDiscountCodes: discountCodes.length,
+      activeDiscountCodes: discountCodes.filter(c => c.isActive).length
+    };
 
-async function sendBookingConfirmation(booking) {
-  const tourNames = {
-    'familie': 'Familien-Tour',
-    'abenteuer': 'Abenteuer-Tour',
-    'sonnenaufgang': 'Sonnenaufgang-Tour'
-  };
-
-  await emailTransporter.sendMail({
-    from: process.env.SMTP_USER,
-    to: booking.email,
-    subject: 'Buchungsbestätigung - Alpaka-Wanderungen',
-    html: `
-      <h2>Vielen Dank für Ihre Buchung! 🦙</h2>
-      <p>Liebe/r ${booking.name},</p>
-      <p>wir haben Ihre Buchung erhalten und freuen uns auf Ihren Besuch!</p>
-      
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
-        <h3>Buchungsdetails:</h3>
-        <p><strong>Tour:</strong> ${tourNames[booking.tour] || booking.tour}</p>
-        <p><strong>Datum:</strong> ${booking.date}</p>
-        <p><strong>Uhrzeit:</strong> ${booking.time}</p>
-        <p><strong>Teilnehmer:</strong> ${booking.participants}</p>
-        <p><strong>Gesamtpreis:</strong> ${booking.totalPrice}€</p>
-      </div>
-      
-      <p>Wir werden uns in Kürze mit Ihnen in Verbindung setzen, um alle Details zu besprechen.</p>
-      <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung!</p>
-      
-      <p>Herzliche Grüße<br>
-      Ihr Alpaka-Wanderungen Team</p>
-    `
-  });
-}
-
-// === SERVER START ===
-app.listen(PORT, '0.0.0.0', async () => {
-  await ensureDataDir();
-  console.log(`
-🦙 === ALPAKA-WANDERUNGEN SERVER GESTARTET ===
-🌐 Server läuft auf: http://localhost:${PORT}
-📁 Statische Dateien von: ${__dirname}
-💾 Daten gespeichert in: ${DATA_DIR}
-⚡ Node.js/Express Server bereit!
-
-🚀 Verfügbare Endpunkte:
-   GET  /                     - Hauptwebsite
-   POST /api/admin/login      - Admin Login
-   GET  /api/bookings         - Buchungen abrufen (Auth)
-   POST /api/bookings         - Neue Buchung
-   PUT  /api/bookings/:id     - Buchung bearbeiten (Auth)
-   DEL  /api/bookings/:id     - Buchung löschen (Auth)
-   POST /api/contact          - Kontaktformular
-  `);
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Fehler beim Laden der Statistiken' });
+  }
 });
 
-module.exports = app;
+// === SERVER START ===
+app.listen(PORT, () => {
+  console.log(`🦙 Alpaka-Wanderungen Server läuft auf Port ${PORT}`);
+  console.log(`📊 Admin Panel: http://localhost:${PORT}/admin`);
+  console.log(`🌐 Website: http://localhost:${PORT}`);
+});

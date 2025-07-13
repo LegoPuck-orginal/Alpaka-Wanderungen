@@ -1,13 +1,59 @@
-# Alpaka-Wanderungen 🦙
+# 🦙 Alpaka-Wanderungen - Vollständige Dokumentation
 
-Premium Alpaka-Wanderungen Website mit modernem Node.js Backend
+## 🚀 Projektübersicht
+Professionelle Alpaka-Wanderungen Website mit Node.js/Express Backend, vollständigem Admin-Panel, Buchungssystem, Gutschein-Management und Rabattcode-System.
 
-## 🚀 Features
+## 📁 Projektstruktur
+```
+Alpaka-Wanderungen/
+├── server.js                 # Express Server & API
+├── package.json              # NPM Konfiguration
+├── index.html               # Hauptseite
+├── css/
+│   ├── styles.css           # Hauptstyles
+│   └── clean-sections.css   # Saubere Sektion-Styles
+├── js/
+│   ├── app.js              # Frontend JavaScript
+│   └── admin.js            # Admin Panel Logic
+├── data/
+│   ├── bookings.json       # Buchungen Datenbank
+│   ├── users.json          # Benutzer Datenbank
+│   ├── vouchers.json       # Gutscheine Datenbank
+│   └── discount-codes.json # Rabattcodes Datenbank
+├── admin/
+│   └── index.html          # Admin Panel Interface
+└── docs/
+    ├── API.md              # API Dokumentation
+    ├── ADMIN.md            # Admin Handbuch
+    └── SETUP.md            # Installation Guide
+```
 
-### Frontend
-- **Responsive Design** - Mobile-First Ansatz
-- **Interactive UI** - Tour Filter, Modals, Smooth Scrolling
-- **Modern CSS** - CSS Grid, Flexbox, Animationen
+## 🛠️ Installation & Setup
+
+### Voraussetzungen
+- Node.js (v14 oder höher)
+- NPM Package Manager
+
+### 1. Projekt starten
+```bash
+# Dependencies installieren
+npm install
+
+# Entwicklungsserver starten
+npm run dev
+
+# Produktionsserver starten  
+npm start
+```
+
+### 2. Umgebungsvariablen (.env)
+```env
+PORT=3000
+JWT_SECRET=ihr-geheimer-jwt-schluessel
+EMAIL_USER=ihre-email@domain.com
+EMAIL_PASS=ihr-email-passwort
+ADMIN_PASSWORD=sicheres-admin-passwort
+```
 - **Progressive Enhancement** - Funktioniert auch ohne JavaScript
 
 ### Backend (Node.js/Express)

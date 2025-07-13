@@ -1,437 +1,623 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - Alpaka Wanderungen</title>
-  <link rel="stylesheet" href="./admin-styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Sofortige Authentifizierungs-Prüfung -->
-  <script>
-    // Prüfe Authentifizierung VOR dem Laden der Seite
-    (function() {
-      const userData = sessionStorage.getItem('alpaka_admin_user');
-      if (!userData) {
-        console.warn('❌ Keine Authentifizierung - Weiterleitung zum Login');
-        window.location.replace('login.html');
-        return;
-      }
-      
-      try {
-        const user = JSON.parse(userData);
-        console.log('✅ Benutzer authentifiziert:', user.name);
-        
-        // Lade Dark Mode Einstellung
-        const darkMode = localStorage.getItem('alpaka_admin_dark_mode');
-        if (darkMode === 'true') {
-          document.documentElement.classList.add('dark');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦙 Alpaka-Wanderungen - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      } catch (error) {
-        console.error('❌ Fehler beim Parsen der Benutzerdaten:', error);
-        sessionStorage.removeItem('alpaka_admin_user');
-        window.location.replace('login.html');
-      }
-    })();
-  </script>
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .admin-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .login-form {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 400px;
+            margin: 2rem auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-dashboard {
+            display: none;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+        }
+
+        .card-content {
+            color: #666;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .btn-success {
+            background: #38a169;
+        }
+
+        .btn-success:hover {
+            background: #2f855a;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table th {
+            font-weight: 700;
+            color: #333;
+            background: #f7fafc;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fef5e7;
+            color: #d69e2e;
+        }
+
+        .status-confirmed {
+            background: #f0fff4;
+            color: #38a169;
+        }
+
+        .status-cancelled {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 50px auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 0.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #f0fff4;
+            color: #38a169;
+            border: 1px solid #9ae6b4;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 20px;
+                max-width: calc(100% - 40px);
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="admin-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">
-          <span class="logo-icon">🦙</span>
-          <h2>Alpaka Admin</h2>
-        </div>
-      </div>
-      
-      <nav class="sidebar-nav">
-        <ul>
-          <li class="nav-item active">
-            <a href="#dashboard" class="nav-link" data-section="dashboard">
-              <span class="nav-icon">📊</span>
-              Dashboard
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#kontaktanfragen" class="nav-link" data-section="kontaktanfragen">
-              <span class="nav-icon">📧</span>
-              Kontaktanfragen
-              <span class="badge" id="unread-count">3</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#buchungen" class="nav-link" data-section="buchungen">
-              <span class="nav-icon">🗓️</span>
-              Buchungen
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#user-management" class="nav-link" data-section="user-management">
-              <span class="nav-icon">👥</span>
-              Benutzer
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#statistiken" class="nav-link" data-section="statistiken">
-              <span class="nav-icon">📈</span>
-              Statistiken
-            </a>
-          </li>
-        </ul>
-      </nav>
-      
-      <div class="sidebar-footer">
-        <a href="../index.html" class="back-to-site">
-          <span class="nav-icon">🌐</span>
-          Zurück zur Website
-        </a>
-        <div class="admin-info">
-          <span class="admin-name">Astrid Mustermann</span>
-          <span class="admin-role">Administrator</span>
-        </div>
-        <button class="logout-btn" onclick="logout()">
-          <span class="nav-icon">🚪</span>
-          Abmelden
-        </button>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Header -->
-      <header class="admin-header">
-        <div class="header-left">
-          <button class="mobile-menu-btn" id="mobile-menu-btn">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-          <h1 id="page-title">Dashboard</h1>
-        </div>
+    <div class="admin-container">
+        <button class="logout-btn" onclick="logout()" style="display: none;" id="logoutBtn">Abmelden</button>
         
-        <div class="header-right">
-          <div class="header-actions">
-            <button class="action-btn" id="refresh-btn" title="Aktualisieren">
-              <span class="btn-icon">🔄</span>
-            </button>
-            <button class="action-btn" id="export-btn" title="Exportieren">
-              <span class="btn-icon">📥</span>
-            </button>
-            <button class="action-btn dark-mode-toggle" id="dark-mode-toggle" title="Dark Mode">
-              <span class="btn-icon">🌙</span>
-            </button>
-          </div>
-          
-          <div class="current-time" id="current-time"></div>
-        </div>
-      </header>
-
-      <!-- Dashboard Section -->
-      <section id="dashboard" class="content-section active">
-        <div class="dashboard-grid">
-          <!-- Stats Cards -->
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">📧</div>
-              <div class="stat-content">
-                <div class="stat-number" id="stat-requests">0</div>
-                <div class="stat-label">Neue Anfragen</div>
-                <div class="stat-change positive">+15%</div>
-              </div>
+        <!-- Login Form -->
+        <div id="loginSection">
+            <div class="admin-header">
+                <h1 class="admin-title">🦙 Admin Panel</h1>
+                <p class="admin-subtitle">Alpaka-Wanderungen Verwaltung</p>
             </div>
             
-            <div class="stat-card">
-              <div class="stat-icon">🗓️</div>
-              <div class="stat-content">
-                <div class="stat-number" id="stat-bookings">0</div>
-                <div class="stat-label">Heute Buchungen</div>
-                <div class="stat-change positive">+8%</div>
-              </div>
+            <div class="login-form">
+                <h2 style="margin-bottom: 1.5rem; text-align: center;">Anmeldung</h2>
+                <div id="loginAlert"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="password">Passwort:</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">Anmelden</button>
+                </form>
             </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">💰</div>
-              <div class="stat-content">
-                <div class="stat-number" id="stat-revenue">0€</div>
-                <div class="stat-label">Heute Umsatz</div>
-                <div class="stat-change positive">+22%</div>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-icon">⭐</div>
-              <div class="stat-content">
-                <div class="stat-number">4.9</div>
-                <div class="stat-label">Bewertung</div>
-                <div class="stat-change neutral">±0%</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="quick-actions">
-            <h3>Schnellaktionen</h3>
-            <div class="action-grid">
-              <button class="quick-action-btn" onclick="showSection('kontaktanfragen')">
-                <span class="action-icon">📧</span>
-                <span class="action-text">Neue Anfragen</span>
-              </button>
-              <button class="quick-action-btn" onclick="showSection('buchungen')">
-                <span class="action-icon">➕</span>
-                <span class="action-text">Buchung hinzufügen</span>
-              </button>
-              <button class="quick-action-btn" onclick="exportData()">
-                <span class="action-icon">📊</span>
-                <span class="action-text">Report erstellen</span>
-              </button>
-              <button class="quick-action-btn" onclick="simulateNewRequest()">
-                <span class="action-icon">🎯</span>
-                <span class="action-text">Test-Anfrage</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Recent Activity -->
-          <div class="recent-activity">
-            <h3>Letzte Aktivitäten</h3>
-            <div class="activity-list" id="activity-list">
-              <!-- Wird durch JavaScript gefüllt -->
-            </div>
-          </div>
-          
-          <!-- 7-Tage Statistik Chart -->
-          <div class="chart-section">
-            <h3>Anrufe der letzten 7 Tage</h3>
-            <div class="chart-container">
-              <canvas id="calls-chart" width="400" height="200"></canvas>
-            </div>
-          </div>
         </div>
-      </section>
-                <div class="activity-icon">📧</div>
-                <div class="activity-content">
-                  <div class="activity-title">Neue Kontaktanfrage</div>
-                  <div class="activity-desc">Maria Schmidt - Familientour für 6 Personen</div>
-                  <div class="activity-time">vor 5 Minuten</div>
+
+        <!-- Dashboard -->
+        <div id="dashboardSection" class="admin-dashboard">
+            <div class="admin-header">
+                <h1 class="admin-title">🦙 Admin Dashboard</h1>
+                <p class="admin-subtitle">Willkommen im Verwaltungsbereich</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Buchungen</h3>
+                        <div class="card-icon">📋</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-number" id="totalBookings">0</div>
+                        <p>Gesamte Buchungen</p>
+                    </div>
                 </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">✅</div>
-                <div class="activity-content">
-                  <div class="activity-title">Buchung bestätigt</div>
-                  <div class="activity-desc">Peter Wagner - 15.07.2025, 10:00 Uhr</div>
-                  <div class="activity-time">vor 12 Minuten</div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Umsatz</h3>
+                        <div class="card-icon">💰</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-number" id="totalRevenue">0€</div>
+                        <p>Gesamtumsatz</p>
+                    </div>
                 </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">💰</div>
-                <div class="activity-content">
-                  <div class="activity-title">Zahlung erhalten</div>
-                  <div class="activity-desc">120€ für Alpaka-Tour (4 Personen)</div>
-                  <div class="activity-time">vor 1 Stunde</div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Gutscheine</h3>
+                        <div class="card-icon">🎁</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-number" id="totalVouchers">0</div>
+                        <p>Erstellte Gutscheine</p>
+                    </div>
                 </div>
-              </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Rabattcodes</h3>
+                        <div class="card-icon">💸</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="stats-number" id="totalDiscountCodes">0</div>
+                        <p>Aktive Codes</p>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Kontaktanfragen Section -->
-      <section id="kontaktanfragen" class="content-section">
-        <div class="section-header">
-          <h2>Kontaktanfragen verwalten</h2>
-          <div class="section-actions">
-            <div class="filter-group">
-              <select id="status-filter" class="filter-select">
-                <option value="all">Alle Status</option>
-                <option value="new">Neu</option>
-                <option value="in-progress">In Bearbeitung</option>
-                <option value="completed">Abgeschlossen</option>
-              </select>
-              <select id="date-filter" class="filter-select">
-                <option value="all">Alle Zeiträume</option>
-                <option value="today">Heute</option>
-                <option value="week">Diese Woche</option>
-                <option value="month">Dieser Monat</option>
-              </select>
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('bookings')">📋 Buchungen</button>
+                <button class="tab" onclick="switchTab('vouchers')">🎁 Gutscheine</button>
+                <button class="tab" onclick="switchTab('discounts')">💸 Rabattcodes</button>
             </div>
-            <button class="primary-btn" onclick="markAllRead()">
-              <span class="btn-icon">✓</span>
-              Alle als gelesen markieren
-            </button>
-          </div>
-        </div>
 
-        <div class="requests-container">
-          <!-- Kontaktanfrage Cards werden hier durch JavaScript eingefügt -->
-        </div>
-      </section>
-
-      <!-- Buchungen Section -->
-      <section id="buchungen" class="content-section">
-        <div class="section-header">
-          <h2>Buchungen verwalten</h2>
-          <div class="section-actions">
-            <button class="primary-btn" onclick="addBooking()">
-              <span class="btn-icon">➕</span>
-              Neue Buchung
-            </button>
-          </div>
-        </div>
-
-        <div class="calendar-container">
-          <div class="calendar-header">
-            <button class="calendar-nav" id="prev-month">‹</button>
-            <h3 id="current-month">Juli 2025</h3>
-            <button class="calendar-nav" id="next-month">›</button>
-          </div>
-          <div class="calendar-grid" id="calendar">
-            <!-- Kalender wird durch JavaScript generiert -->
-          </div>
-        </div>
-
-        <div class="booking-list">
-          <h3>Heutige Buchungen</h3>
-          <div class="booking-items">
-            <!-- Buchungen werden hier durch JavaScript eingefügt -->
-          </div>
-        </div>
-      </section>
-
-      <!-- User Management Section -->
-      <section id="user-management" class="content-section">
-        <div class="section-header">
-          <h2>Benutzer verwalten</h2>
-          <div class="section-actions">
-            <button class="primary-btn" onclick="showAddUserModal()">
-              <span class="btn-icon">👤</span>
-              Neuer Benutzer
-            </button>
-          </div>
-        </div>
-
-        <div class="users-container">
-          <div class="users-grid" id="users-grid">
-            <!-- User cards werden hier durch JavaScript eingefügt -->
-          </div>
-        </div>
-      </section>
-
-      <!-- Statistiken Section -->
-      <section id="statistiken" class="content-section">
-        <div class="section-header">
-          <h2>Statistiken & Analytics</h2>
-          <div class="section-actions">
-            <select class="filter-select">
-              <option value="7days">Letzte 7 Tage</option>
-              <option value="30days">Letzte 30 Tage</option>
-              <option value="90days">Letzte 90 Tage</option>
-              <option value="year">Dieses Jahr</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3>Anrufe der letzten 7 Tage</h3>
-            <div class="chart-placeholder">
-              <canvas id="calls-chart" width="400" height="200"></canvas>
+            <!-- Bookings Tab -->
+            <div id="bookingsTab" class="tab-content active">
+                <div class="table-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2>📋 Buchungsverwaltung</h2>
+                        <button class="btn" onclick="refreshBookings()">🔄 Aktualisieren</button>
+                    </div>
+                    <div id="bookingsAlert"></div>
+                    <div style="overflow-x: auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>E-Mail</th>
+                                    <th>Tour</th>
+                                    <th>Datum</th>
+                                    <th>Teilnehmer</th>
+                                    <th>Preis</th>
+                                    <th>Status</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookingsTable">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 2rem;">Laden...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-          </div>
-          
-          <div class="chart-card">
-            <h3>Buchungen-Entwicklung</h3>
-            <div class="chart-placeholder">
-              <canvas id="bookings-chart" width="400" height="200"></canvas>
-            </div>
-          </div>
-          
-          <div class="chart-card">
-            <h3>Umsatz-Entwicklung</h3>
-            <div class="chart-placeholder">
-              <canvas id="revenue-chart" width="400" height="200"></canvas>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
 
-  <!-- Modal für Anfrage Details -->
-  <div id="request-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Anfrage Details</h3>
-        <button class="modal-close" onclick="closeModal('request-modal')">×</button>
-      </div>
-      <div class="modal-body" id="modal-body">
-        <!-- Content wird durch JavaScript eingefügt -->
-      </div>
-      <div class="modal-footer">
-        <button class="secondary-btn" onclick="closeModal('request-modal')">Schließen</button>
-        <button class="primary-btn" onclick="respondToRequest()">Antworten</button>
-      </div>
+            <!-- Vouchers Tab -->
+            <div id="vouchersTab" class="tab-content">
+                <div class="table-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2>🎁 Gutschein-Verwaltung</h2>
+                        <button class="btn" onclick="showCreateVoucherModal()">+ Neuer Gutschein</button>
+                    </div>
+                    <div id="vouchersAlert"></div>
+                    <div style="overflow-x: auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Wert</th>
+                                    <th>Beschreibung</th>
+                                    <th>Gültig bis</th>
+                                    <th>Status</th>
+                                    <th>Eingelöst</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vouchersTable">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 2rem;">Laden...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discount Codes Tab -->
+            <div id="discountsTab" class="tab-content">
+                <div class="table-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2>💸 Rabattcode-Verwaltung</h2>
+                        <button class="btn" onclick="showCreateDiscountModal()">+ Neuer Rabattcode</button>
+                    </div>
+                    <div id="discountsAlert"></div>
+                    <div style="overflow-x: auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Wert</th>
+                                    <th>Typ</th>
+                                    <th>Beschreibung</th>
+                                    <th>Verwendet</th>
+                                    <th>Limit</th>
+                                    <th>Gültig bis</th>
+                                    <th>Status</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="discountsTable">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 2rem;">Laden...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Modal für User hinzufügen/bearbeiten -->
-  <div id="user-modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="user-modal-title">Neuer Benutzer</h3>
-        <button class="modal-close" onclick="closeModal('user-modal')">×</button>
-      </div>
-      <div class="modal-body">
-        <form id="user-form">
-          <div class="form-row">
-            <div>
-              <label for="user-username">Benutzername</label>
-              <input type="text" id="user-username" required>
+    <!-- Voucher Modal -->
+    <div id="voucherModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">🎁 Neuer Gutschein</h3>
+                <button class="close-btn" onclick="closeModal('voucherModal')">&times;</button>
             </div>
-            <div>
-              <label for="user-name">Vollständiger Name</label>
-              <input type="text" id="user-name" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div>
-              <label for="user-email">E-Mail</label>
-              <input type="email" id="user-email" required>
-            </div>
-            <div>
-              <label for="user-role">Rolle</label>
-              <select id="user-role">
-                <option value="user">Benutzer</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Administrator</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div>
-              <label for="user-password">Passwort</label>
-              <input type="password" id="user-password" required>
-            </div>
-            <div>
-              <label for="user-password-confirm">Passwort bestätigen</label>
-              <input type="password" id="user-password-confirm" required>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="secondary-btn" onclick="closeModal('user-modal')">Abbrechen</button>
-        <button class="primary-btn" onclick="saveUser()">Speichern</button>
-      </div>
+            <div id="voucherModalAlert"></div>
+            <form id="voucherForm">
+                <div class="form-group">
+                    <label for="voucherValue">Wert (€):</label>
+                    <input type="number" id="voucherValue" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="voucherDescription">Beschreibung:</label>
+                    <input type="text" id="voucherDescription" required>
+                </div>
+                <div class="form-group">
+                    <label for="voucherExpiry">Gültig bis (optional):</label>
+                    <input type="date" id="voucherExpiry">
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" style="background: #ccc;" onclick="closeModal('voucherModal')">Abbrechen</button>
+                    <button type="submit" class="btn">Gutschein erstellen</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <!-- Toast Notifications -->
-  <div id="toast-container"></div>
+    <!-- Discount Code Modal -->
+    <div id="discountModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">💸 Neuer Rabattcode</h3>
+                <button class="close-btn" onclick="closeModal('discountModal')">&times;</button>
+            </div>
+            <div id="discountModalAlert"></div>
+            <form id="discountForm">
+                <div class="form-group">
+                    <label for="discountCode">Code:</label>
+                    <input type="text" id="discountCode" style="text-transform: uppercase;" required>
+                </div>
+                <div class="form-group">
+                    <label for="discountType">Typ:</label>
+                    <select id="discountType" required>
+                        <option value="percentage">Prozent (%)</option>
+                        <option value="fixed">Fester Betrag (€)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="discountValue">Wert:</label>
+                    <input type="number" id="discountValue" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="discountDescription">Beschreibung:</label>
+                    <input type="text" id="discountDescription" required>
+                </div>
+                <div class="form-group">
+                    <label for="discountLimit">Verwendungslimit (optional):</label>
+                    <input type="number" id="discountLimit">
+                </div>
+                <div class="form-group">
+                    <label for="discountExpiry">Gültig bis (optional):</label>
+                    <input type="date" id="discountExpiry">
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn" style="background: #ccc;" onclick="closeModal('discountModal')">Abbrechen</button>
+                    <button type="submit" class="btn">Rabattcode erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-  <script src="./admin-system.js"></script>
-  <script src="./admin-script.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
