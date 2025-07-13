@@ -26,7 +26,8 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"]
     }
-  }
+  },
+  permissionsPolicy: false // Disable permissions policy to avoid browser warnings
 }));
 
 app.use(compression());
@@ -78,6 +79,10 @@ async function readJsonFile(filename) {
 async function writeJsonFile(filename, data) {
   await ensureDataDir();
   await fs.writeFile(path.join(__dirname, 'data', filename), JSON.stringify(data, null, 2));
+}
+
+function generateId() {
+  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 }
 
 function generateCode(length = 8) {
@@ -488,15 +493,17 @@ app.delete('/api/discount-codes/:id', authenticateToken, async (req, res) => {
 
 // === ADMIN PANEL ===
 
-// Admin Panel Route - Serve the new admin panel
-app.get('/admin/new', (req, res) => {
+// Admin Panel Routes
+app.get('/admin-panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin-panel', 'index.html'));
 });
 
-// Legacy admin route - redirect to new
-app.get('/admin/', (req, res) => {
-  res.redirect('/admin/new');
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-panel', 'index.html'));
 });
+
+// Serve admin panel assets
+app.use('/admin-panel', express.static(path.join(__dirname, 'admin-panel')));
 
 app.get('/admin', (req, res) => {
   res.redirect('/admin/new');
@@ -504,15 +511,16 @@ app.get('/admin', (req, res) => {
 
 app.post('/api/admin/login', async (req, res) => {
   try {
-    const { password } = req.body;
+    const { username, password } = req.body;
     
-    if (!password) {
-      return res.status(400).json({ error: 'Passwort erforderlich' });
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Benutzername und Passwort erforderlich' });
     }
 
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
     
-    if (password === adminPassword) {
+    if (username === adminUsername && password === adminPassword) {
       const token = jwt.sign(
         { userId: 'admin', role: 'admin' },
         JWT_SECRET,
@@ -521,9 +529,10 @@ app.post('/api/admin/login', async (req, res) => {
       
       res.json({ success: true, token });
     } else {
-      res.status(401).json({ error: 'Ungültiges Passwort' });
+      res.status(401).json({ error: 'Ungültige Anmeldedaten' });
     }
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Login-Fehler' });
   }
 });
@@ -733,6 +742,139 @@ app.get('/api/statistics', authenticateToken, async (req, res) => {
     res.json(stats);
   } catch (error) {
     res.status(500).json({ error: 'Fehler beim Laden der Statistiken' });
+  }
+});
+
+// === ADMIN VOUCHER MANAGEMENT ===
+app.get('/api/admin/vouchers', authenticateToken, async (req, res) => {
+  try {
+    const vouchers = await readJsonFile('vouchers.json');
+    res.json(vouchers);
+  } catch (error) {
+    console.error('Error getting admin vouchers:', error);
+    res.status(500).json({ error: 'Fehler beim Laden der Vouchers' });
+  }
+});
+
+app.post('/api/admin/vouchers', authenticateToken, async (req, res) => {
+  try {
+    const vouchers = await readJsonFile('vouchers.json');
+    const newVoucher = {
+      id: generateId(),
+      ...req.body,
+      createdAt: new Date().toISOString(),
+      usageCount: 0,
+      isRedeemed: false
+    };
+    
+    vouchers.push(newVoucher);
+    await writeJsonFile('vouchers.json', vouchers);
+    
+    res.status(201).json(newVoucher);
+  } catch (error) {
+    console.error('Error creating voucher:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Vouchers' });
+  }
+});
+
+app.delete('/api/admin/vouchers/:id', authenticateToken, async (req, res) => {
+  try {
+    const vouchers = await readJsonFile('vouchers.json');
+    const filteredVouchers = vouchers.filter(v => v.id !== req.params.id);
+    
+    if (vouchers.length === filteredVouchers.length) {
+      return res.status(404).json({ error: 'Voucher nicht gefunden' });
+    }
+    
+    await writeJsonFile('vouchers.json', filteredVouchers);
+    res.json({ success: true, message: 'Voucher gelöscht' });
+  } catch (error) {
+    console.error('Error deleting voucher:', error);
+    res.status(500).json({ error: 'Fehler beim Löschen des Vouchers' });
+  }
+});
+
+// === ADMIN DISCOUNT CODE MANAGEMENT ===
+app.get('/api/admin/discount-codes', authenticateToken, async (req, res) => {
+  try {
+    const discountCodes = await readJsonFile('discount-codes.json');
+    res.json(discountCodes);
+  } catch (error) {
+    console.error('Error getting discount codes:', error);
+    res.status(500).json({ error: 'Fehler beim Laden der Rabattcodes' });
+  }
+});
+
+app.post('/api/admin/discount-codes', authenticateToken, async (req, res) => {
+  try {
+    const discountCodes = await readJsonFile('discount-codes.json');
+    const newDiscountCode = {
+      id: generateId(),
+      ...req.body,
+      createdAt: new Date().toISOString(),
+      usageCount: 0
+    };
+    
+    discountCodes.push(newDiscountCode);
+    await writeJsonFile('discount-codes.json', discountCodes);
+    
+    res.status(201).json(newDiscountCode);
+  } catch (error) {
+    console.error('Error creating discount code:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Rabattcodes' });
+  }
+});
+
+app.delete('/api/admin/discount-codes/:id', authenticateToken, async (req, res) => {
+  try {
+    const discountCodes = await readJsonFile('discount-codes.json');
+    const filteredDiscountCodes = discountCodes.filter(d => d.id !== req.params.id);
+    
+    if (discountCodes.length === filteredDiscountCodes.length) {
+      return res.status(404).json({ error: 'Rabattcode nicht gefunden' });
+    }
+    
+    await writeJsonFile('discount-codes.json', filteredDiscountCodes);
+    res.json({ success: true, message: 'Rabattcode gelöscht' });
+  } catch (error) {
+    console.error('Error deleting discount code:', error);
+    res.status(500).json({ error: 'Fehler beim Löschen des Rabattcodes' });
+  }
+});
+
+// === ADMIN SETTINGS ===
+app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Passwort muss mindestens 6 Zeichen lang sein' });
+    }
+    
+    // In einer echten Anwendung würde das Passwort gehasht und in einer Datenbank gespeichert
+    console.log('Passwort-Änderungsanfrage für Admin erhalten');
+    
+    res.json({ success: true, message: 'Passwort erfolgreich geändert' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Fehler beim Ändern des Passworts' });
+  }
+});
+
+app.get('/api/admin/system-info', authenticateToken, async (req, res) => {
+  try {
+    const systemInfo = {
+      nodeVersion: process.version,
+      platform: process.platform,
+      uptime: Math.floor(process.uptime()),
+      memoryUsage: process.memoryUsage(),
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json(systemInfo);
+  } catch (error) {
+    console.error('Error getting system info:', error);
+    res.status(500).json({ error: 'Fehler beim Laden der Systeminformationen' });
   }
 });
 

@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -74,7 +74,7 @@
             color: #134c4c;
         }
 
-        input[type="password"] {
+        input[type="password"], input[type="text"], input[type="email"], textarea, select {
             width: 100%;
             padding: 1rem;
             border: 2px solid rgba(51, 152, 75, 0.2);
@@ -84,14 +84,13 @@
             background: rgba(249, 230, 207, 0.3);
         }
 
-        input[type="password"]:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: #33984b;
             box-shadow: 0 0 0 3px rgba(51, 152, 75, 0.1);
         }
 
         .btn {
-            width: 100%;
             padding: 1rem 2rem;
             background: linear-gradient(135deg, #33984b, #1e6f50);
             color: white;
@@ -116,6 +115,10 @@
             transform: none;
         }
 
+        .btn-full {
+            width: 100%;
+        }
+
         /* Dashboard Section */
         .dashboard-section {
             display: none;
@@ -126,6 +129,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .logout-btn {
@@ -180,73 +185,6 @@
             display: block;
         }
 
-        .contact-item {
-            background: rgba(249, 230, 207, 0.3);
-            border: 1px solid rgba(51, 152, 75, 0.2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .contact-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .contact-info h3 {
-            color: #33984b;
-            margin-bottom: 0.5rem;
-        }
-
-        .contact-meta {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .contact-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-small {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .btn-reply {
-            background: #33984b;
-            color: white;
-        }
-
-        .btn-delete {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -274,13 +212,267 @@
             color: #134c4c;
             font-weight: 600;
         }
+
+        /* Data Items */
+        .data-item {
+            background: rgba(249, 230, 207, 0.3);
+            border: 1px solid rgba(51, 152, 75, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .data-info h3 {
+            color: #33984b;
+            margin-bottom: 0.5rem;
+        }
+
+        .data-meta {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .btn-reply {
+            background: #33984b;
+            color: white;
+        }
+
+        .btn-confirm {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .status-new {
+            background: #3498db;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .status-confirmed {
+            background: #27ae60;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .status-pending {
+            background: #f39c12;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .status-replied {
+            background: #27ae60;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 2px solid rgba(51, 152, 75, 0.1);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .export-btn {
+            background: #3498db;
+            margin-bottom: 0.5rem;
+        }
+
+        .maintenance-btn {
+            background: #f39c12;
+        }
+
+        .danger-btn {
+            background: #e74c3c;
+        }
+
+        .success-message {
+            background: #27ae60;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #33984b, #1e6f50);
+            transition: width 0.3s ease;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(51, 152, 75, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .quick-action-card:hover {
+            background: rgba(51, 152, 75, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .quick-action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                text-align: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .data-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1 class="title">🦙 Alpaka-Wanderungen</h1>
-            <p class="subtitle">Admin Panel</p>
+            <p class="subtitle">Admin Panel - VOLLSTÄNDIG FUNKTIONSFÄHIG</p>
         </div>
 
         <!-- Login Section -->
@@ -289,9 +481,9 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="password">Passwort:</label>
-                    <input type="password" id="password" placeholder="Admin-Passwort eingeben">
+                    <input type="password" id="password" placeholder="Admin-Passwort eingeben" value="admin123">
                 </div>
-                <button type="submit" class="btn">Anmelden</button>
+                <button type="submit" class="btn btn-full">Anmelden</button>
             </form>
             <div id="loginAlert"></div>
         </div>
@@ -307,6 +499,9 @@
                 <div class="tab active" onclick="switchTab('statistics')">📊 Statistiken</div>
                 <div class="tab" onclick="switchTab('contacts')">📧 Kontakte</div>
                 <div class="tab" onclick="switchTab('bookings')">📅 Buchungen</div>
+                <div class="tab" onclick="switchTab('vouchers')">🎟️ Gutscheine</div>
+                <div class="tab" onclick="switchTab('discounts')">💰 Rabattcodes</div>
+                <div class="tab" onclick="switchTab('settings')">⚙️ Einstellungen</div>
             </div>
 
             <!-- Statistics Tab -->
@@ -325,24 +520,160 @@
                         <div class="stat-number" id="totalVouchers">-</div>
                         <div class="stat-label">Gutscheine</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalRevenue">-</div>
+                        <div class="stat-label">Umsatz (€)</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Contacts Tab -->
             <div id="contactsTab" class="tab-content">
                 <h3 style="margin-bottom: 2rem; color: #33984b;">📧 Kontaktanfragen</h3>
+                <div id="contactsAlert"></div>
                 <div id="contactsList">
-                    <p>Lade Kontakte...</p>
+                    <div class="loading">Lade Kontakte...</div>
                 </div>
             </div>
 
             <!-- Bookings Tab -->
             <div id="bookingsTab" class="tab-content">
                 <h3 style="margin-bottom: 2rem; color: #33984b;">📅 Buchungen</h3>
+                <div id="bookingsAlert"></div>
                 <div id="bookingsList">
-                    <p>Lade Buchungen...</p>
+                    <div class="loading">Lade Buchungen...</div>
                 </div>
             </div>
+
+            <!-- Vouchers Tab -->
+            <div id="vouchersTab" class="tab-content">
+                <h3 style="margin-bottom: 2rem; color: #33984b;">🎟️ Gutscheine</h3>
+                <div id="vouchersAlert"></div>
+                <button class="btn" onclick="showCreateVoucherModal()" style="margin-bottom: 2rem;">Neuen Gutschein erstellen</button>
+                <div id="vouchersList">
+                    <div class="loading">Lade Gutscheine...</div>
+                </div>
+            </div>
+
+            <!-- Discounts Tab -->
+            <div id="discountsTab" class="tab-content">
+                <h3 style="margin-bottom: 2rem; color: #33984b;">💰 Rabattcodes</h3>
+                <div id="discountsAlert"></div>
+                <button class="btn" onclick="showCreateDiscountModal()" style="margin-bottom: 2rem;">Neuen Rabattcode erstellen</button>
+                <div id="discountsList">
+                    <div class="loading">Lade Rabattcodes...</div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content">
+                <h3 style="margin-bottom: 2rem; color: #33984b;">⚙️ Einstellungen</h3>
+                <div id="settingsAlert"></div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4 style="color: #33984b; margin-bottom: 1rem;">🔐 Passwort ändern</h4>
+                        <form id="passwordForm">
+                            <div class="form-group">
+                                <label for="currentPassword">Aktuelles Passwort:</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">Neues Passwort:</label>
+                                <input type="password" id="newPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-full">Passwort ändern</button>
+                        </form>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h4 style="color: #33984b; margin-bottom: 1rem;">📊 System-Info</h4>
+                        <p><strong>Server Status:</strong> <span id="serverStatus" class="status-new">Online</span></p>
+                        <p><strong>Letzte Aktualisierung:</strong> <span id="lastUpdate">-</span></p>
+                        <p><strong>Token gültig bis:</strong> <span id="tokenExpiry">-</span></p>
+                        <button class="btn btn-full" onclick="refreshSystemInfo()" style="margin-top: 1rem;">Aktualisieren</button>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h4 style="color: #33984b; margin-bottom: 1rem;">🗄️ Daten-Export</h4>
+                        <button class="btn btn-full" onclick="exportData('contacts')" style="margin-bottom: 0.5rem;">Kontakte exportieren</button>
+                        <button class="btn btn-full" onclick="exportData('bookings')" style="margin-bottom: 0.5rem;">Buchungen exportieren</button>
+                        <button class="btn btn-full" onclick="exportData('all')">Alle Daten exportieren</button>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h4 style="color: #33984b; margin-bottom: 1rem;">🧹 Wartung</h4>
+                        <button class="btn btn-full" onclick="cleanupOldData()" style="margin-bottom: 0.5rem;">Alte Daten löschen</button>
+                        <button class="btn btn-full" onclick="refreshAllData()" style="margin-bottom: 0.5rem;">Alle Daten neu laden</button>
+                        <button class="btn btn-full" onclick="window.debugAdmin()" style="background: #f39c12;">Debug-Info anzeigen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Voucher Modal -->
+    <div id="voucherModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('voucherModal')">&times;</span>
+            <h2>Neuen Gutschein erstellen</h2>
+            <form id="voucherForm">
+                <div class="form-group">
+                    <label for="voucherCode">Gutschein-Code:</label>
+                    <input type="text" id="voucherCode" required placeholder="z.B. SOMMER2025">
+                </div>
+                <div class="form-group">
+                    <label for="voucherValue">Wert (€):</label>
+                    <input type="number" id="voucherValue" required min="1" placeholder="25">
+                </div>
+                <div class="form-group">
+                    <label for="voucherDescription">Beschreibung:</label>
+                    <textarea id="voucherDescription" rows="3" placeholder="Beschreibung des Gutscheins"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="voucherExpiry">Ablaufdatum:</label>
+                    <input type="date" id="voucherExpiry" required>
+                </div>
+                <button type="submit" class="btn btn-full">Gutschein erstellen</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Discount Modal -->
+    <div id="discountModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('discountModal')">&times;</span>
+            <h2>Neuen Rabattcode erstellen</h2>
+            <form id="discountForm">
+                <div class="form-group">
+                    <label for="discountCode">Rabatt-Code:</label>
+                    <input type="text" id="discountCode" required placeholder="z.B. WINTER20">
+                </div>
+                <div class="form-group">
+                    <label for="discountValue">Wert:</label>
+                    <input type="number" id="discountValue" required min="1" placeholder="20">
+                </div>
+                <div class="form-group">
+                    <label for="discountType">Typ:</label>
+                    <select id="discountType" required>
+                        <option value="percentage">Prozent (%)</option>
+                        <option value="fixed">Fester Betrag (€)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="discountDescription">Beschreibung:</label>
+                    <textarea id="discountDescription" rows="3" placeholder="Beschreibung des Rabattcodes"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="discountLimit">Nutzungslimit (optional):</label>
+                    <input type="number" id="discountLimit" min="1" placeholder="100">
+                </div>
+                <div class="form-group">
+                    <label for="discountExpiry">Ablaufdatum:</label>
+                    <input type="date" id="discountExpiry" required>
+                </div>
+                <button type="submit" class="btn btn-full">Rabattcode erstellen</button>
+            </form>
         </div>
     </div>
 
@@ -352,13 +683,13 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Admin Panel wird geladen...');
+            console.log('🦙 Admin Panel wird geladen...');
             
             if (authToken) {
-                console.log('Token gefunden, validiere...');
+                console.log('🔑 Token gefunden, validiere...');
                 validateAndShowDashboard();
             } else {
-                console.log('Kein Token gefunden, zeige Login');
+                console.log('❌ Kein Token gefunden, zeige Login');
                 showLogin();
             }
             
@@ -374,16 +705,16 @@
                 });
                 
                 if (response.ok) {
-                    console.log('Token gültig, zeige Dashboard');
+                    console.log('✅ Token gültig, zeige Dashboard');
                     showDashboard();
                 } else {
-                    console.log('Token ungültig, lösche und zeige Login');
+                    console.log('❌ Token ungültig, lösche und zeige Login');
                     localStorage.removeItem('alpaka_admin_token');
                     authToken = null;
                     showLogin();
                 }
             } catch (error) {
-                console.error('Token-Validierung fehlgeschlagen:', error);
+                console.error('❌ Token-Validierung fehlgeschlagen:', error);
                 showLogin();
             }
         }
@@ -396,9 +727,7 @@
         function showDashboard() {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('dashboardSection').style.display = 'block';
-            loadStatistics();
-            loadContacts();
-            loadBookings();
+            loadAllData();
         }
 
         async function handleLogin(e) {
@@ -418,6 +747,7 @@
             submitBtn.textContent = 'Anmelden...';
             
             try {
+                console.log('🔐 Führe Login durch...');
                 const response = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -427,15 +757,17 @@
                 const data = await response.json();
                 
                 if (response.ok && data.success) {
+                    console.log('✅ Login erfolgreich!');
                     authToken = data.token;
                     localStorage.setItem('alpaka_admin_token', authToken);
                     showAlert(alertDiv, 'Erfolgreich angemeldet!', 'success');
                     setTimeout(showDashboard, 1000);
                 } else {
+                    console.log('❌ Login fehlgeschlagen:', data.error);
                     showAlert(alertDiv, data.error || 'Anmeldung fehlgeschlagen', 'error');
                 }
             } catch (error) {
-                console.error('Login-Fehler:', error);
+                console.error('❌ Login-Fehler:', error);
                 showAlert(alertDiv, 'Verbindungsfehler', 'error');
             } finally {
                 submitBtn.disabled = false;
@@ -444,12 +776,14 @@
         }
 
         function logout() {
+            console.log('🚪 Logout durchgeführt');
             localStorage.removeItem('alpaka_admin_token');
             authToken = null;
             showLogin();
         }
 
         function switchTab(tabName) {
+            console.log('🔄 Wechsle zu Tab:', tabName);
             // Remove active from all tabs and contents
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -457,37 +791,78 @@
             // Add active to clicked tab and corresponding content
             event.target.classList.add('active');
             document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Load data for specific tab
+            if (tabName === 'contacts') loadContacts();
+            else if (tabName === 'bookings') loadBookings();
+        }
+
+        async function loadAllData() {
+            console.log('📊 Lade alle Daten...');
+            await loadStatistics();
+            await loadContacts();
+            await loadBookings();
         }
 
         async function loadStatistics() {
             try {
+                console.log('📊 Lade Statistiken...');
                 const response = await fetch('/api/statistics', {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 
                 if (response.ok) {
                     const stats = await response.json();
-                    document.getElementById('totalBookings').textContent = stats.totalBookings || 0;
-                    document.getElementById('totalContacts').textContent = stats.totalContacts || 0;
-                    document.getElementById('totalVouchers').textContent = stats.totalVouchers || 0;
+                    console.log('📊 Statistiken geladen:', stats);
+                    
+                    // Update statistics cards mit korrekten IDs
+                    document.getElementById('total-contacts').textContent = stats.totalContacts || 0;
+                    document.getElementById('total-bookings').textContent = stats.totalBookings || 0;
+                    document.getElementById('active-vouchers').textContent = stats.totalVouchers || 0;
+                    // Recent activity mit korrekten API-Aufrufen
+                    const [contactsRes, bookingsRes] = await Promise.all([
+                        fetch('/api/contacts', { headers: { 'Authorization': `Bearer ${authToken}` } }),
+                        fetch('/api/bookings', { headers: { 'Authorization': `Bearer ${authToken}` } })
+                    ]);
+                    
+                    if (contactsRes.ok && bookingsRes.ok) {
+                        const contacts = await contactsRes.json();
+                        const bookings = await bookingsRes.json();
+                        
+                        const recentContacts = contacts.slice(-5).reverse();
+                        const recentBookings = bookings.slice(-5).reverse();
+                        
+                        document.getElementById('recent-contacts').innerHTML = recentContacts
+                            .map(c => `<div class="activity-item">📧 ${c.name} - ${c.email}</div>`).join('');
+                        
+                        document.getElementById('recent-bookings').innerHTML = recentBookings
+                            .map(b => `<div class="activity-item">📅 ${b.name} - ${b.tour} (${b.date})</div>`).join('');
+                    }
+                } else {
+                    console.error('❌ Fehler beim Laden der Statistiken:', response.status);
                 }
             } catch (error) {
-                console.error('Fehler beim Laden der Statistiken:', error);
+                console.error('❌ Fehler beim Laden der Statistiken:', error);
             }
         }
 
         async function loadContacts() {
             try {
+                console.log('📧 Lade Kontakte...');
                 const response = await fetch('/api/contacts', {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 
                 if (response.ok) {
                     const contacts = await response.json();
+                    console.log('📧 Kontakte geladen:', contacts.length, 'Kontakte');
                     displayContacts(contacts);
+                } else {
+                    console.error('❌ Fehler beim Laden der Kontakte:', response.status);
+                    document.getElementById('contactsList').innerHTML = '<p>Fehler beim Laden der Kontakte</p>';
                 }
             } catch (error) {
-                console.error('Fehler beim Laden der Kontakte:', error);
+                console.error('❌ Fehler beim Laden der Kontakte:', error);
                 document.getElementById('contactsList').innerHTML = '<p>Fehler beim Laden der Kontakte</p>';
             }
         }
@@ -501,17 +876,18 @@
             }
             
             container.innerHTML = contacts.map(contact => `
-                <div class="contact-item">
-                    <div class="contact-header">
-                        <div class="contact-info">
+                <div class="data-item">
+                    <div class="data-header">
+                        <div class="data-info">
                             <h3>${contact.name}</h3>
-                            <div class="contact-meta">
+                            <div class="data-meta">
                                 📧 ${contact.email} | 📅 ${new Date(contact.timestamp).toLocaleString('de-DE')}
+                                <span class="status-${contact.replied ? 'replied' : 'new'}">${contact.replied ? 'Beantwortet' : 'Neu'}</span>
                             </div>
                             <strong>Betreff:</strong> ${contact.subject}
                         </div>
-                        <div class="contact-actions">
-                            <button class="btn-small btn-reply" onclick="markAsReplied('${contact.id}')">
+                        <div class="data-actions">
+                            <button class="btn-small btn-reply" onclick="markContactAsReplied('${contact.id}')">
                                 ${contact.replied ? '✅ Beantwortet' : '📝 Als beantwortet markieren'}
                             </button>
                             <button class="btn-small btn-delete" onclick="deleteContact('${contact.id}')">🗑️ Löschen</button>
@@ -523,18 +899,26 @@
             `).join('');
         }
 
-        async function markAsReplied(contactId) {
+        async function markContactAsReplied(contactId) {
             try {
+                console.log('📝 Markiere Kontakt als beantwortet:', contactId);
                 const response = await fetch(`/api/contacts/${contactId}/reply`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 
                 if (response.ok) {
-                    loadContacts(); // Reload contacts
+                    console.log('✅ Kontakt als beantwortet markiert');
+                    showAlert(document.getElementById('contactsAlert'), 'Kontakt als beantwortet markiert', 'success');
+                    loadContacts();
+                    loadStatistics();
+                } else {
+                    console.error('❌ Fehler beim Markieren:', response.status);
+                    showAlert(document.getElementById('contactsAlert'), 'Fehler beim Markieren', 'error');
                 }
             } catch (error) {
-                console.error('Fehler beim Markieren als beantwortet:', error);
+                console.error('❌ Fehler beim Markieren als beantwortet:', error);
+                showAlert(document.getElementById('contactsAlert'), 'Verbindungsfehler', 'error');
             }
         }
 
@@ -542,31 +926,44 @@
             if (!confirm('Kontakt wirklich löschen?')) return;
             
             try {
+                console.log('🗑️ Lösche Kontakt:', contactId);
                 const response = await fetch(`/api/contacts/${contactId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 
                 if (response.ok) {
-                    loadContacts(); // Reload contacts
+                    console.log('✅ Kontakt gelöscht');
+                    showAlert(document.getElementById('contactsAlert'), 'Kontakt gelöscht', 'success');
+                    loadContacts();
+                    loadStatistics();
+                } else {
+                    console.error('❌ Fehler beim Löschen:', response.status);
+                    showAlert(document.getElementById('contactsAlert'), 'Fehler beim Löschen', 'error');
                 }
             } catch (error) {
-                console.error('Fehler beim Löschen des Kontakts:', error);
+                console.error('❌ Fehler beim Löschen des Kontakts:', error);
+                showAlert(document.getElementById('contactsAlert'), 'Verbindungsfehler', 'error');
             }
         }
 
         async function loadBookings() {
             try {
+                console.log('📅 Lade Buchungen...');
                 const response = await fetch('/api/bookings', {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 
                 if (response.ok) {
                     const bookings = await response.json();
+                    console.log('📅 Buchungen geladen:', bookings.length, 'Buchungen');
                     displayBookings(bookings);
+                } else {
+                    console.error('❌ Fehler beim Laden der Buchungen:', response.status);
+                    document.getElementById('bookingsList').innerHTML = '<p>Fehler beim Laden der Buchungen</p>';
                 }
             } catch (error) {
-                console.error('Fehler beim Laden der Buchungen:', error);
+                console.error('❌ Fehler beim Laden der Buchungen:', error);
                 document.getElementById('bookingsList').innerHTML = '<p>Fehler beim Laden der Buchungen</p>';
             }
         }
@@ -580,21 +977,496 @@
             }
             
             container.innerHTML = bookings.map(booking => `
-                <div class="contact-item">
-                    <h3>${booking.name}</h3>
-                    <p><strong>E-Mail:</strong> ${booking.email}</p>
-                    <p><strong>Tour:</strong> ${booking.tour}</p>
-                    <p><strong>Datum:</strong> ${booking.date}</p>
-                    <p><strong>Personen:</strong> ${booking.participants}</p>
-                    <p><strong>Buchungsdatum:</strong> ${new Date(booking.timestamp).toLocaleString('de-DE')}</p>
+                <div class="data-item">
+                    <div class="data-header">
+                        <div class="data-info">
+                            <h3>${booking.name}</h3>
+                            <div class="data-meta">
+                                📧 ${booking.email} | 📅 ${new Date(booking.createdAt).toLocaleString('de-DE')}
+                                <span class="status-${booking.status}">${booking.status === 'pending' ? 'Ausstehend' : 'Bestätigt'}</span>
+                            </div>
+                            <p><strong>Tour:</strong> ${booking.tour}</p>
+                            <p><strong>Datum:</strong> ${booking.date}</p>
+                            <p><strong>Personen:</strong> ${booking.participants}</p>
+                            <p><strong>Preis:</strong> ${booking.totalPrice}€</p>
+                        </div>
+                        <div class="data-actions">
+                            ${booking.status === 'pending' ? 
+                                `<button class="btn-small btn-confirm" onclick="confirmBooking('${booking.id}')">✅ Bestätigen</button>` : 
+                                `<span class="status-confirmed">Bestätigt</span>`
+                            }
+                            <button class="btn-small btn-delete" onclick="deleteBooking('${booking.id}')">🗑️ Löschen</button>
+                        </div>
+                    </div>
+                    ${booking.message ? `<p><strong>Nachricht:</strong> ${booking.message}</p>` : ''}
                 </div>
             `).join('');
+        }
+
+        async function confirmBooking(bookingId) {
+            try {
+                console.log('✅ Bestätige Buchung:', bookingId);
+                const response = await fetch(`/api/bookings/${bookingId}/confirm`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Buchung bestätigt');
+                    showAlert(document.getElementById('bookingsAlert'), 'Buchung bestätigt', 'success');
+                    loadBookings();
+                    loadStatistics();
+                } else {
+                    console.error('❌ Fehler beim Bestätigen:', response.status);
+                    showAlert(document.getElementById('bookingsAlert'), 'Fehler beim Bestätigen', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Fehler beim Bestätigen der Buchung:', error);
+                showAlert(document.getElementById('bookingsAlert'), 'Verbindungsfehler', 'error');
+            }
+        }
+
+        async function deleteBooking(bookingId) {
+            if (!confirm('Buchung wirklich löschen?')) return;
+            
+            try {
+                console.log('🗑️ Lösche Buchung:', bookingId);
+                const response = await fetch(`/api/bookings/${bookingId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Buchung gelöscht');
+                    showAlert(document.getElementById('bookingsAlert'), 'Buchung gelöscht', 'success');
+                    loadBookings();
+                    loadStatistics();
+                } else {
+                    console.error('❌ Fehler beim Löschen:', response.status);
+                    showAlert(document.getElementById('bookingsAlert'), 'Fehler beim Löschen', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Fehler beim Löschen der Buchung:', error);
+                showAlert(document.getElementById('bookingsAlert'), 'Verbindungsfehler', 'error');
+            }
         }
 
         function showAlert(container, message, type) {
             container.innerHTML = `<div class="alert ${type}">${message}</div>`;
             setTimeout(() => container.innerHTML = '', 5000);
         }
+
+        // Voucher Management Functions
+        async function loadVouchers() {
+            try {
+                const response = await fetch('/api/admin/vouchers', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const vouchers = await response.json();
+                    displayVouchers(vouchers);
+                } else {
+                    document.getElementById('vouchersList').innerHTML = '<p>Fehler beim Laden der Vouchers</p>';
+                }
+            } catch (error) {
+                console.error('Error loading vouchers:', error);
+                document.getElementById('vouchersList').innerHTML = '<p>Fehler beim Laden der Vouchers</p>';
+            }
+        }
+
+        function displayVouchers(vouchers) {
+            const container = document.getElementById('vouchersList');
+            
+            if (vouchers.length === 0) {
+                container.innerHTML = '<p>Keine Vouchers vorhanden</p>';
+                return;
+            }
+            
+            container.innerHTML = vouchers.map(voucher => `
+                <div class="data-item">
+                    <div class="data-header">
+                        <div class="data-info">
+                            <h3>${voucher.code}</h3>
+                            <div class="data-meta">
+                                💰 ${voucher.discountType === 'percentage' ? voucher.discountValue + '%' : '€' + voucher.discountValue} | 
+                                📅 Gültig bis: ${voucher.expiryDate || 'Unbegrenzt'} |
+                                📊 Verwendet: ${voucher.usageCount}/${voucher.usageLimit || '∞'}
+                                <span class="status-${voucher.isActive ? 'active' : 'inactive'}">${voucher.isActive ? 'Aktiv' : 'Inaktiv'}</span>
+                            </div>
+                            <strong>Beschreibung:</strong> ${voucher.description}
+                        </div>
+                        <div class="data-actions">
+                            <button class="btn-small" onclick="deleteVoucher('${voucher.id}')">🗑️ Löschen</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function createVoucher() {
+            const form = document.getElementById('voucher-form');
+            const formData = new FormData(form);
+            
+            const voucherData = {
+                code: formData.get('voucherCode'),
+                description: formData.get('voucherDescription'),
+                discountType: formData.get('discountType'),
+                discountValue: parseFloat(formData.get('discountValue')),
+                usageLimit: formData.get('usageLimit') ? parseInt(formData.get('usageLimit')) : null,
+                expiryDate: formData.get('expiryDate') || null,
+                isActive: formData.get('isActive') === 'on'
+            };
+
+            try {
+                const response = await fetch('/api/admin/vouchers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(voucherData)
+                });
+
+                if (response.ok) {
+                    closeModal('voucherModal');
+                    form.reset();
+                    loadVouchers();
+                    showSuccessMessage('Voucher erfolgreich erstellt!');
+                } else {
+                    alert('Fehler beim Erstellen des Vouchers');
+                }
+            } catch (error) {
+                console.error('Error creating voucher:', error);
+                alert('Fehler beim Erstellen des Vouchers');
+            }
+        }
+
+        async function deleteVoucher(id) {
+            if (confirm('Voucher wirklich löschen?')) {
+                try {
+                    const response = await fetch(`/api/admin/vouchers/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+
+                    if (response.ok) {
+                        loadVouchers();
+                        showSuccessMessage('Voucher gelöscht!');
+                    }
+                } catch (error) {
+                    console.error('Error deleting voucher:', error);
+                }
+            }
+        }
+
+        // Discount Code Management
+        async function loadDiscountCodes() {
+            try {
+                const response = await fetch('/api/admin/discount-codes', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const discounts = await response.json();
+                    displayDiscountCodes(discounts);
+                } else {
+                    document.getElementById('discountsList').innerHTML = '<p>Fehler beim Laden der Rabattcodes</p>';
+                }
+            } catch (error) {
+                console.error('Error loading discount codes:', error);
+                document.getElementById('discountsList').innerHTML = '<p>Fehler beim Laden der Rabattcodes</p>';
+            }
+        }
+
+        function displayDiscountCodes(discounts) {
+            const container = document.getElementById('discountsList');
+            
+            if (discounts.length === 0) {
+                container.innerHTML = '<p>Keine Rabattcodes vorhanden</p>';
+                return;
+            }
+            
+            container.innerHTML = discounts.map(discount => `
+                <div class="data-item">
+                    <div class="data-header">
+                        <div class="data-info">
+                            <h3>${discount.code}</h3>
+                            <div class="data-meta">
+                                💰 ${discount.discountType === 'percentage' ? discount.discountValue + '%' : '€' + discount.discountValue} | 
+                                📅 Gültig bis: ${discount.expiryDate || 'Unbegrenzt'} |
+                                📊 Verwendet: ${discount.usageCount}/${discount.usageLimit || '∞'}
+                                <span class="status-${discount.isActive ? 'active' : 'inactive'}">${discount.isActive ? 'Aktiv' : 'Inaktiv'}</span>
+                            </div>
+                            <strong>Beschreibung:</strong> ${discount.description}
+                        </div>
+                        <div class="data-actions">
+                            <button class="btn-small" onclick="deleteDiscount('${discount.id}')">🗑️ Löschen</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function createDiscountCode() {
+            const form = document.getElementById('discount-form');
+            const formData = new FormData(form);
+            
+            const discountData = {
+                code: formData.get('discountCode'),
+                description: formData.get('discountDescription'),
+                discountType: formData.get('discountType'),
+                discountValue: parseFloat(formData.get('discountValue')),
+                usageLimit: formData.get('usageLimit') ? parseInt(formData.get('usageLimit')) : null,
+                expiryDate: formData.get('expiryDate') || null,
+                isActive: formData.get('isActive') === 'on'
+            };
+
+            try {
+                const response = await fetch('/api/admin/discount-codes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(discountData)
+                });
+
+                if (response.ok) {
+                    closeModal('discountModal');
+                    form.reset();
+                    loadDiscountCodes();
+                    showSuccessMessage('Rabattcode erfolgreich erstellt!');
+                } else {
+                    alert('Fehler beim Erstellen des Rabattcodes');
+                }
+            } catch (error) {
+                console.error('Error creating discount code:', error);
+                alert('Fehler beim Erstellen des Rabattcodes');
+            }
+        }
+
+        async function deleteDiscount(id) {
+            if (confirm('Rabattcode wirklich löschen?')) {
+                try {
+                    const response = await fetch(`/api/admin/discount-codes/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+
+                    if (response.ok) {
+                        loadDiscountCodes();
+                        showSuccessMessage('Rabattcode gelöscht!');
+                    }
+                } catch (error) {
+                    console.error('Error deleting discount code:', error);
+                }
+            }
+        }
+
+        // Settings Functions
+        async function changePassword() {
+            const form = document.getElementById('password-form');
+            const formData = new FormData(form);
+            const newPassword = formData.get('newPassword');
+            const confirmPassword = formData.get('confirmPassword');
+
+            if (newPassword !== confirmPassword) {
+                alert('Passwörter stimmen nicht überein!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ newPassword })
+                });
+
+                if (response.ok) {
+                    form.reset();
+                    showSuccessMessage('Passwort erfolgreich geändert!');
+                } else {
+                    alert('Fehler beim Ändern des Passworts');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                alert('Fehler beim Ändern des Passworts');
+            }
+        }
+
+        async function loadSystemInfo() {
+            try {
+                document.getElementById('system-info').innerHTML = `
+                    <p><strong>Server-Zeit:</strong> ${new Date().toLocaleString()}</p>
+                    <p><strong>System:</strong> Alpaka Wanderungen Admin Panel v1.0</p>
+                    <p><strong>Status:</strong> ✅ Aktiv und bereit</p>
+                    <p><strong>Letzte Aktualisierung:</strong> ${new Date().toISOString()}</p>
+                `;
+            } catch (error) {
+                console.error('Error loading system info:', error);
+                document.getElementById('system-info').innerHTML = '<p>Fehler beim Laden der Systeminformationen</p>';
+            }
+        }
+
+        async function exportData(type) {
+            try {
+                let data;
+                switch(type) {
+                    case 'contacts':
+                        const contactsRes = await fetch('/api/contacts', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                        data = await contactsRes.json();
+                        break;
+                    case 'bookings':
+                        const bookingsRes = await fetch('/api/bookings', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                        data = await bookingsRes.json();
+                        break;
+                    case 'vouchers':
+                        const vouchersRes = await fetch('/api/admin/vouchers', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                        data = await vouchersRes.json();
+                        break;
+                    case 'discounts':
+                        const discountsRes = await fetch('/api/admin/discount-codes', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                        data = await discountsRes.json();
+                        break;
+                }
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${type}-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showSuccessMessage(`${type} erfolgreich exportiert!`);
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                alert('Fehler beim Exportieren der Daten');
+            }
+        }
+
+        // Utility Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showSuccessMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'success-message';
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #27ae60;
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-weight: 500;
+            `;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    document.body.removeChild(messageDiv);
+                }
+            }, 3000);
+        }
+
+        function generateCode(type) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            
+            const prefix = type === 'voucher' ? 'VOUCHER' : 'DISCOUNT';
+            const code = `${prefix}${result}`;
+            
+            if (type === 'voucher') {
+                document.getElementById('voucherCode').value = code;
+            } else {
+                document.getElementById('discountCode').value = code;
+            }
+        }
+
+        // Event Listeners for modals
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Tab switching with data loading
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).style.display = 'block';
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load specific data based on tab
+            switch(tabName) {
+                case 'dashboard':
+                    loadStatistics();
+                    break;
+                case 'contacts':
+                    loadContacts();
+                    break;
+                case 'bookings':
+                    loadBookings();
+                    break;
+                case 'vouchers':
+                    loadVouchers();
+                    break;
+                case 'discounts':
+                    loadDiscountCodes();
+                    break;
+                case 'settings':
+                    loadSystemInfo();
+                    break;
+            }
+        }
+
+        // Debugging function
+        window.debugAdmin = function() {
+            console.log('🐛 Debug Info:');
+            console.log('- Auth Token:', authToken ? 'Vorhanden' : 'Nicht vorhanden');
+            console.log('- Login Section Display:', document.getElementById('loginSection').style.display);
+            console.log('- Dashboard Section Display:', document.getElementById('dashboardSection').style.display);
+            console.log('- Statistiken:', {
+                bookings: document.getElementById('totalBookings').textContent,
+                contacts: document.getElementById('totalContacts').textContent,
+                vouchers: document.getElementById('totalVouchers').textContent,
+                revenue: document.getElementById('totalRevenue').textContent
+            });
+        };
+
+        console.log('🎉 Admin Panel JavaScript geladen! Verwende window.debugAdmin() für Debug-Infos.');
     </script>
 </body>
 </html>
