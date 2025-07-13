@@ -735,3 +735,209 @@ html {
         transform: translateY(-20px);
     }
 }
+
+/* Gutschein Section */
+.gutschein-section {
+    background: linear-gradient(135deg, rgba(246, 202, 159, 0.3), rgba(249, 230, 207, 0.5));
+    border-top: 3px solid #33984b;
+    border-bottom: 3px solid #33984b;
+}
+
+.gutschein-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+.gutschein-info h3 {
+    color: #33984b;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.gutschein-benefits {
+    list-style: none;
+    padding: 0;
+}
+
+.gutschein-benefits li {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #33984b;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.gutschein-benefits li:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateX(5px);
+}
+
+.gutschein-form-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(51, 152, 75, 0.1);
+    border: 2px solid rgba(51, 152, 75, 0.2);
+}
+
+.gutschein-form h3 {
+    color: #33984b;
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.form-section {
+    background: rgba(246, 202, 159, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin: 1.5rem 0;
+    border: 1px solid rgba(51, 152, 75, 0.1);
+}
+
+.form-section h4 {
+    color: #33984b;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #134c4c;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid rgba(51, 152, 75, 0.2);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #33984b;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(51, 152, 75, 0.1);
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.radio-label:hover {
+    background: rgba(51, 152, 75, 0.05);
+}
+
+.radio-label input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #33984b;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom {
+    background: #33984b;
+    border-color: #33984b;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.btn-large {
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.form-note {
+    margin-top: 1rem;
+    text-align: center;
+    color: #666;
+}
+
+.form-note small {
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* Responsive Design für Gutschein-Form */
+@media (max-width: 992px) {
+    .gutschein-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .gutschein-form-container {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .gutschein-form-container {
+        padding: 1.5rem;
+    }
+    
+    .radio-group {
+        gap: 0.5rem;
+    }
+}

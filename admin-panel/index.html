@@ -496,12 +496,12 @@
             </div>
 
             <div class="tabs">
-                <div class="tab active" onclick="switchTab('statistics')">📊 Statistiken</div>
-                <div class="tab" onclick="switchTab('contacts')">📧 Kontakte</div>
-                <div class="tab" onclick="switchTab('bookings')">📅 Buchungen</div>
-                <div class="tab" onclick="switchTab('vouchers')">🎟️ Gutscheine</div>
-                <div class="tab" onclick="switchTab('discounts')">💰 Rabattcodes</div>
-                <div class="tab" onclick="switchTab('settings')">⚙️ Einstellungen</div>
+                <div class="tab active" onclick="showTab('statistics')">📊 Statistiken</div>
+                <div class="tab" onclick="showTab('contacts')">📧 Kontakte</div>
+                <div class="tab" onclick="showTab('bookings')">📅 Buchungen</div>
+                <div class="tab" onclick="showTab('vouchers')">🎟️ Gutscheine</div>
+                <div class="tab" onclick="showTab('discounts')">💰 Rabattcodes</div>
+                <div class="tab" onclick="showTab('settings')">⚙️ Einstellungen</div>
             </div>
 
             <!-- Statistics Tab -->
@@ -816,9 +816,10 @@
                     console.log('📊 Statistiken geladen:', stats);
                     
                     // Update statistics cards mit korrekten IDs
-                    document.getElementById('total-contacts').textContent = stats.totalContacts || 0;
-                    document.getElementById('total-bookings').textContent = stats.totalBookings || 0;
-                    document.getElementById('active-vouchers').textContent = stats.totalVouchers || 0;
+                    document.getElementById('totalContacts').textContent = stats.totalContacts || 0;
+                    document.getElementById('totalBookings').textContent = stats.totalBookings || 0;
+                    document.getElementById('totalVouchers').textContent = stats.totalVouchers || 0;
+                    document.getElementById('totalRevenue').textContent = stats.totalRevenue || 0;
                     // Recent activity mit korrekten API-Aufrufen
                     const [contactsRes, bookingsRes] = await Promise.all([
                         fetch('/api/contacts', { headers: { 'Authorization': `Bearer ${authToken}` } }),
@@ -1412,8 +1413,8 @@
         }
 
         // Tab switching with data loading
-        function showTab(tabName) {
-            // Hide all tabs
+        function showTab(tabName, tabElement) {
+            // Hide all tab contents
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.style.display = 'none';
             });
@@ -1423,15 +1424,22 @@
                 tab.classList.remove('active');
             });
             
-            // Show selected tab
-            document.getElementById(tabName).style.display = 'block';
+            // Show selected tab content
+            const tabContent = document.getElementById(tabName + 'Tab');
+            if (tabContent) {
+                tabContent.style.display = 'block';
+            }
             
-            // Add active class to clicked tab
-            event.target.classList.add('active');
+            // Add active class to clicked tab (find by onclick content)
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.onclick && tab.onclick.toString().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
             
             // Load specific data based on tab
             switch(tabName) {
-                case 'dashboard':
+                case 'statistics':
                     loadStatistics();
                     break;
                 case 'contacts':
