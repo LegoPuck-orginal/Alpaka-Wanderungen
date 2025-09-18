@@ -13,5 +13,10 @@ export async function GET() {
       imageUrl: true,
     },
   });
-  return NextResponse.json(tours);
+  return new NextResponse(JSON.stringify(tours), {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+    },
+  });
 }

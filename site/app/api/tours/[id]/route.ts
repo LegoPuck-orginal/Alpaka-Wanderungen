@@ -12,5 +12,10 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     },
   });
   if (!tour) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(tour);
+  return new NextResponse(JSON.stringify(tour), {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+    },
+  });
 }

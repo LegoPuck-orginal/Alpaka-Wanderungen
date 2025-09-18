@@ -13,7 +13,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     const res = await signIn("credentials", { email, password, redirect: false });
-    if (res?.error) {
+    if (!res || res.error) {
       setError("Login fehlgeschlagen");
     } else {
       router.push("/");

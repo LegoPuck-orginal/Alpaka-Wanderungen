@@ -9,6 +9,8 @@ type TourCard = {
   imageUrl: string | null;
 };
 
+export const revalidate = 60;
+
 export default async function ToursPage() {
   const tours: TourCard[] = await prisma.tour.findMany({
     orderBy: { createdAt: "desc" },

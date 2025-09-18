@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import SignOutButton from "@/components/SignOutButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +26,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions as any);
+  let session: any = null;
+  try {
+    session = await getServerSession(authOptions as any);
+  } catch (e) {
+    console.error("NextAuth getServerSession error:", e);
+    session = null;
+  }
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -34,11 +41,11 @@ export default async function RootLayout({
             <Link href="/" className="text-xl font-semibold text-[var(--accent-dark)]">Alpaka Wanderungen</Link>
             <nav className="flex gap-4 text-sm items-center">
               <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/tours">Touren</Link>
-              <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/admin">Admin</Link>
+              {(session as any)?.user?.role === 'admin' && (
+                <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/admin">Admin</Link>
+              )}
               {(session as any)?.user ? (
-                <form action="/api/auth/signout" method="post">
-                  <button className="px-3 py-1 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Logout</button>
-                </form>
+                <SignOutButton />
               ) : (
                 <Link className="px-3 py-1 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10" href="/login">Login</Link>
               )}

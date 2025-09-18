@@ -7,6 +7,8 @@ function formatEuro(cents: number) {
 
 type SlotLite = { id: string; start: Date; end: Date; capacity: number };
 
+export const revalidate = 30;
+
 export default async function TourDetail({ params }: { params: { id: string } }) {
   const tour = await prisma.tour.findUnique({
     where: { id: params.id },
