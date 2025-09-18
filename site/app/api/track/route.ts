@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     if (!path || !sessionId) return NextResponse.json({ error: 'Bad Request' }, { status: 400 });
     const referrer = req.headers.get('referer') ?? undefined;
     const userAgent = req.headers.get('user-agent') ?? undefined;
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.ip || undefined;
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined;
     await prisma.pageView.create({ data: { path, sessionId, referrer, userAgent, ip } });
     return NextResponse.json({ ok: true });
   } catch (e) {

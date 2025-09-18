@@ -58,6 +58,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <div className="font-semibold">Benutzer</div>
           <div className="text-sm opacity-80">Admins & Rollen verwalten</div>
         </a>
+        <a href="/admin/stats" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+          <div className="font-semibold">Statistiken</div>
+          <div className="text-sm opacity-80">Seitenaufrufe & Trends</div>
+        </a>
       </div>
 
       <form action={createTour} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 grid sm:grid-cols-2 gap-4 mb-8">

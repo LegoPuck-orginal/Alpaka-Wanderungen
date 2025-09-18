@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import SignOutButton from "../components/SignOutButton";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import Tracker from "../components/Tracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,7 +52,8 @@ export default async function RootLayout({
           </div>
         </header>
 
-        <main className="min-h-[calc(100vh-120px)]">{children}</main>
+  <main className="min-h-[calc(100vh-120px)]">{children}</main>
+  <Tracker />
 
         <footer className="w-full border-t border-[color:var(--accent-dark)]/10">
           <div className="mx-auto max-w-5xl px-4 py-6 text-sm text-[color:var(--foreground)]/80 flex items-center justify-between">
