@@ -6,6 +6,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Einfache Key-Value-Content-Tabelle für CMS-Texte
+model Content {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
