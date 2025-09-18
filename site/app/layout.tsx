@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import SignOutButton from "../components/SignOutButton";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,7 @@ export default async function RootLayout({
               {(session as any)?.user?.role === 'admin' && (
                 <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/admin">Admin</Link>
               )}
+              <ThemeSwitcher />
               {(session as any)?.user ? (
                 <SignOutButton />
               ) : (
