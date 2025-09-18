@@ -58,7 +58,10 @@ export default async function RootLayout({
         <footer className="w-full border-t border-[color:var(--accent-dark)]/10">
           <div className="mx-auto max-w-5xl px-4 py-6 text-sm text-[color:var(--foreground)]/80 flex items-center justify-between">
             <span>© {new Date().getFullYear()} Alpaka Wanderungen</span>
-            <span className="opacity-80">Entspannt unterwegs im Grünen</span>
+            <div className="flex items-center gap-4">
+              <a className="opacity-80 hover:underline" href="/datenschutz">Datenschutz</a>
+              <span className="opacity-80">Entspannt unterwegs im Grünen</span>
+            </div>
           </div>
         </footer>
       </body>

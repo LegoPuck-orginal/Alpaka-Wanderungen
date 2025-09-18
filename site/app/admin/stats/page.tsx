@@ -4,13 +4,20 @@ function formatDate(d: Date) {
   return d.toISOString().slice(0,10);
 }
 
+type TopPath = { path: string; _count: { _all: number } };
+
 export default async function AdminStatsPage() {
   // Gesamtaufrufe
   const total = await prisma.pageView.count();
   // Einzigartige Sessions
   const uniqueSessions = (await prisma.pageView.findMany({ distinct: ['sessionId'], select: { sessionId: true } })).length;
   // Top-Pfade
-  const top = await prisma.pageView.groupBy({ by: ['path'], _count: { _all: true }, orderBy: { _count: { _all: 'desc' } }, take: 10 });
+  const top: { path: string; _count: { path: number } }[] = await prisma.pageView.groupBy({
+    by: ['path'],
+    _count: { path: true },
+    orderBy: { _count: { path: 'desc' } },
+    take: 10,
+  });
   // Letzte 7 Tage
   const since = new Date(Date.now() - 7*24*60*60*1000);
   const last = await prisma.pageView.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } });
@@ -41,7 +48,7 @@ export default async function AdminStatsPage() {
       <h2 className="text-xl font-semibold mb-2">Top Seiten</h2>
       <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4">
         <ul className="grid gap-1">
-          {top.map(t => (<li key={t.path} className="flex justify-between"><span>{t.path}</span><span className="font-semibold">{t._count._all}</span></li>))}
+          {top.map(t => (<li key={t.path} className="flex justify-between"><span>{t.path}</span><span className="font-semibold">{t._count.path}</span></li>))}
         </ul>
       </div>
     </div>
