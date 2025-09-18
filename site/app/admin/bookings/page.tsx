@@ -32,7 +32,8 @@ async function updatePaymentStatus(formData: FormData) {
   }
 }
 
-export default async function BookingsAdminPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
+export default async function BookingsAdminPage({ searchParams }: { searchParams: Promise<{ error?: string; success?: string }> }) {
+  const sp = await searchParams;
   const bookings = await prisma.booking.findMany({
     orderBy: { createdAt: 'desc' },
     include: { slot: { include: { tour: true } }, user: true, payment: true },
@@ -44,11 +45,11 @@ export default async function BookingsAdminPage({ searchParams }: { searchParams
       <nav className="mb-6 text-sm">
         <a className="underline" href="/admin">← Zurück zum Admin</a>
       </nav>
-      {searchParams?.error && (
-        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{searchParams.error}</div>
+      {sp?.error && (
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{sp.error}</div>
       )}
-      {searchParams?.success && (
-        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{searchParams.success}</div>
+      {sp?.success && (
+        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{sp.success}</div>
       )}
 
       <div className="grid gap-3">

@@ -29,18 +29,19 @@ async function deleteSlot(formData: FormData) {
   }
 }
 
-export default async function SlotsAdminPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
+export default async function SlotsAdminPage({ searchParams }: { searchParams: Promise<{ error?: string; success?: string }> }) {
+  const sp = await searchParams;
   const tours = await prisma.tour.findMany({ orderBy: { title: 'asc' } });
   const slots = await prisma.eventSlot.findMany({ orderBy: { start: 'asc' }, include: { tour: true } });
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-3xl font-bold mb-4 text-[var(--accent-dark)]">Slots verwalten</h1>
       <p className="opacity-80 mb-6">Termine anlegen und löschen</p>
-      {searchParams?.error && (
-        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{searchParams.error}</div>
+      {sp?.error && (
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{sp.error}</div>
       )}
-      {searchParams?.success && (
-        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{searchParams.success}</div>
+      {sp?.success && (
+        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{sp.success}</div>
       )}
       <nav className="mb-6 text-sm">
         <a className="underline" href="/admin">← Zurück zum Admin</a>
