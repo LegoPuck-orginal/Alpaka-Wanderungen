@@ -10,6 +10,7 @@ async function main() {
   await prisma.eventSlot.deleteMany();
   await prisma.tour.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.content?.deleteMany?.();
 
   const passwordHash = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.create({
@@ -66,6 +67,15 @@ async function main() {
   ]);
 
   console.log('Seed completed. Admin:', admin.email);
+
+  // Content-Defaults
+  try {
+    await prisma.$transaction([
+      prisma.content.upsert({ where: { key: 'hero.title' }, update: { value: 'Alpaka Wanderungen' }, create: { key: 'hero.title', value: 'Alpaka Wanderungen' } }),
+      prisma.content.upsert({ where: { key: 'hero.subtitle' }, update: { value: 'Erlebe unvergessliche Touren mit unseren Alpakas in der Natur. Jetzt Termin reservieren und entspannen!' }, create: { key: 'hero.subtitle', value: 'Erlebe unvergessliche Touren mit unseren Alpakas in der Natur. Jetzt Termin reservieren und entspannen!' } }),
+      prisma.content.upsert({ where: { key: 'hero.cta' }, update: { value: 'Jetzt Termin buchen' }, create: { key: 'hero.cta', value: 'Jetzt Termin buchen' } }),
+    ]);
+  } catch {}
 }
 
 main()

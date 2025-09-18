@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { revalidatePath } from "next/cache";
 
 function formatEuro(cents: number) {
   return (cents / 100).toFixed(2) + " €";
@@ -56,8 +59,16 @@ export default async function TourDetail({ params }: { params: { id: string } })
                 'use server';
                 const persons = Number(formData.get('persons')) || 1;
                 const slotId = String(formData.get('slotId'));
-                // TODO: Session-User
-                await prisma.booking.create({ data: { userId: (await ensureGuestUser()).id, slotId, persons, status: 'pending' } });
+                let userId: string | null = null;
+                try {
+                  const session = await getServerSession(authOptions as any);
+                  userId = (session as any)?.user?.id ?? null;
+                } catch {}
+                if (!userId) {
+                  userId = (await ensureGuestUser()).id;
+                }
+                await prisma.booking.create({ data: { userId, slotId, persons, status: 'pending' } });
+                revalidatePath(`/tours/${params.id}`);
               }} className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] transition-colors">Reservieren</button>
             </div>
           </form>

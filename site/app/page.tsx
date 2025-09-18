@@ -1,15 +1,21 @@
 import Image from "next/image";
+import { getManyContent } from "@/lib/content";
 
-export default function Home() {
+export default async function Home() {
+  const c = await getManyContent([
+    { key: 'hero.title', fallback: 'Alpaka Wanderungen' },
+    { key: 'hero.subtitle', fallback: 'Erlebe unvergessliche Touren mit unseren Alpakas in der Natur. Jetzt Termin reservieren und entspannen!' },
+    { key: 'hero.cta', fallback: 'Jetzt Termin buchen' },
+  ]);
   return (
     <div className="font-sans bg-[var(--background)] text-[var(--foreground)]">
       <section className="mx-auto max-w-5xl px-6 py-16 text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold mb-3 text-[var(--accent-dark)]">Alpaka Wanderungen</h1>
-        <p className="text-lg sm:text-xl mb-6 text-[var(--accent)]">Erlebe unvergessliche Touren mit unseren Alpakas in der Natur. Jetzt Termin reservieren und entspannen!</p>
+  <h1 className="text-4xl sm:text-5xl font-bold mb-3 text-[var(--accent-dark)]">{c['hero.title']}</h1>
+  <p className="text-lg sm:text-xl mb-6 text-[var(--accent)]">{c['hero.subtitle']}</p>
         <div className="flex items-center justify-center">
           <Image src="/file.svg" alt="Alpaka Logo" width={120} height={120} priority />
         </div>
-  <a href="#buchung" className="inline-block mt-8 px-6 py-3 rounded-lg bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow hover:bg-[var(--accent-dark)] transition-colors">Jetzt Termin buchen</a>
+  <a href="#buchung" className="inline-block mt-8 px-6 py-3 rounded-lg bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow hover:bg-[var(--accent-dark)] transition-colors">{c['hero.cta']}</a>
       </section>
 
       <section className="mx-auto max-w-5xl px-6 py-12 grid sm:grid-cols-3 gap-6">

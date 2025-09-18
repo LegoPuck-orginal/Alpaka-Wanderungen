@@ -17,7 +17,7 @@ async function deleteContent(formData: FormData) {
 }
 
 export default async function ContentAdminPage() {
-  const items: { key: string; value: string }[] = await prisma.content.findMany({ orderBy: { key: 'asc' } });
+  const items: { key: string; value: string }[] = await (prisma as any).content.findMany({ orderBy: { key: 'asc' } });
   const defaults: { key: string; label: string; hint?: string }[] = [
     { key: 'hero.title', label: 'Startseite: Hero Titel' },
     { key: 'hero.subtitle', label: 'Startseite: Hero Untertitel' },
