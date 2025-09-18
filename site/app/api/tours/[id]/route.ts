@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
   const tour = await prisma.tour.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       slots: {
         orderBy: { start: "asc" },
