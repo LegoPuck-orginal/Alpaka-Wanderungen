@@ -1,4 +1,5 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions, Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -22,7 +23,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Passwort", type: "password" },
       },
-  async authorize(credentials): Promise<any> {
+  async authorize(credentials): Promise<{ id: string; name: string | null; email: string; role: "admin" | "user" } | null> {
         try {
           const parsed = credentialsSchema.safeParse(credentials);
           if (!parsed.success) return null;
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
           if (!user) return null;
           const ok = await bcrypt.compare(password, user.passwordHash);
           if (!ok) return null;
-          return user as any;
+          return { id: user.id, name: user.name, email: user.email, role: user.role as "admin" | "user" };
         } catch (e) {
           console.error('authorize error', e);
           return null;
@@ -41,16 +42,23 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      type AppJWT = JWT & { id?: string; role?: string };
+      const t = token as AppJWT;
       if (user) {
-        (token as any).id = (user as any).id;
-        (token as any).role = (user as any).role;
+        const u = user as Partial<{ id: string; role: string }>;
+        if (u.id) t.id = u.id;
+        if (u.role) t.role = u.role;
       }
-      return token;
+      return t;
     },
     async session({ session, token }) {
-      (session as any).user.id = (token as any).id;
-      (session as any).user.role = (token as any).role;
-      return session;
+      const t = token as Partial<{ id: string; role: string }>;
+      const s = session as Session & { user: { id?: string; role?: string } };
+      if (s.user) {
+        s.user.id = t.id;
+        s.user.role = t.role;
+      }
+      return s;
     },
   },
   pages: { signIn: "/login" },

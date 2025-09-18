@@ -27,7 +27,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let session: unknown = null;
+  let session: Awaited<ReturnType<typeof getServerSession<typeof authOptions>>> | null = null;
   try {
     session = await getServerSession(authOptions);
   } catch (e) {
@@ -42,11 +42,11 @@ export default async function RootLayout({
             <Link href="/" className="text-xl font-semibold text-[var(--accent-dark)]">Alpaka Wanderungen</Link>
             <nav className="flex gap-4 text-sm items-center">
               <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/tours">Touren</Link>
-              {(session as any)?.user?.role === 'admin' && (
+              {session?.user && (session.user as any).role === 'admin' && (
                 <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/admin">Admin</Link>
               )}
               <ThemeSwitcher />
-              {(session as any)?.user ? <SignOutButton /> : null}
+              {session?.user ? <SignOutButton /> : null}
             </nav>
           </div>
         </header>
