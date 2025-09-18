@@ -4,7 +4,7 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/admin')) {
-    const token = await getToken({ req });
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     if (!token || (token as any).role !== 'admin') {
       const url = new URL('/login', req.url);
       return NextResponse.redirect(url);

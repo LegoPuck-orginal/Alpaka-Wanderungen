@@ -14,6 +14,7 @@ export const authOptions = {
   jwt: {
     maxAge: 60 * 60 * 24 * 7,
   },
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     Credentials({
       name: "Credentials",
@@ -22,16 +23,19 @@ export const authOptions = {
         password: { label: "Passwort", type: "password" },
       },
       async authorize(credentials) {
-        const parsed = credentialsSchema.safeParse(credentials);
-        if (!parsed.success) return null;
-        const { email, password } = parsed.data;
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) return null;
-        // Nur für dev: akzeptiere placeholder, sonst bcrypt-Check
-        if (user.passwordHash === "dev-placeholder") return user;
-        const ok = await bcrypt.compare(password, user.passwordHash);
-        if (!ok) return null;
-        return user;
+        try {
+          const parsed = credentialsSchema.safeParse(credentials);
+          if (!parsed.success) return null;
+          const { email, password } = parsed.data;
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (!user) return null;
+          const ok = await bcrypt.compare(password, user.passwordHash);
+          if (!ok) return null;
+          return user as any;
+        } catch (e) {
+          console.error('authorize error', e);
+          return null;
+        }
       },
     }),
   ],
