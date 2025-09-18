@@ -17,7 +17,7 @@ async function deleteContent(formData: FormData) {
 }
 
 export default async function ContentAdminPage() {
-  const items = await prisma.content.findMany({ orderBy: { key: 'asc' } });
+  const items: { key: string; value: string }[] = await prisma.content.findMany({ orderBy: { key: 'asc' } });
   const defaults: { key: string; label: string; hint?: string }[] = [
     { key: 'hero.title', label: 'Startseite: Hero Titel' },
     { key: 'hero.subtitle', label: 'Startseite: Hero Untertitel' },
@@ -32,8 +32,8 @@ export default async function ContentAdminPage() {
       </nav>
 
       <div className="grid gap-6">
-        {[...defaults, ...items.filter(i => !defaults.find(d => d.key === i.key)).map(i => ({ key: i.key, label: i.key }))].map((d) => {
-          const existing = items.find(i => i.key === d.key);
+        {[...defaults, ...items.filter((i: { key: string }) => !defaults.find(d => d.key === i.key)).map((i: { key: string }) => ({ key: i.key, label: i.key }))].map((d) => {
+          const existing = items.find((i: { key: string; value: string }) => i.key === d.key);
           return (
             <form key={d.key} action={upsertContent} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 grid gap-3">
               <div className="text-sm opacity-80">{d.label}</div>
