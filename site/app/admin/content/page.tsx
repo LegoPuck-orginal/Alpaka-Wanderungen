@@ -5,14 +5,14 @@ async function upsertContent(formData: FormData) {
   'use server';
   const key = String(formData.get('key'));
   const value = String(formData.get('value') ?? '');
-  await prisma.content.upsert({ where: { key }, update: { value }, create: { key, value } });
+  await (prisma as any).content.upsert({ where: { key }, update: { value }, create: { key, value } });
   revalidatePath('/admin/content');
 }
 
 async function deleteContent(formData: FormData) {
   'use server';
   const key = String(formData.get('key'));
-  await prisma.content.delete({ where: { key } });
+  await (prisma as any).content.delete({ where: { key } });
   revalidatePath('/admin/content');
 }
 
@@ -42,10 +42,7 @@ export default async function ContentAdminPage() {
               <div className="flex items-center gap-2">
                 <button className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Speichern</button>
                 {existing && (
-                  <form action={deleteContent}>
-                    <input type="hidden" name="key" value={d.key} />
-                    <button className="px-3 py-2 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10" formAction={deleteContent}>Löschen</button>
-                  </form>
+                  <button className="px-3 py-2 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10" formAction={deleteContent}>Löschen</button>
                 )}
               </div>
             </form>
