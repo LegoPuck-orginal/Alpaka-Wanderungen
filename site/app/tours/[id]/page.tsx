@@ -16,10 +16,10 @@ type SlotLite = { id: string; start: Date; end: Date; capacity: number };
 
 export const revalidate = 30;
 
-export default async function TourDetail({ params, searchParams }: { params: { id: string }, searchParams: Promise<{ error?: string; success?: string }> }) {
-  const sp = await searchParams;
+export default async function TourDetail({ params, searchParams }: { params: Promise<{ id: string }>, searchParams: Promise<{ error?: string; success?: string }> }) {
+  const [p, sp] = await Promise.all([params, searchParams]);
   const tour = await prisma.tour.findUnique({
-    where: { id: params.id },
+    where: { id: p.id },
     include: {
       slots: { orderBy: { start: "asc" } },
     },
@@ -70,15 +70,15 @@ export default async function TourDetail({ params, searchParams }: { params: { i
               <input id={`persons-${s.id}`} name="persons" type="number" min={1} defaultValue={1} className="w-16 px-2 py-1 rounded border border-[var(--border)] bg-transparent" />
               <button formAction={async (formData: FormData) => {
                 'use server';
-                const parsed = BookingSchema.safeParse(Object.fromEntries(formData as any));
+                const parsed = BookingSchema.safeParse(Object.fromEntries(formData as unknown as Iterable<readonly [PropertyKey, FormDataEntryValue]>) as unknown as Record<string, unknown>);
                 if (!parsed.success) {
-                  redirect(`/tours/${params.id}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Eingaben prüfen')}`);
+                  redirect(`/tours/${p.id}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Eingaben prüfen')}`);
                 }
                 const { persons, slotId, email } = parsed.data as { persons: number; slotId: string; email: string };
                 let userId: string | null = null;
                 try {
-                  const session = await getServerSession(authOptions as any);
-                  userId = (session as any)?.user?.id ?? null;
+                  const session = await getServerSession(authOptions);
+                  userId = (session?.user as unknown as { id?: string })?.id ?? null;
                 } catch {}
                 if (!userId) {
                   userId = (await ensureGuestUser()).id;
@@ -86,7 +86,7 @@ export default async function TourDetail({ params, searchParams }: { params: { i
                 // Kapazität prüfen
                 const slot = await prisma.eventSlot.findUnique({ where: { id: slotId }, include: { tour: true } });
                 if (!slot) {
-                  redirect(`/tours/${params.id}?error=${encodeURIComponent('Termin nicht gefunden')}`);
+                  redirect(`/tours/${p.id}?error=${encodeURIComponent('Termin nicht gefunden')}`);
                 }
                 const booked = await prisma.booking.aggregate({
                   _sum: { persons: true },
@@ -94,7 +94,7 @@ export default async function TourDetail({ params, searchParams }: { params: { i
                 });
                 const used = booked._sum.persons ?? 0;
                 if (used + persons > slot.capacity) {
-                  redirect(`/tours/${params.id}?error=${encodeURIComponent('Leider nicht genug freie Plätze')}`);
+                  redirect(`/tours/${p.id}?error=${encodeURIComponent('Leider nicht genug freie Plätze')}`);
                 }
                 const booking = await prisma.booking.create({ data: { userId, slotId, persons, contactEmail: email, status: 'pending' } });
                 // Payment initialisieren
@@ -103,8 +103,8 @@ export default async function TourDetail({ params, searchParams }: { params: { i
                 // E-Mail Stubs
                 await sendMail({ to: 'admin@example.com', subject: 'Neue Buchung', text: `Buchung ${booking.id} für ${persons} Person(en) · Kontakt: ${email}` });
                 // Erfolg
-                revalidatePath(`/tours/${params.id}`);
-                redirect(`/tours/${params.id}?success=${encodeURIComponent('Reservierung eingegangen')}`);
+                revalidatePath(`/tours/${p.id}`);
+                redirect(`/tours/${p.id}?success=${encodeURIComponent('Reservierung eingegangen')}`);
               }} className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] transition-colors">Reservieren</button>
             </div>
           </form>

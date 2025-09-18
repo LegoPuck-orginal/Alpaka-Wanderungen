@@ -35,7 +35,7 @@ export default function LoginPage() {
           {error && <div className="text-red-600 text-sm">{String(error).replace(/"/g, '&quot;')}</div>}
         <button type="submit" className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Einloggen</button>
       </form>
-      <p className="text-sm opacity-80 mt-4">Dev-Login: admin@example.com mit beliebigem Passwort ("dev-placeholder").</p>
+  <p className="text-sm opacity-80 mt-4">Dev-Login: admin@example.com mit beliebigem Passwort (&quot;dev-placeholder&quot;).</p>
     </div>
   );
 }

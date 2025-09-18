@@ -2,7 +2,7 @@ import { prisma } from "./prisma";
 
 export async function getContent(key: string, fallback = ""): Promise<string> {
   try {
-    const row = await (prisma as any).content.findUnique({ where: { key } });
+    const row = await prisma.content.findUnique({ where: { key } });
     return row?.value ?? fallback;
   } catch {
     return fallback;
