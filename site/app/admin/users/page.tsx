@@ -17,7 +17,7 @@ async function createUser(formData: FormData) {
     await prisma.user.create({ data: { email, name: name || '', role, passwordHash: hash } });
     revalidatePath('/admin/users');
     redirect('/admin/users?success=Benutzer+angelegt');
-  } catch (e) {
+  } catch {
     redirect('/admin/users?error=Benutzer+konnte+nicht+angelegt+werden');
   }
 }
@@ -42,7 +42,7 @@ async function updateRole(formData: FormData) {
     await prisma.user.update({ where: { id }, data: { role } });
     revalidatePath('/admin/users');
     redirect('/admin/users?success=Rolle+aktualisiert');
-  } catch (e) {
+  } catch {
     redirect('/admin/users?error=Rolle+konnte+nicht+aktualisiert+werden');
   }
 }
@@ -60,7 +60,7 @@ async function resetPassword(formData: FormData) {
     await prisma.user.update({ where: { id }, data: { passwordHash: hash } });
     revalidatePath('/admin/users');
     redirect('/admin/users?success=Passwort+gesetzt');
-  } catch (e) {
+  } catch {
     redirect('/admin/users?error=Passwort+konnte+nicht+gesetzt+werden');
   }
 }
@@ -80,7 +80,7 @@ async function deleteUser(formData: FormData) {
     await prisma.user.delete({ where: { id } });
     revalidatePath('/admin/users');
     redirect('/admin/users?success=Benutzer+gelöscht');
-  } catch (e) {
+  } catch {
     redirect('/admin/users?error=Benutzer+konnte+nicht+gelöscht+werden');
   }
 }

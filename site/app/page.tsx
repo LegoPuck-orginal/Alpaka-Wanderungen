@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getManyContent } from "@/lib/content";
+import { prisma } from "@/lib/prisma";
+
+export const revalidate = 60;
 
 export default async function Home() {
   const c = await getManyContent([
@@ -43,19 +46,7 @@ export default async function Home() {
         </ol>
       </section>
 
-      <section className="mx-auto max-w-5xl px-6 py-12">
-        <h2 className="text-2xl font-semibold mb-4 text-[var(--accent-dark)]">Beliebte Touren (Vorschau)</h2>
-        <div className="grid sm:grid-cols-3 gap-6">
-          {[1,2,3].map((i) => (
-            <div key={i} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4">
-              <div className="h-28 rounded-md mb-3 bg-[var(--accent)]/30"></div>
-              <h3 className="font-semibold mb-1">Alpaka-Tour #{i}</h3>
-              <p className="text-sm opacity-80 mb-3">60–90 Minuten | Gemütliches Tempo</p>
-              <Link href="/tours" className="text-sm underline">Details ansehen</Link>
-            </div>
-          ))}
-        </div>
-      </section>
+      <DynamicTours />
 
       <section className="mx-auto max-w-5xl px-6 py-12">
         <h2 className="text-2xl font-semibold mb-4 text-[var(--accent-dark)]">Was Gäste sagen</h2>
@@ -82,5 +73,34 @@ export default async function Home() {
         </div>
       </section>
     </div>
+  );
+}
+
+async function DynamicTours() {
+  const tours = await prisma.tour.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 3,
+    select: { id: true, title: true, description: true, durationMin: true, priceCents: true, imageUrl: true, imageAlt: true },
+  });
+  if (tours.length === 0) return null;
+  return (
+    <section className="mx-auto max-w-5xl px-6 py-12">
+      <h2 className="text-2xl font-semibold mb-4 text-[var(--accent-dark)]">Beliebte Touren</h2>
+      <div className="grid sm:grid-cols-3 gap-6">
+        {tours.map(t => (
+          <div key={t.id} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4">
+            <div className="h-28 rounded-md mb-3 bg-[var(--accent)]/20 flex items-center justify-center text-sm opacity-70 overflow-hidden">
+              {t.imageUrl ? (
+                <Image src={t.imageUrl} alt={t.imageAlt || t.title} width={400} height={160} className="h-full w-full object-cover rounded-md" />
+              ) : 'Alpaka Tour'}
+            </div>
+            <h3 className="font-semibold mb-1">{t.title}</h3>
+            <p className="text-sm opacity-80 mb-3 line-clamp-3">{t.description}</p>
+            <div className="text-sm opacity-80 mb-3">Dauer: {t.durationMin} Min · Preis: {(t.priceCents/100).toFixed(2)} €</div>
+            <Link href={`/tours/${t.id}`} className="text-sm underline">Details ansehen</Link>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

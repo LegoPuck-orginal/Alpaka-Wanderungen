@@ -10,7 +10,7 @@ async function updateBookingStatus(formData: FormData) {
     await prisma.booking.update({ where: { id }, data: { status } });
     revalidatePath('/admin/bookings');
     redirect('/admin/bookings?success=Status+aktualisiert');
-  } catch (e) {
+  } catch {
     redirect('/admin/bookings?error=Update+fehlgeschlagen');
   }
 }
@@ -27,7 +27,7 @@ async function updatePaymentStatus(formData: FormData) {
     });
     revalidatePath('/admin/bookings');
     redirect('/admin/bookings?success=Zahlungsstatus+aktualisiert');
-  } catch (e) {
+  } catch {
     redirect('/admin/bookings?error=Zahlungsstatus+Fehler');
   }
 }

@@ -23,14 +23,31 @@ function computeAllowedOrigins() {
   return ["*", ...origins];
 }
 
+const images = (() => {
+  const patterns: { protocol: 'http' | 'https'; hostname: string; port?: string; pathname: string }[] = [];
+  if (process.env.STORAGE_BACKEND === 's3' && process.env.S3_PUBLIC_BASE) {
+    try {
+      const u = new URL(process.env.S3_PUBLIC_BASE);
+      const proto = (u.protocol.replace(':','') as 'http' | 'https');
+      patterns.push({ protocol: proto, hostname: u.hostname, pathname: '/**' });
+    } catch {}
+  }
+  if (process.env.STORAGE_BACKEND === 'cloudinary') {
+    patterns.push({ protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' });
+  }
+  return patterns.length ? { remotePatterns: patterns as any } : undefined;
+})();
+
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       // In dev hinter Proxys (z. B. Codespaces) kann der Origin vom Forwarded-Host abweichen.
       // Wir erlauben hier alle Origins, um Server Actions nicht zu blockieren.
       allowedOrigins: computeAllowedOrigins(),
+      bodySizeLimit: '16mb',
     },
   },
+  images,
 };
 
 export default nextConfig;

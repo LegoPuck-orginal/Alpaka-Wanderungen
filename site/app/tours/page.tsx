@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 
 type TourCard = {
   id: string;
@@ -7,6 +8,7 @@ type TourCard = {
   durationMin: number;
   priceCents: number;
   imageUrl: string | null;
+  imageAlt?: string | null;
 };
 
 export const revalidate = 60;
@@ -21,6 +23,7 @@ export default async function ToursPage() {
       durationMin: true,
       priceCents: true,
       imageUrl: true,
+      imageAlt: true,
     },
   });
 
@@ -31,7 +34,11 @@ export default async function ToursPage() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {tours.map((t) => (
           <div key={t.id} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4">
-            <div className="h-28 rounded-md mb-3 bg-[var(--accent)]/25"></div>
+            <div className="h-28 rounded-md mb-3 bg-[var(--accent)]/20 overflow-hidden">
+              {t.imageUrl ? (
+                <Image src={t.imageUrl} alt={t.imageAlt || t.title} width={600} height={180} className="h-full w-full object-cover rounded-md" />
+              ) : null}
+            </div>
             <h3 className="font-semibold mb-1">{t.title}</h3>
             <p className="text-sm opacity-80 mb-3 line-clamp-3">{t.description}</p>
             <div className="text-sm opacity-80 mb-3">Dauer: {t.durationMin} Min</div>

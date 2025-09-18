@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import SignOutButton from "../components/SignOutButton";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import Tracker from "../components/Tracker";
+import { Suspense } from "react";
+import ClientNav from "../components/ClientNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,27 +27,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let session: Awaited<ReturnType<typeof getServerSession<typeof authOptions>>> | null = null;
-  try {
-    session = await getServerSession(authOptions);
-  } catch (e) {
-    console.error("NextAuth getServerSession error:", e);
-    session = null;
-  }
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <header className="w-full sticky top-0 backdrop-blur bg-[color:var(--background)]/80 border-b border-[color:var(--accent-dark)]/10 z-10">
           <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
             <Link href="/" className="text-xl font-semibold text-[var(--accent-dark)]">Alpaka Wanderungen</Link>
-            <nav className="flex gap-4 text-sm items-center">
-              <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/tours">Touren</Link>
-              {session?.user && (session.user as unknown as { role?: string })?.role === 'admin' && (
-                <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/admin">Admin</Link>
-              )}
-              <ThemeSwitcher />
-              {session?.user ? <SignOutButton /> : null}
-            </nav>
+            <Suspense fallback={<nav className="flex gap-4 text-sm items-center"><Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/tours">Touren</Link><ThemeSwitcher /></nav>}>
+              <ClientNav />
+            </Suspense>
           </div>
         </header>
 

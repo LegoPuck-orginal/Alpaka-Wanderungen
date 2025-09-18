@@ -39,6 +39,12 @@ export default async function ContentAdminPage() {
               <div className="text-sm opacity-80">{d.label}</div>
               <input type="hidden" name="key" value={d.key} />
               <textarea name="value" defaultValue={existing?.value ?? ''} rows={3} className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
+              {existing && (
+                <div className="text-xs opacity-70 bg-[var(--accent)]/10 border border-[var(--border)] rounded px-2 py-2">
+                  <div className="font-medium mb-1">Aktueller Wert</div>
+                  <pre className="whitespace-pre-wrap">{existing.value}</pre>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <button className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Speichern</button>
                 {existing && (

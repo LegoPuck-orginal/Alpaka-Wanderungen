@@ -4,15 +4,13 @@ function formatDate(d: Date) {
   return d.toISOString().slice(0,10);
 }
 
-type TopPath = { path: string; _count: { _all: number } };
-
 export default async function AdminStatsPage() {
   // Gesamtaufrufe
   const total = await prisma.pageView.count();
   // Einzigartige Sessions
   const uniqueSessions = (await prisma.pageView.findMany({ distinct: ['sessionId'], select: { sessionId: true } })).length;
   // Top-Pfade (in JS sortiert, um strikte Prisma-Typen zu umgehen)
-  const topRaw: TopPath[] = await prisma.pageView.groupBy({ by: ['path'], _count: { _all: true } });
+  const topRaw = await prisma.pageView.groupBy({ by: ['path'], _count: { _all: true } });
   const top = topRaw.sort((a, b) => b._count._all - a._count._all).slice(0, 10);
   // Letzte 7 Tage
   const since = new Date(Date.now() - 7*24*60*60*1000);

@@ -40,9 +40,11 @@ model Tour {
   priceCents  Int
   capacity    Int
   imageUrl    String?
+  imageAlt    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   slots       EventSlot[]
+  images      TourImage[]
 }
 
 model EventSlot {
@@ -99,5 +101,20 @@ model Payment {
   updatedAt   DateTime @updatedAt
 
   booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model TourImage {
+  id        String   @id @default(cuid())
+  tourId    String
+  url       String
+  alt       String?
+  width     Int?
+  height    Int?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  tour      Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId, position])
 }
 

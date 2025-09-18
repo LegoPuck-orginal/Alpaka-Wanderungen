@@ -1,18 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { SlotSchema } from "@/lib/schemas";
 import { redirect } from "next/navigation";
 
 async function createSlot(formData: FormData) {
   'use server';
-  const data = Object.fromEntries(formData);
-  const parsed = SlotSchema.safeParse(data);
-  if (!parsed.success) {
-    redirect(`/admin/slots?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Ungültige Eingaben')}`);
+  const tourId = String(formData.get('tourId'));
+  const dateStr = String(formData.get('date'));
+  const timeStr = String(formData.get('time'));
+  const capacity = Number(formData.get('capacity') ?? 1);
+  if (!tourId || !dateStr || !timeStr) {
+    redirect(`/admin/slots?error=${encodeURIComponent('Bitte Tour, Datum und Uhrzeit angeben')}`);
   }
-  const start = new Date(String(data.start));
-  const end = new Date(String(data.end));
-  await prisma.eventSlot.create({ data: { tourId: String(data.tourId), start, end, capacity: Number(data.capacity) } });
+  const tour = await prisma.tour.findUnique({ where: { id: tourId } });
+  if (!tour) redirect(`/admin/slots?error=${encodeURIComponent('Tour nicht gefunden')}`);
+  // Start aus Datum+Zeit zusammenbauen (lokale Zeit)
+  const start = new Date(`${dateStr}T${timeStr}:00`);
+  const end = new Date(start.getTime() + tour!.durationMin * 60_000);
+  await prisma.eventSlot.create({ data: { tourId, start, end, capacity } });
   revalidatePath('/admin/slots');
   redirect('/admin/slots?success=Slot+angelegt');
 }
@@ -24,7 +28,7 @@ async function deleteSlot(formData: FormData) {
     await prisma.eventSlot.delete({ where: { id } });
     revalidatePath('/admin/slots');
     redirect('/admin/slots?success=Slot+gelöscht');
-  } catch (e) {
+  } catch {
     redirect('/admin/slots?error=Slot+konnte+nicht+gelöscht+werden');
   }
 }
@@ -55,12 +59,14 @@ export default async function SlotsAdminPage({ searchParams }: { searchParams: P
           </select>
         </div>
         <div>
-          <label className="block text-sm mb-1">Start</label>
-          <input name="start" type="datetime-local" required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
+          <label className="block text-sm mb-1">Datum</label>
+          <input name="date" type="date" required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
         </div>
         <div>
-          <label className="block text-sm mb-1">Ende</label>
-          <input name="end" type="datetime-local" required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
+          <label className="block text-sm mb-1">Uhrzeit</label>
+          <select name="time" className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent">
+            {['09:00','11:00','13:00','15:00','17:00'].map(h => <option key={h} value={h}>{h}</option>)}
+          </select>
         </div>
         <div>
           <label className="block text-sm mb-1">Kapazität</label>
