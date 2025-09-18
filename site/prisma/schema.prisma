@@ -1,0 +1,84 @@
+// Prisma schema for Alpaka-Wanderungen
+// Assumptions: SQLite for local dev
+// Roles: 'admin' | 'user'
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  // Note: SQLite unterstützt keine Prisma-Enums. Wir nutzen Strings mit Default.
+  role          String   @default("user")
+  passwordHash  String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  bookings      Booking[]
+}
+
+model Tour {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  durationMin Int
+  priceCents  Int
+  capacity    Int
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  slots       EventSlot[]
+}
+
+model EventSlot {
+  id        String   @id @default(cuid())
+  tourId    String
+  start     DateTime
+  end       DateTime
+  capacity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tour      Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+
+  @@index([tourId, start])
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  userId     String
+  slotId     String
+  persons    Int      @default(1)
+  // pending | confirmed | canceled
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slot       EventSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  payment    Payment?
+
+  @@index([userId])
+  @@index([slotId])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  amountCents Int
+  currency    String   @default("EUR")
+  // init | paid | failed
+  status      String   @default("init")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
