@@ -21,6 +21,23 @@ export const BookingSchema = z.object({
   email: z.string().email('Bitte gültige E-Mail angeben'),
 });
 
+export const UserCreateSchema = z.object({
+  email: z.string().email('Bitte gültige E-Mail'),
+  name: z.string().min(1, 'Name erforderlich').optional().default(''),
+  password: z.string().min(6, 'Mindestens 6 Zeichen'),
+  role: z.enum(['admin','user']).default('admin'),
+});
+
+export const UserRoleSchema = z.object({
+  id: z.string().min(1),
+  role: z.enum(['admin','user']),
+});
+
+export const UserPasswordSchema = z.object({
+  id: z.string().min(1),
+  password: z.string().min(6, 'Mindestens 6 Zeichen'),
+});
+
 export type TourInput = z.infer<typeof TourSchema>;
 export type SlotInput = z.infer<typeof SlotSchema>;
 export type BookingInput = z.infer<typeof BookingSchema>;
