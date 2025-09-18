@@ -59,7 +59,7 @@ export default async function BookingsAdminPage({ searchParams }: { searchParams
               <div>
                 <div className="font-semibold">{b.slot.tour.title}</div>
                 <div className="text-sm opacity-80">{new Date(b.slot.start).toLocaleString()} – Personen: {b.persons}</div>
-                <div className="text-sm opacity-80">Bucher: {b.user?.email ?? 'Gast'}</div>
+                <div className="text-sm opacity-80">Kontakt: {b.contactEmail ?? b.user?.email ?? 'Gast'}</div>
               </div>
               <form action={updateBookingStatus} className="flex items-center gap-2">
                 <input type="hidden" name="id" value={b.id} />

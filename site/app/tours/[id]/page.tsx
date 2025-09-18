@@ -5,6 +5,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { sendMail } from "../../../lib/mailer";
+import { BookingSchema } from "@/lib/schemas";
+import bcrypt from "bcryptjs";
 
 function formatEuro(cents: number) {
   return (cents / 100).toFixed(2) + " €";
@@ -62,12 +64,17 @@ export default async function TourDetail({ params, searchParams }: { params: { i
               <div className="text-sm opacity-80">bis {new Date(s.end).toLocaleTimeString()}</div>
             </div>
             <div className="flex items-center gap-2">
+              <label className="text-sm" htmlFor={`email-${s.id}`}>E-Mail</label>
+              <input id={`email-${s.id}`} name="email" type="email" required className="w-56 px-2 py-1 rounded border border-[var(--border)] bg-transparent" placeholder="dein@email.de" />
               <label className="text-sm" htmlFor={`persons-${s.id}`}>Personen</label>
               <input id={`persons-${s.id}`} name="persons" type="number" min={1} defaultValue={1} className="w-16 px-2 py-1 rounded border border-[var(--border)] bg-transparent" />
               <button formAction={async (formData: FormData) => {
                 'use server';
-                const persons = Number(formData.get('persons')) || 1;
-                const slotId = String(formData.get('slotId'));
+                const parsed = BookingSchema.safeParse(Object.fromEntries(formData as any));
+                if (!parsed.success) {
+                  redirect(`/tours/${params.id}?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Eingaben prüfen')}`);
+                }
+                const { persons, slotId, email } = parsed.data as { persons: number; slotId: string; email: string };
                 let userId: string | null = null;
                 try {
                   const session = await getServerSession(authOptions as any);
@@ -89,12 +96,12 @@ export default async function TourDetail({ params, searchParams }: { params: { i
                 if (used + persons > slot.capacity) {
                   redirect(`/tours/${params.id}?error=${encodeURIComponent('Leider nicht genug freie Plätze')}`);
                 }
-                const booking = await prisma.booking.create({ data: { userId, slotId, persons, status: 'pending' } });
+                const booking = await prisma.booking.create({ data: { userId, slotId, persons, contactEmail: email, status: 'pending' } });
                 // Payment initialisieren
                 const amountCents = (slot.tour?.priceCents ?? 0) * persons;
                 await prisma.payment.create({ data: { bookingId: booking.id, amountCents, currency: 'EUR', status: 'init' } });
                 // E-Mail Stubs
-                await sendMail({ to: 'admin@example.com', subject: 'Neue Buchung', text: `Buchung ${booking.id} für ${persons} Person(en)` });
+                await sendMail({ to: 'admin@example.com', subject: 'Neue Buchung', text: `Buchung ${booking.id} für ${persons} Person(en) · Kontakt: ${email}` });
                 // Erfolg
                 revalidatePath(`/tours/${params.id}`);
                 redirect(`/tours/${params.id}?success=${encodeURIComponent('Reservierung eingegangen')}`);
@@ -111,5 +118,6 @@ async function ensureGuestUser() {
   const email = "guest@example.com";
   const user = await prisma.user.findUnique({ where: { email } });
   if (user) return user;
-  return prisma.user.create({ data: { email, name: 'Gast', role: 'user', passwordHash: 'guest' } });
+  const hash = await bcrypt.hash('guest', 10);
+  return prisma.user.create({ data: { email, name: 'Gast', role: 'user', passwordHash: hash } });
 }

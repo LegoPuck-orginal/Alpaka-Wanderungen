@@ -18,6 +18,7 @@ export const SlotSchema = z.object({
 export const BookingSchema = z.object({
   slotId: z.string().min(1, 'Slot fehlt'),
   persons: z.coerce.number().int().min(1, 'Mindestens 1 Person'),
+  email: z.string().email('Bitte gültige E-Mail angeben'),
 });
 
 export type TourInput = z.infer<typeof TourSchema>;

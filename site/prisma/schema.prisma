@@ -65,6 +65,7 @@ model Booking {
   userId     String
   slotId     String
   persons    Int      @default(1)
+  contactEmail String?
   // pending | confirmed | canceled
   status     String   @default("pending")
   createdAt  DateTime @default(now())

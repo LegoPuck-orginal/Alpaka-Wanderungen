@@ -46,11 +46,7 @@ export default async function RootLayout({
                 <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/admin">Admin</Link>
               )}
               <ThemeSwitcher />
-              {(session as any)?.user ? (
-                <SignOutButton />
-              ) : (
-                <Link className="px-3 py-1 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10" href="/login">Login</Link>
-              )}
+              {(session as any)?.user ? <SignOutButton /> : null}
             </nav>
           </div>
         </header>
