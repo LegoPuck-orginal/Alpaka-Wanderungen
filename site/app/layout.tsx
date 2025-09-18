@@ -4,7 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import SignOutButton from "@/components/SignOutButton";
+import SignOutButton from "../components/SignOutButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
