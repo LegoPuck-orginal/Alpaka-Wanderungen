@@ -10,7 +10,10 @@ const credentialsSchema = z.object({
 });
 
 export const authOptions = {
-  session: { strategy: "jwt" as const },
+  session: { strategy: "jwt" as const, maxAge: 60 * 60 * 24 * 7 },
+  jwt: {
+    maxAge: 60 * 60 * 24 * 7,
+  },
   providers: [
     Credentials({
       name: "Credentials",
