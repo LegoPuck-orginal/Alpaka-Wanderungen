@@ -32,7 +32,7 @@ export default function LoginPage() {
           <label className="block text-sm mb-1">Passwort</label>
           <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="w-full px-3 py-2 rounded border border-[var(--border)] bg-[var(--surface)]" required />
         </div>
-        {error && <div className="text-red-600 text-sm">{error}</div>}
+          {error && <div className="text-red-600 text-sm">{String(error).replace(/"/g, '&quot;')}</div>}
         <button type="submit" className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Einloggen</button>
       </form>
       <p className="text-sm opacity-80 mt-4">Dev-Login: admin@example.com mit beliebigem Passwort ("dev-placeholder").</p>

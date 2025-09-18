@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 async function createTour(formData: FormData): Promise<void> {
   'use server';
-  const data = Object.fromEntries(formData) as any;
+  const data = Object.fromEntries(formData);
   const parsed = TourSchema.safeParse(data);
   if (!parsed.success) {
     redirect(`/admin?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Ungültige Eingaben')}`);

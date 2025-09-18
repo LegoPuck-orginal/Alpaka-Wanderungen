@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 async function createSlot(formData: FormData) {
   'use server';
-  const data = Object.fromEntries(formData) as any;
+  const data = Object.fromEntries(formData);
   const parsed = SlotSchema.safeParse(data);
   if (!parsed.success) {
     redirect(`/admin/slots?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Ungültige Eingaben')}`);

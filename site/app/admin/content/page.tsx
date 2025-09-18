@@ -5,19 +5,19 @@ async function upsertContent(formData: FormData) {
   'use server';
   const key = String(formData.get('key'));
   const value = String(formData.get('value') ?? '');
-  await (prisma as any).content.upsert({ where: { key }, update: { value }, create: { key, value } });
+  await prisma.content.upsert({ where: { key }, update: { value }, create: { key, value } });
   revalidatePath('/admin/content');
 }
 
 async function deleteContent(formData: FormData) {
   'use server';
   const key = String(formData.get('key'));
-  await (prisma as any).content.delete({ where: { key } });
+  await prisma.content.delete({ where: { key } });
   revalidatePath('/admin/content');
 }
 
 export default async function ContentAdminPage() {
-  const items: { key: string; value: string }[] = await (prisma as any).content.findMany({ orderBy: { key: 'asc' } });
+  const items = await prisma.content.findMany({ orderBy: { key: 'asc' } });
   const defaults: { key: string; label: string; hint?: string }[] = [
     { key: 'hero.title', label: 'Startseite: Hero Titel' },
     { key: 'hero.subtitle', label: 'Startseite: Hero Untertitel' },

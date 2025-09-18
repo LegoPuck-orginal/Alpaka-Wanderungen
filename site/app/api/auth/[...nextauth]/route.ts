@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -9,7 +9,7 @@ const credentialsSchema = z.object({
   password: z.string().min(4),
 });
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" as const, maxAge: 60 * 60 * 24 * 7 },
   jwt: {
     maxAge: 60 * 60 * 24 * 7,
@@ -22,7 +22,7 @@ export const authOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Passwort", type: "password" },
       },
-      async authorize(credentials) {
+  async authorize(credentials): Promise<any> {
         try {
           const parsed = credentialsSchema.safeParse(credentials);
           if (!parsed.success) return null;
@@ -40,21 +40,21 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role;
+        (token as any).id = (user as any).id;
+        (token as any).role = (user as any).role;
       }
       return token;
     },
-    async session({ session, token }: any) {
-      (session as any).user.id = token.id;
-      (session as any).user.role = token.role;
+    async session({ session, token }) {
+      (session as any).user.id = (token as any).id;
+      (session as any).user.role = (token as any).role;
       return session;
     },
   },
   pages: { signIn: "/login" },
 } as const;
 
-const handler = NextAuth(authOptions as any);
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

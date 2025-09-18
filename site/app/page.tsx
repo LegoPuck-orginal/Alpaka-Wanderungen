@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getManyContent } from "@/lib/content";
 
 export default async function Home() {
@@ -36,7 +37,7 @@ export default async function Home() {
       <section className="mx-auto max-w-5xl px-6 py-12">
         <h2 className="text-2xl font-semibold mb-4 text-[var(--accent-dark)]">So läuft’s ab</h2>
         <ol className="list-decimal list-inside space-y-2">
-          <li>Wähle eine Tour aus der <a className="underline" href="/tours">Tour-Übersicht</a>.</li>
+          <li>Wähle eine Tour aus der <Link className="underline" href="/tours">Tour-Übersicht</Link>.</li>
           <li>Reserviere deinen Wunschtermin und gib die Teilnehmerzahl an.</li>
           <li>Erhalte eine Bestätigung per E-Mail – wir bereiten alles vor.</li>
         </ol>
@@ -50,7 +51,7 @@ export default async function Home() {
               <div className="h-28 rounded-md mb-3 bg-[var(--accent)]/30"></div>
               <h3 className="font-semibold mb-1">Alpaka-Tour #{i}</h3>
               <p className="text-sm opacity-80 mb-3">60–90 Minuten | Gemütliches Tempo</p>
-              <a href="/tours" className="text-sm underline">Details ansehen</a>
+              <Link href="/tours" className="text-sm underline">Details ansehen</Link>
             </div>
           ))}
         </div>
@@ -73,10 +74,10 @@ export default async function Home() {
       <section id="buchung" className="mx-auto max-w-5xl px-6 py-12">
         <div className="p-6 rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm">
           <h2 className="text-2xl font-semibold mb-2 text-[var(--accent-dark)]">Schnellbuchung</h2>
-          <p className="mb-4">Besuche die <a className="underline" href="/tours">Tour-Übersicht</a>, wähle einen Termin und buche deine Alpaka-Wanderung.</p>
+          <p className="mb-4">Besuche die <Link className="underline" href="/tours">Tour-Übersicht</Link>, wähle einen Termin und buche deine Alpaka-Wanderung.</p>
           <div className="flex gap-3">
-            <a href="/tours" className="px-5 py-2 rounded-lg bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] transition-colors font-medium">Touren ansehen</a>
-            <a href="/admin" className="px-5 py-2 rounded-lg border border-[var(--border)] hover:bg-[var(--accent)]/15 transition-colors font-medium">Zum Admin</a>
+            <Link href="/tours" className="px-5 py-2 rounded-lg bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] transition-colors font-medium">Touren ansehen</Link>
+            <Link href="/admin" className="px-5 py-2 rounded-lg border border-[var(--border)] hover:bg-[var(--accent)]/15 transition-colors font-medium">Zum Admin</Link>
           </div>
         </div>
       </section>

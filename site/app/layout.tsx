@@ -27,9 +27,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let session: any = null;
+  let session: unknown = null;
   try {
-    session = await getServerSession(authOptions as any);
+    session = await getServerSession(authOptions);
   } catch (e) {
     console.error("NextAuth getServerSession error:", e);
     session = null;
