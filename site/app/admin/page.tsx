@@ -1,37 +1,45 @@
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
-
-const TourSchema = z.object({
-  title: z.string().min(3),
-  description: z.string().min(10),
-  durationMin: z.coerce.number().int().min(30),
-  priceCents: z.coerce.number().int().min(0),
-  capacity: z.coerce.number().int().min(1),
-});
+import { TourSchema } from "@/lib/schemas";
+import { redirect } from "next/navigation";
 
 async function createTour(formData: FormData): Promise<void> {
   'use server';
   const data = Object.fromEntries(formData) as any;
   const parsed = TourSchema.safeParse(data);
-  if (!parsed.success) return;
+  if (!parsed.success) {
+    redirect(`/admin?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Ungültige Eingaben')}`);
+  }
   await prisma.tour.create({ data: parsed.data });
   revalidatePath('/admin');
+  redirect('/admin?success=Tour+angelegt');
 }
 
 async function deleteTour(formData: FormData): Promise<void> {
   'use server';
   const id = String(formData.get('id'));
-  await prisma.tour.delete({ where: { id } });
-  revalidatePath('/admin');
+  try {
+    await prisma.tour.delete({ where: { id } });
+    revalidatePath('/admin');
+    redirect('/admin?success=Tour+gelöscht');
+  } catch (e) {
+    redirect('/admin?error=Tour+konnte+nicht+gelöscht+werden');
+  }
 }
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ error?: string; success?: string }> }) {
+  const sp = await searchParams;
   const tours = await prisma.tour.findMany({ orderBy: { createdAt: 'desc' } });
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-3xl font-bold mb-4 text-[var(--accent-dark)]">Admin-Dashboard</h1>
       <p className="opacity-80 mb-6">Touren verwalten</p>
+      {sp?.error && (
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{sp.error}</div>
+      )}
+      {sp?.success && (
+        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{sp.success}</div>
+      )}
 
       <div className="grid sm:grid-cols-3 gap-3 mb-8">
         <a href="/admin/slots" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">

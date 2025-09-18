@@ -1,39 +1,47 @@
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
-
-const SlotSchema = z.object({
-  tourId: z.string().min(1),
-  start: z.string().datetime().or(z.string().min(1)),
-  end: z.string().datetime().or(z.string().min(1)),
-  capacity: z.coerce.number().int().min(1),
-});
+import { SlotSchema } from "@/lib/schemas";
+import { redirect } from "next/navigation";
 
 async function createSlot(formData: FormData) {
   'use server';
   const data = Object.fromEntries(formData) as any;
   const parsed = SlotSchema.safeParse(data);
-  if (!parsed.success) return;
+  if (!parsed.success) {
+    redirect(`/admin/slots?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Ungültige Eingaben')}`);
+  }
   const start = new Date(String(data.start));
   const end = new Date(String(data.end));
   await prisma.eventSlot.create({ data: { tourId: String(data.tourId), start, end, capacity: Number(data.capacity) } });
   revalidatePath('/admin/slots');
+  redirect('/admin/slots?success=Slot+angelegt');
 }
 
 async function deleteSlot(formData: FormData) {
   'use server';
   const id = String(formData.get('id'));
-  await prisma.eventSlot.delete({ where: { id } });
-  revalidatePath('/admin/slots');
+  try {
+    await prisma.eventSlot.delete({ where: { id } });
+    revalidatePath('/admin/slots');
+    redirect('/admin/slots?success=Slot+gelöscht');
+  } catch (e) {
+    redirect('/admin/slots?error=Slot+konnte+nicht+gelöscht+werden');
+  }
 }
 
-export default async function SlotsAdminPage() {
+export default async function SlotsAdminPage({ searchParams }: { searchParams?: { error?: string; success?: string } }) {
   const tours = await prisma.tour.findMany({ orderBy: { title: 'asc' } });
   const slots = await prisma.eventSlot.findMany({ orderBy: { start: 'asc' }, include: { tour: true } });
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-3xl font-bold mb-4 text-[var(--accent-dark)]">Slots verwalten</h1>
       <p className="opacity-80 mb-6">Termine anlegen und löschen</p>
+      {searchParams?.error && (
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{searchParams.error}</div>
+      )}
+      {searchParams?.success && (
+        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{searchParams.success}</div>
+      )}
       <nav className="mb-6 text-sm">
         <a className="underline" href="/admin">← Zurück zum Admin</a>
       </nav>
