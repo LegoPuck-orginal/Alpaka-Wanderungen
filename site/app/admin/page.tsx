@@ -33,6 +33,21 @@ export default async function AdminPage() {
       <h1 className="text-3xl font-bold mb-4 text-[var(--accent-dark)]">Admin-Dashboard</h1>
       <p className="opacity-80 mb-6">Touren verwalten</p>
 
+      <div className="grid sm:grid-cols-3 gap-3 mb-8">
+        <a href="/admin/slots" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+          <div className="font-semibold">Slots</div>
+          <div className="text-sm opacity-80">Termine anlegen & löschen</div>
+        </a>
+        <a href="/admin/bookings" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+          <div className="font-semibold">Buchungen</div>
+          <div className="text-sm opacity-80">Status verwalten</div>
+        </a>
+        <a href="/admin/content" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+          <div className="font-semibold">Texte</div>
+          <div className="text-sm opacity-80">Inhalte bearbeiten</div>
+        </a>
+      </div>
+
       <form action={createTour} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 grid sm:grid-cols-2 gap-4 mb-8">
         <div>
           <label className="block text-sm mb-1">Titel</label>
