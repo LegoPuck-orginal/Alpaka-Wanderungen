@@ -14,7 +14,8 @@ type SlotLite = { id: string; start: Date; end: Date; capacity: number };
 
 export const revalidate = 30;
 
-export default async function TourDetail({ params, searchParams }: { params: { id: string }, searchParams?: { error?: string; success?: string } }) {
+export default async function TourDetail({ params, searchParams }: { params: { id: string }, searchParams: Promise<{ error?: string; success?: string }> }) {
+  const sp = await searchParams;
   const tour = await prisma.tour.findUnique({
     where: { id: params.id },
     include: {
@@ -26,11 +27,11 @@ export default async function TourDetail({ params, searchParams }: { params: { i
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <h1 className="text-3xl font-bold mb-2 text-[var(--accent-dark)]">{tour.title}</h1>
-      {searchParams?.error && (
-        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{searchParams.error}</div>
+      {sp?.error && (
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{sp.error}</div>
       )}
-      {searchParams?.success && (
-        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{searchParams.success}</div>
+      {sp?.success && (
+        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{sp.success}</div>
       )}
       <p className="opacity-80 mb-6">{tour.description}</p>
       <div className="grid sm:grid-cols-3 gap-6 mb-8">
