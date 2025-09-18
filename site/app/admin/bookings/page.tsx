@@ -12,7 +12,7 @@ async function updateBookingStatus(formData: FormData) {
 export default async function BookingsAdminPage() {
   const bookings = await prisma.booking.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { eventSlot: { include: { tour: true } }, user: true }
+    include: { slot: { include: { tour: true } }, user: true },
   });
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
@@ -27,8 +27,8 @@ export default async function BookingsAdminPage() {
           <div key={b.id} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="font-semibold">{b.eventSlot.tour.title}</div>
-                <div className="text-sm opacity-80">{new Date(b.eventSlot.start).toLocaleString()} – Plätze: {b.seats}</div>
+                <div className="font-semibold">{b.slot.tour.title}</div>
+                <div className="text-sm opacity-80">{new Date(b.slot.start).toLocaleString()} – Personen: {b.persons}</div>
                 <div className="text-sm opacity-80">Bucher: {b.user?.email ?? 'Gast'}</div>
               </div>
               <form action={updateBookingStatus} className="flex items-center gap-2">
