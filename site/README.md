@@ -162,10 +162,99 @@ Konfiguriert über `STORAGE_BACKEND` (siehe `.env`). Lokal speichert unter `publ
 - Uploads: `public/uploads/` mitsichern
 
 ## Troubleshooting
-- „Unable to open the database file“ → `DATABASE_URL` absolut + `npx prisma db push`; Verzeichnisrechte prüfen
-- Login scheitert → `NEXTAUTH_URL` auf LAN/Domain setzen, Browser‑Cookies löschen, Passwort neu setzen
-- Build bricht mit Admin‑Seiten ab → `app/admin/layout.tsx` ist bereits dynamisch (kein Prerender)
-- 404 auf `/api/health` → Build/Start prüfen, Route existiert unter `app/api/health/route.ts`
+Nach Themen gruppiert – jeweils mit Symptomen, Ursache, Diagnose und Fix.
+
+### 1) Environment/Config
+- Symptom: „Environment variable not found: DATABASE_URL“
+  - Ursache: `.env` fehlt oder key fehlt
+  - Diagnose: `grep -n DATABASE_URL .env*`; `npx prisma generate`
+  - Fix: `.env` anlegen; `DATABASE_URL` setzen; `npx prisma db push`
+- Symptom: Login schlägt ohne Fehler fehl
+  - Ursache: Falsche `NEXTAUTH_URL` (LAN vs Domain); Cookies „falsch“
+  - Diagnose: `echo $NEXTAUTH_URL`; `curl -I http://IP:3000/api/auth/csrf`
+  - Fix: `NEXTAUTH_URL` korrekt setzen; Browser‑Cookies löschen; neu anmelden
+- Symptom: Server Actions blockiert (CORS/Origin)
+  - Ursache: forwarded Host nicht whitelisted
+  - Diagnose: Browser‑Netzwerk‑Tab; 403/400 bei Action
+  - Fix: In `next.config.ts` Origins erweitern oder App hinter korrektem Host betreiben
+
+### 2) Datenbank (SQLite/Prisma)
+- Symptom: „Unable to open the database file“
+  - Ursache: relative `DATABASE_URL`, Verzeichnis nicht existent, Rechte fehlen
+  - Diagnose: `echo $DATABASE_URL`; `ls -l $(dirname <sqlite-path>)`
+  - Fix: absoluten Pfad setzen; Verzeichnis anlegen; Rechte prüfen; `npx prisma db push`
+- Symptom: Migration/Schema passt nicht zur DB
+  - Ursache: Schema geändert, DB nicht aktualisiert
+  - Diagnose: `npx prisma generate` Meldungen; App‑Fehler bei Abfragen
+  - Fix: `npx prisma db push`; ggf. Backup und Neuaufbau
+
+### 3) Build/Next.js
+- Symptom: Build bricht bei Admin‑Seiten/SSR ab
+  - Ursache: DB‑Zugriff zur Build‑Zeit
+  - Diagnose: Build‑Logs; Stacktrace zeigt Prisma im Build
+  - Fix: `app/admin/layout.tsx` setzt `dynamic='force-dynamic'` und `revalidate=0`
+- Symptom: Startfehler „required-server-files.json“/Manifest fehlt
+  - Ursache: Server vor Build gestartet oder Output gelöscht
+  - Diagnose: prüfen: `.next/` existiert?
+  - Fix: `npm run build` erneut; dann `npx next start`
+
+### 4) Auth/NextAuth
+- Symptom: „CSRF token mismatch“/„Callback URL mismatch“
+  - Ursache: Falsche `NEXTAUTH_URL`/Proxy‑Header
+  - Diagnose: `curl -I http://IP:3000/api/auth/csrf`
+  - Fix: `NEXTAUTH_URL` korrigieren; bei Proxy `X-Forwarded-*` setzen
+- Symptom: Passwort korrekt, dennoch kein Login
+  - Ursache: Admin nicht vorhanden oder Hash anders
+  - Diagnose: `node -e` Prisma‑Einzeiler (User prüfen)
+  - Fix: Admin via Seed/Einzeiler upserten; Passwort neu setzen
+
+### 5) Uploads/Bilder
+- Symptom: Upload schlägt leise fehl
+  - Ursache: MIME nicht erlaubt; >5MB; fehlende Storage‑ENV
+  - Diagnose: Admin‑Form Rückmeldung; Server‑Logs
+  - Fix: erlaubten Typ/JPG/PNG/WebP nutzen; <5MB; Storage‑ENV setzen (S3/Cloudinary)
+- Symptom: Bilder werden nicht angezeigt
+  - Ursache: Next Image remotePatterns fehlen
+  - Diagnose: `next.config.ts` images‑Konfig prüfen
+  - Fix: passende `remotePatterns` ergänzen
+
+### 6) Netzwerk/Firewall/Proxy
+- Symptom: LAN‑Clients erreichen Seite nicht
+  - Ursache: Server bindet auf 127.0.0.1; UFW blockt Port
+  - Diagnose: `ss -tulpn | grep 3000`; `sudo ufw status`
+  - Fix: `-H 0.0.0.0` starten; UFW Port 3000 freigeben
+- Symptom: Hinter Nginx 502/404
+  - Ursache: falscher upstream/host header
+  - Diagnose: Nginx‑Logs; Upstream Check
+  - Fix: proxy_pass auf `http://127.0.0.1:3000`; `proxy_set_header Host $host;`
+
+### 7) OS/Dateirechte
+- Symptom: „EACCES: permission denied“ bei SQLite/Uploads
+  - Ursache: falsche Owner/Rechte
+  - Diagnose: `ls -la prisma/ public/uploads`
+  - Fix: `chown -R <user>:<group>`; `chmod` ausreichend
+
+### 8) Performance
+- Symptom: Erste Anfrage langsam
+  - Ursache: Cold start, DB‑Warming
+  - Fix: Warmup‑Ping (Health‑Check), Caching (revalidate), Ressourcen prüfen
+- Symptom: Bilder groß/langsam
+  - Ursache: Originalgröße/keine Komprimierung
+  - Fix: Upload‑Resize aktiv; WebP; CDN/Proxy‑Cache nutzen
+
+### 9) Backups/Wiederherstellung
+- Symptom: DB korrupt
+  - Ursache: Crash beim Schreiben
+  - Diagnose: `sqlite3 dev.db "PRAGMA integrity_check;"`
+  - Fix: Restore aus Backup; Downtime‑Backup: Dienst stoppen, Datei kopieren
+
+### 10) Sonstiges
+- Symptom: 404 auf `/api/health`
+  - Ursache: Build/Start nicht durchgelaufen
+  - Fix: `npm run build && npx next start`
+- Symptom: „Cannot specify encType…“ (React Warning)
+  - Ursache: encType bei Server Actions
+  - Fix: `encType` entfernen (bereits erledigt)
 
 ## Wartung & Updates
 - Dependencies aktualisieren (vorsichtig): `npm outdated`, dann selektiv `npm i <pkg>@latest`
