@@ -20,7 +20,7 @@ function run(cmd, args, opts = {}) {
 fs.mkdirSync(path.join(root, 'prisma'), { recursive: true });
 fs.mkdirSync(path.join(root, 'public', 'uploads'), { recursive: true });
 
-// 2) Create .env if missing
+// 2) Create .env if missing, else normalize DATABASE_URL to absolute file path
 const envFile = path.join(root, '.env');
 if (!fs.existsSync(envFile)) {
   const secret = crypto.randomBytes(32).toString('base64');
@@ -34,6 +34,28 @@ if (!fs.existsSync(envFile)) {
   ].join('\n');
   fs.writeFileSync(envFile, content, 'utf8');
   console.log('[quickstart] wrote .env');
+} else {
+  try {
+    const txt = fs.readFileSync(envFile, 'utf8');
+    let changed = false;
+    const normalized = txt.split(/\r?\n/).map((line) => {
+      const m = line.match(/^\s*DATABASE_URL\s*=\s*"?file:(.+?)"?\s*$/);
+      if (m) {
+        const raw = m[1].trim();
+        const abs = raw.startsWith('/') ? raw : path.join(root, raw.replace(/^\.\//, ''));
+        const newLine = `DATABASE_URL="file:${abs}"`;
+        if (newLine !== line) changed = true;
+        return newLine;
+      }
+      return line;
+    }).join('\n');
+    if (changed) {
+      fs.writeFileSync(envFile, normalized, 'utf8');
+      console.log('[quickstart] normalized DATABASE_URL to absolute path in .env');
+    }
+  } catch (e) {
+    console.warn('[quickstart] could not normalize .env:', e?.message);
+  }
 }
 
 // Mirror to .env.production if missing
@@ -41,6 +63,21 @@ const envProd = path.join(root, '.env.production');
 if (!fs.existsSync(envProd)) {
   fs.copyFileSync(envFile, envProd);
   console.log('[quickstart] wrote .env.production');
+} else {
+  try {
+    // Keep DATABASE_URL in production env aligned with .env if it differs
+    const base = fs.readFileSync(envFile, 'utf8');
+    const prod = fs.readFileSync(envProd, 'utf8');
+    const mBase = base.match(/^\s*DATABASE_URL\s*=\s*.*$/m);
+    const mProd = prod.match(/^\s*DATABASE_URL\s*=\s*.*$/m);
+    if (mBase && (!mProd || mProd[0] !== mBase[0])) {
+      const updated = mProd ? prod.replace(mProd[0], mBase[0]) : `${prod.trim()}\n${mBase[0]}\n`;
+      fs.writeFileSync(envProd, updated, 'utf8');
+      console.log('[quickstart] synced DATABASE_URL to .env.production');
+    }
+  } catch (e) {
+    console.warn('[quickstart] could not sync .env.production:', e?.message);
+  }
 }
 
 // 3) Prisma generate + db push
