@@ -17,6 +17,8 @@ async function createTour(formData: FormData): Promise<void> {
     durationMin: data.durationMin,
     priceCents,
     capacity: data.capacity,
+    minPersonsPerBooking: data.minPersonsPerBooking ?? 1,
+    maxPersonsPerBooking: data.maxPersonsPerBooking ?? 6,
   });
   if (!parsed.success) {
     redirect(`/admin?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Ungültige Eingaben')}`);
@@ -212,12 +214,20 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <textarea name="description" required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" rows={3} />
         </div>
         <div>
-          <label className="block text-sm mb-1">Preis (Euro)</label>
+          <label className="block text-sm mb-1">Preis (Euro pro Person)</label>
           <input name="priceEuro" type="number" step="0.01" min={0} required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
         </div>
         <div>
           <label className="block text-sm mb-1">Kapazität</label>
           <input name="capacity" type="number" min={1} required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
+        </div>
+        <div>
+          <label className="block text-sm mb-1">Min. Personen pro Buchung</label>
+          <input name="minPersonsPerBooking" type="number" min={1} defaultValue={1} className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
+        </div>
+        <div>
+          <label className="block text-sm mb-1">Max. Personen pro Buchung</label>
+          <input name="maxPersonsPerBooking" type="number" min={1} defaultValue={6} className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
         </div>
         <div className="sm:col-span-2">
           <button className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Tour anlegen</button>
@@ -245,7 +255,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <button className="px-3 py-1 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10 text-sm">Speichern</button>
               </form>
               <div className="mt-3 flex items-center gap-3">
-                <form action={uploadTourImage} encType="multipart/form-data" className="flex items-center gap-2">
+                <form action={uploadTourImage} className="flex items-center gap-2">
                   <input type="hidden" name="tourId" value={t.id} />
                   <input name="image" type="file" accept="image/jpeg,image/png,image/webp" className="text-sm" required />
                   <button className="btn-primary text-sm">Bild hochladen</button>
@@ -259,7 +269,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </div>
               <div className="mt-4">
                 <div className="text-sm font-medium mb-2">Galerie</div>
-                <form action={uploadGallery} encType="multipart/form-data" className="flex items-center gap-2 mb-3">
+                <form action={uploadGallery} className="flex items-center gap-2 mb-3">
                   <input type="hidden" name="tourId" value={t.id} />
                   <input name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple className="text-sm" />
                   <button className="btn-primary text-sm">Bilder hinzufügen</button>

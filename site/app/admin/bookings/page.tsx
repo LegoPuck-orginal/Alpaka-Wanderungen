@@ -57,7 +57,7 @@ export default async function BookingsAdminPage({ searchParams }: { searchParams
           <div key={b.id} className="card p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="font-semibold">{b.slot.tour.title}</div>
+                <div className="font-semibold">{b.slot.tour.title} <span className="opacity-60 text-xs">[{(b as unknown as { code?: string }).code ?? b.id}]</span></div>
                 <div className="text-sm opacity-80">{new Date(b.slot.start).toLocaleString()} – Personen: {b.persons}</div>
                 <div className="text-sm opacity-80">Kontakt: {b.contactEmail ?? b.user?.email ?? 'Gast'}</div>
               </div>

@@ -41,6 +41,8 @@ model Tour {
   durationMin Int
   priceCents  Int
   capacity    Int
+  minPersonsPerBooking Int @default(1)
+  maxPersonsPerBooking Int @default(6)
   imageUrl    String?
   imageAlt    String?
   createdAt   DateTime @default(now())
@@ -66,6 +68,7 @@ model EventSlot {
 
 model Booking {
   id         String   @id @default(cuid())
+  code       String?  @unique
   userId     String
   slotId     String
   persons    Int      @default(1)

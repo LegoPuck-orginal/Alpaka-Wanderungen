@@ -5,6 +5,7 @@ import { UserCreateSchema, UserRoleSchema, UserPasswordSchema } from "@/lib/sche
 import bcrypt from "bcryptjs";
 import { authenticator } from "otplib";
 import QRCode from "qrcode";
+import Image from "next/image";
 
 async function createUser(formData: FormData) {
   'use server';
@@ -148,7 +149,7 @@ export default async function UsersAdminPage({ searchParams }: { searchParams: P
                   <button className="px-3 py-2 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10">Passwort setzen</button>
                 </form>
                 {/* 2FA Bereich */}
-                <TwoFactorBlock userId={u.id} email={u.email} twoFactorEnabled={(u as any).twoFactorEnabled} />
+                <TwoFactorBlock userId={u.id} email={u.email} twoFactorEnabled={Boolean(u.twoFactorEnabled)} />
                 <form action={deleteUser}>
                   <input type="hidden" name="id" value={u.id} />
                   <button className="px-3 py-2 rounded border border-[var(--border)] hover:bg-red-500/10">Löschen</button>
@@ -217,7 +218,16 @@ async function TwoFactorBlock({ userId, email, twoFactorEnabled }: { userId: str
             </form>
           ) : (
             <div className="flex items-center gap-3">
-              {qr && <img src={qr} alt="2FA QR Code" className="h-24 w-24 border border-[var(--border)] rounded" />}
+              {qr && (
+                <Image
+                  src={qr}
+                  alt="2FA QR Code"
+                  width={96}
+                  height={96}
+                  unoptimized
+                  className="h-24 w-24 border border-[var(--border)] rounded"
+                />
+              )}
               <div className="text-xs opacity-80 break-all">
                 <div>Secret: <code>{secret}</code></div>
                 <div>Scanne den QR-Code mit deiner Authenticator-App und gib den 6-stelligen Code ein.</div>

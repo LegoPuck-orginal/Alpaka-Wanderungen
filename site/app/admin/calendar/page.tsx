@@ -5,28 +5,37 @@ function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1
 
 export const revalidate = 60;
 
-export default async function CalendarPage({ searchParams }: { searchParams?: Promise<{ month?: string }> }) {
-  const sp = searchParams ? await searchParams : {};
+export default async function CalendarPage({ searchParams }: { searchParams?: Promise<{ month?: string; day?: string }> }) {
+  const sp: { month?: string; day?: string } = searchParams ? await searchParams : {};
   const base = sp?.month ? new Date(sp.month + '-01') : new Date();
   const from = startOfMonth(base);
   const to = endOfMonth(base);
   // Summe Personen pro Tag anhand Slot.start Datum
   const slots = await prisma.eventSlot.findMany({
     where: { start: { gte: from, lte: to } },
-    select: { id: true, start: true },
+    select: { id: true, start: true, capacity: true },
+    orderBy: { start: 'asc' },
   });
   const slotIds = slots.map(s => s.id);
   const bookings = slotIds.length ? await prisma.booking.groupBy({
-    by: ['slotId'],
+    by: ['slotId','status'],
     _sum: { persons: true },
     where: { slotId: { in: slotIds }, status: { in: ['pending','confirmed'] } },
   }) : [];
   const map = new Map<string, number>();
+  // Detail-Slots pro Tag sammeln
+  const perDaySlots = new Map<string, { time: string; booked: number; confirmed: number; pending: number; capacity: number }[]>();
   for (const s of slots) {
     const day = s.start.toISOString().slice(0,10);
-    const b = bookings.find(x => x.slotId === s.id);
-    const sum = b?._sum.persons ?? 0;
+    const bConfirmed = bookings.find(x => x.slotId === s.id && x.status === 'confirmed');
+    const bPending = bookings.find(x => x.slotId === s.id && x.status === 'pending');
+    const confirmed = bConfirmed?._sum.persons ?? 0;
+    const pending = bPending?._sum.persons ?? 0;
+    const sum = confirmed + pending;
     map.set(day, (map.get(day) ?? 0) + sum);
+    const arr = perDaySlots.get(day) ?? [];
+    arr.push({ time: s.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), booked: sum, confirmed, pending, capacity: s.capacity });
+    perDaySlots.set(day, arr);
   }
 
   const days: { date: Date; key: string; count: number }[] = [];
@@ -75,16 +84,32 @@ export default async function CalendarPage({ searchParams }: { searchParams?: Pr
             'bg-[color:var(--accent)]/40',
           ][level];
           const ring = level > 0 ? 'ring-1 ring-[color:var(--accent)]/30' : '';
+          const items = perDaySlots.get(d.key) ?? [];
           return (
             <div key={d.key} className={`rounded-lg border border-[var(--border)] p-2 min-h-20 ${bg} ${ring}`} title={`${d.count} gebucht`}>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-1">
                 <div className="text-xs opacity-70">{d.date.getDate()}.</div>
                 {d.count > 0 && (
-                  <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-[color:var(--accent)]/15 text-[color:var(--accent-dark)]">
-                    {d.count} Pers.
-                  </span>
+                  <a href={`/admin/calendar?month=${base.toISOString().slice(0,7)}&day=${d.key}`} className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-[color:var(--accent)]/15 text-[color:var(--accent-dark)] hover:underline">
+                    Σ {d.count} Pers.
+                  </a>
                 )}
               </div>
+              {items.length > 0 && (
+                <div className="space-y-1">
+                  {items.slice(0, sp?.day === d.key ? items.length : 3).map((it, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-[11px]">
+                      <span className="opacity-70 tabular-nums">{it.time} Uhr</span>
+                      <span className="px-1.5 py-0.5 rounded bg-[color:var(--accent)]/10 text-[color:var(--accent-dark)] tabular-nums">{it.booked}/{it.capacity}</span>
+                      <span className="px-1 py-0.5 rounded bg-emerald-100/60 text-emerald-700 tabular-nums">{it.confirmed} bestätigt</span>
+                      {it.pending>0 && (<span className="px-1 py-0.5 rounded bg-amber-100/60 text-amber-700 tabular-nums">{it.pending} offen</span>)}
+                    </div>
+                  ))}
+                  {items.length > 3 && sp?.day !== d.key && (
+                    <div className="text-[10px] opacity-60">+{items.length - 3} weitere</div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

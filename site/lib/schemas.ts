@@ -6,6 +6,11 @@ export const TourSchema = z.object({
   durationMin: z.coerce.number().int().min(30, 'Mindestens 30 Minuten'),
   priceCents: z.coerce.number().int().min(0, 'Preis ungültig'),
   capacity: z.coerce.number().int().min(1, 'Kapazität ungültig'),
+  minPersonsPerBooking: z.coerce.number().int().min(1).max(50).default(1),
+  maxPersonsPerBooking: z.coerce.number().int().min(1).max(50).default(6),
+}).refine((v) => v.maxPersonsPerBooking >= v.minPersonsPerBooking, {
+  message: 'Max muss ≥ Min sein',
+  path: ['maxPersonsPerBooking']
 });
 
 export const SlotSchema = z.object({

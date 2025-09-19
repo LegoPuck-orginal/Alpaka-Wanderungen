@@ -28,6 +28,9 @@ export default async function TourDetail({ params, searchParams }: { params: Pro
     },
   });
   if (!tour) return notFound();
+  // Min/Max Personen aus Tour (mit Fallback, falls Typen noch nicht aktualisiert)
+  const minP = (tour as unknown as { minPersonsPerBooking?: number }).minPersonsPerBooking ?? 1;
+  const maxP = (tour as unknown as { maxPersonsPerBooking?: number }).maxPersonsPerBooking ?? 6;
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
@@ -59,7 +62,7 @@ export default async function TourDetail({ params, searchParams }: { params: Pro
           <div className="text-lg font-semibold">{tour.durationMin} Min</div>
         </div>
         <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4">
-          <div className="text-sm opacity-80">Preis</div>
+          <div className="text-sm opacity-80">Preis (pro Person)</div>
           <div className="text-lg font-semibold">{formatEuro(tour.priceCents)}</div>
         </div>
         <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4">
@@ -68,12 +71,12 @@ export default async function TourDetail({ params, searchParams }: { params: Pro
         </div>
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4 text-[var(--accent-dark)]">Termine</h2>
-      <div className="grid sm:grid-cols-2 gap-4">
+  <h2 className="text-2xl font-semibold mb-4 text-[var(--accent-dark)]">Termine</h2>
+  <div className="grid grid-cols-1 gap-4">
         {tour.slots.length === 0 && (
           <div className="opacity-70">Derzeit keine Termine verfügbar.</div>
         )}
-      {tour.slots.map((s: SlotLite) => (
+        {tour.slots.map((s: SlotLite) => (
           <form key={s.id} action={async (formData: FormData) => {
             'use server';
             const slotId = String(formData.get('slotId'));
@@ -92,39 +95,52 @@ export default async function TourDetail({ params, searchParams }: { params: Pro
               userId = (await ensureGuestUser()).id;
             }
                 const result = await prisma.$transaction(async (tx) => {
-                  const slot = await tx.eventSlot.findUnique({ where: { id: slotId }, include: { tour: true } });
+                  const slot = await tx.eventSlot.findUnique({ where: { id: slotId }, include: { tour: { select: { priceCents: true, minPersonsPerBooking: true, maxPersonsPerBooking: true } } } }) as ( { id: string; capacity: number; start: Date; end: Date; tourId: string; createdAt: Date; updatedAt: Date; tour: { priceCents: number; minPersonsPerBooking: number; maxPersonsPerBooking: number } } | null );
                   if (!slot) return { err: 'Termin nicht gefunden' } as const;
+                  // Min/Max prüfen (pro Tour konfiguriert)
+                  const minP = slot.tour?.minPersonsPerBooking ?? 1;
+                  const maxP = slot.tour?.maxPersonsPerBooking ?? 99;
+                  if (persons < minP) return { err: `Mindestens ${minP} Person(en) pro Buchung` } as const;
+                  if (persons > maxP) return { err: `Maximal ${maxP} Person(en) pro Buchung` } as const;
                   const booked = await tx.booking.aggregate({ _sum: { persons: true }, where: { slotId, status: { in: ['pending','confirmed'] } } });
                   const used = booked._sum.persons ?? 0;
                   if (used + persons > slot.capacity) return { err: 'Leider nicht genug freie Plätze' } as const;
+                  // Buchung anlegen
                   const booking = await tx.booking.create({ data: { userId: userId!, slotId, persons, contactEmail: email, status: 'pending' } });
-                  const amountCents = (slot.tour?.priceCents ?? 0) * persons;
+                  // einfachen, menschenlesbaren Code generieren (z.B. ALP-XXXXX) und setzen
+                  const code = `ALP-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+                  await tx.booking.update({ where: { id: booking.id }, data: { code } });
+                  const amountCents = (slot.tour.priceCents ?? 0) * persons;
                   await tx.payment.create({ data: { bookingId: booking.id, amountCents, currency: 'EUR', status: 'init' } });
-                  return { ok: booking } as const;
+                  return { ok: { ...booking, code } } as const;
                 });
                 if ('err' in result) {
                   const msg = result.err ?? 'Fehler bei der Reservierung';
                   redirect(`/tours/${p.id}?error=${encodeURIComponent(msg)}`);
                 }
-                const booking = result.ok;
-            await sendMail({ to: 'admin@example.com', subject: 'Neue Buchung', text: `Buchung ${booking.id} für ${persons} Person(en) · Kontakt: ${email}` });
+  const booking = result.ok as { id: string; code?: string };
+      await sendMail({ to: 'admin@example.com', subject: 'Neue Buchung', text: `Buchung ${booking.code ?? booking.id} für ${persons} Person(en) · Kontakt: ${email}` });
             revalidatePath(`/tours/${p.id}`);
             redirect(`/tours/${p.id}?success=${encodeURIComponent('Reservierung eingegangen')}`);
-          }} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 flex items-center justify-between gap-3">
+          }} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 grid gap-4 md:grid md:grid-cols-[1fr_auto] md:items-center">
             <input type="hidden" name="slotId" value={s.id} />
-            <div>
-              <div className="font-medium">{new Date(s.start).toLocaleString()}</div>
-                  <div className="text-sm opacity-80">bis {new Date(s.end).toLocaleTimeString()}</div>
-                  {/* Freie Plätze Anzeige */}
-                  <SlotFreeSeats slotId={s.id} capacity={s.capacity} />
+              <div className="min-w-0">
+                <div className="font-medium tabular-nums">{new Date(s.start).toLocaleDateString()} um {new Date(s.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} Uhr</div>
+                <div className="text-sm opacity-80 tabular-nums">bis {new Date(s.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} Uhr</div>
+                {/* Freie Plätze Anzeige */}
+                <div className="mt-1"><SlotFreeSeats slotId={s.id} capacity={s.capacity} /></div>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm" htmlFor={`email-${s.id}`}>E-Mail</label>
-              <input id={`email-${s.id}`} name="email" type="email" required className="w-56 px-2 py-1 rounded border border-[var(--border)] bg-transparent" placeholder="dein@email.de" />
-              <label className="text-sm" htmlFor={`persons-${s.id}`}>Personen</label>
-              <input id={`persons-${s.id}`} name="persons" type="number" min={1} defaultValue={1} className="w-16 px-2 py-1 rounded border border-[var(--border)] bg-transparent" />
-              <SubmitButton className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] transition-colors">Reservieren</SubmitButton>
-            </div>
+              <div className="flex flex-wrap md:flex-nowrap items-center justify-start gap-2 md:justify-self-end">
+                <div className="flex items-center gap-2 shrink-0">
+                  <label className="text-sm" htmlFor={`email-${s.id}`}>E-Mail</label>
+                  <input id={`email-${s.id}`} name="email" type="email" required className="w-64 max-w-full px-2 py-1 rounded border border-[var(--border)] bg-transparent" placeholder="dein@email.de" />
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <label className="text-sm" htmlFor={`persons-${s.id}`}>Personen</label>
+                  <input id={`persons-${s.id}`} name="persons" type="number" min={minP} max={maxP} defaultValue={minP} className="w-20 px-2 py-1 rounded border border-[var(--border)] bg-transparent" />
+                </div>
+                <SubmitButton className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] transition-colors shrink-0">Reservieren</SubmitButton>
+              </div>
           </form>
         ))}
       </div>
