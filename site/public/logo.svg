@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" role="img" aria-label="Alpaka Wanderungen Logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6ec69a"/>
+      <stop offset="100%" stop-color="#2f7a55"/>
+    </linearGradient>
+  </defs>
+  <!-- Simple alpaca head icon + wordmark -->
+  <g fill="none" stroke="url(#g)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22c5 0 9-4 9-9s-4-9-9-9S3 8 3 13s4 9 9 9z" fill="none"/>
+    <path d="M7 10c1-2 3-3 5-3m6 5c0 2-1 3-3 4M7 20c2 1 4 2 5 2 1 0 3-1 5-2"/>
+    <circle cx="9.5" cy="13.5" r="0.8" fill="#2f7a55" stroke="none"/>
+    <circle cx="14.5" cy="13.5" r="0.8" fill="#2f7a55" stroke="none"/>
+  </g>
+  <text x="30" y="20" font-family="system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial" font-weight="700" font-size="12" fill="#2f7a55">Alpaka</text>
+  <text x="80" y="20" font-family="system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial" font-weight="600" font-size="12" fill="#6ec69a">Wanderungen</text>
+</svg>

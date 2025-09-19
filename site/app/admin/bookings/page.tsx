@@ -39,22 +39,22 @@ export default async function BookingsAdminPage({ searchParams }: { searchParams
     include: { slot: { include: { tour: true } }, user: true, payment: true },
   });
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-4 text-[var(--accent-dark)]">Buchungen verwalten</h1>
+    <div className="mx-auto max-w-6xl px-6 py-10">
+      <h1 className="text-3xl font-bold mb-2 text-[var(--accent-dark)]">Buchungen verwalten</h1>
       <p className="opacity-80 mb-6">Status anpassen und Überblick behalten</p>
       <nav className="mb-6 text-sm">
         <a className="underline" href="/admin">← Zurück zum Admin</a>
       </nav>
       {sp?.error && (
-        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{sp.error}</div>
+        <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{sp.error || 'Aktion fehlgeschlagen'}</div>
       )}
       {sp?.success && (
-        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{sp.success}</div>
+        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{sp.success || 'Gespeichert'}</div>
       )}
 
       <div className="grid gap-3">
         {bookings.map(b => (
-          <div key={b.id} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4">
+          <div key={b.id} className="card p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="font-semibold">{b.slot.tour.title}</div>
@@ -63,21 +63,21 @@ export default async function BookingsAdminPage({ searchParams }: { searchParams
               </div>
               <form action={updateBookingStatus} className="flex items-center gap-2">
                 <input type="hidden" name="id" value={b.id} />
-                <select name="status" defaultValue={b.status} className="px-3 py-2 rounded border border-[var(--border)] bg-transparent">
+                <select name="status" defaultValue={b.status} className="px-3 py-2 rounded border border-[var(--border)] bg-transparent focus-outline">
                   <option value="pending">ausstehend</option>
                   <option value="confirmed">bestätigt</option>
                   <option value="canceled">storniert</option>
                 </select>
-                <button className="px-3 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Speichern</button>
+                <button className="btn-primary">Speichern</button>
               </form>
               <form action={updatePaymentStatus} className="flex items-center gap-2">
                 <input type="hidden" name="bookingId" value={b.id} />
-                <select name="paymentStatus" defaultValue={b.payment?.status ?? 'init'} className="px-3 py-2 rounded border border-[var(--border)] bg-transparent">
+                <select name="paymentStatus" defaultValue={b.payment?.status ?? 'init'} className="px-3 py-2 rounded border border-[var(--border)] bg-transparent focus-outline">
                   <option value="init">offen</option>
                   <option value="paid">bezahlt</option>
                   <option value="failed">fehlgeschlagen</option>
                 </select>
-                <button className="px-3 py-2 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10">Zahlung setzen</button>
+                <button className="btn-secondary">Zahlung setzen</button>
               </form>
             </div>
           </div>

@@ -86,3 +86,66 @@ a:hover {
 h1, h2, h3, h4 {
   line-height: 1.25;
 }
+
+/* Moderne UI-Verbesserungen */
+button, input, select, textarea {
+  color: var(--foreground);
+}
+
+input, select, textarea {
+  background: rgba(255,255,255,0.04);
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--foreground) 50%), linear-gradient(135deg, var(--foreground) 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* Kontrast für Dropdown-Texte erhöhen */
+select, option {
+  color: var(--foreground);
+}
+
+/* Karten/Container Look */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* Primäre Aktion */
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: 1px solid color-mix(in oklab, var(--accent) 60%, black);
+  border-radius: 10px;
+  padding: 0.5rem 0.875rem;
+}
+.btn-primary:hover { background: var(--accent-dark); }
+
+/* Sekundäre Aktion */
+.btn-secondary {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.5rem 0.875rem;
+}
+.btn-secondary:hover { background: color-mix(in oklab, var(--accent) 12%, transparent); }
+
+/* Fokusoptik */
+.focus-outline:focus-visible {
+  outline: 2px solid var(--accent-dark);
+  outline-offset: 2px;
+}
+
+/* Helfer für schlechte Kontrastumgebung */
+.text-high-contrast { color: color-mix(in oklab, var(--foreground) 92%, black); }
+.muted { color: color-mix(in oklab, var(--foreground) 60%, transparent); }
+

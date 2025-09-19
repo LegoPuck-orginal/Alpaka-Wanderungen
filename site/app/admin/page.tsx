@@ -159,9 +159,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const tours = await prisma.tour.findMany({ orderBy: { createdAt: 'desc' }, include: { images: { orderBy: { position: 'asc' } } } });
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="text-3xl font-bold mb-4 text-[var(--accent-dark)]">Admin-Dashboard</h1>
-      <p className="opacity-80 mb-6">Touren verwalten</p>
+    <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-[var(--accent-dark)]">Admin-Dashboard</h1>
+        <p className="opacity-80">Touren verwalten</p>
+      </div>
       {sp?.error && (
         <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-3 py-2">{sp.error}</div>
       )}
@@ -169,34 +171,34 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 text-emerald-700 px-3 py-2">{sp.success}</div>
       )}
 
-      <div className="grid sm:grid-cols-3 gap-3 mb-8">
-        <a href="/admin/slots" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+      <div className="grid sm:grid-cols-3 gap-4 mb-8">
+        <a href="/admin/slots" className="block card p-4 hover:bg-[var(--accent)]/10">
           <div className="font-semibold">Slots</div>
           <div className="text-sm opacity-80">Termine anlegen & löschen</div>
         </a>
-        <a href="/admin/bookings" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+        <a href="/admin/bookings" className="block card p-4 hover:bg-[var(--accent)]/10">
           <div className="font-semibold">Buchungen</div>
           <div className="text-sm opacity-80">Status verwalten</div>
         </a>
-        <a href="/admin/content" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+        <a href="/admin/content" className="block card p-4 hover:bg-[var(--accent)]/10">
           <div className="font-semibold">Texte</div>
           <div className="text-sm opacity-80">Inhalte bearbeiten</div>
         </a>
-        <a href="/admin/users" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+        <a href="/admin/users" className="block card p-4 hover:bg-[var(--accent)]/10">
           <div className="font-semibold">Benutzer</div>
           <div className="text-sm opacity-80">Admins & Rollen verwalten</div>
         </a>
-        <a href="/admin/stats" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+        <a href="/admin/stats" className="block card p-4 hover:bg-[var(--accent)]/10">
           <div className="font-semibold">Statistiken</div>
           <div className="text-sm opacity-80">Seitenaufrufe & Trends</div>
         </a>
-        <a href="/admin/calendar" className="block rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 hover:bg-[var(--accent)]/10">
+        <a href="/admin/calendar" className="block card p-4 hover:bg-[var(--accent)]/10">
           <div className="font-semibold">Kalender</div>
           <div className="text-sm opacity-80">Buchungen pro Tag</div>
         </a>
       </div>
 
-  <form action={createTour} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 grid sm:grid-cols-2 gap-4 mb-8">
+  <form action={createTour} className="card p-4 grid sm:grid-cols-2 gap-4 mb-8">
         <div>
           <label className="block text-sm mb-1">Titel</label>
           <input name="title" required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
@@ -224,7 +226,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
       <div className="grid gap-4">
         {tours.map((t) => (
-          <div key={t.id} className="rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm p-4 flex items-start gap-4">
+          <div key={t.id} className="card p-4 flex items-start gap-4">
             {t.imageUrl ? (
               <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md border border-[var(--border)]">
                 <Image src={t.imageUrl} alt="Tour Bild" fill sizes="112px" className="object-cover" />
@@ -246,12 +248,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <form action={uploadTourImage} encType="multipart/form-data" className="flex items-center gap-2">
                   <input type="hidden" name="tourId" value={t.id} />
                   <input name="image" type="file" accept="image/jpeg,image/png,image/webp" className="text-sm" required />
-                  <button className="px-3 py-1 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] text-sm">Bild hochladen</button>
+                  <button className="btn-primary text-sm">Bild hochladen</button>
                 </form>
                 {t.imageUrl && (
                   <form action={deleteTourImage}>
                     <input type="hidden" name="tourId" value={t.id} />
-                    <button className="px-3 py-1 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10 text-sm">Bild entfernen</button>
+                    <button className="btn-secondary text-sm">Bild entfernen</button>
                   </form>
                 )}
               </div>
@@ -260,7 +262,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <form action={uploadGallery} encType="multipart/form-data" className="flex items-center gap-2 mb-3">
                   <input type="hidden" name="tourId" value={t.id} />
                   <input name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple className="text-sm" />
-                  <button className="px-3 py-1 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)] text-sm">Bilder hinzufügen</button>
+                  <button className="btn-primary text-sm">Bilder hinzufügen</button>
                 </form>
                 {t.images.length === 0 ? (
                   <div className="text-sm opacity-70">Noch keine Galeriebilder.</div>
@@ -274,11 +276,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                         <form action={updateGalleryAlt} className="mt-2 flex items-center gap-2">
                           <input type="hidden" name="imageId" value={img.id} />
                           <input name="alt" defaultValue={img.alt ?? ''} placeholder="Alt-Text" className="w-full px-2 py-1 rounded border border-[var(--border)] bg-transparent text-xs" />
-                          <button className="px-2 py-1 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10 text-xs">Speichern</button>
+                          <button className="btn-secondary text-xs">Speichern</button>
                         </form>
                         <form action={deleteGalleryImage} className="mt-1">
                           <input type="hidden" name="imageId" value={img.id} />
-                          <button className="w-full px-2 py-1 rounded border border-[var(--border)] hover:bg-red-50 text-xs">Löschen</button>
+                          <button className="w-full btn-secondary text-xs hover:bg-red-50">Löschen</button>
                         </form>
                       </div>
                     ))}
@@ -288,7 +290,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             </div>
             <form action={deleteTour}>
               <input type="hidden" name="id" value={t.id} />
-              <button className="px-3 py-1 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10">Löschen</button>
+              <button className="btn-secondary">Löschen</button>
             </form>
           </div>
         ))}
