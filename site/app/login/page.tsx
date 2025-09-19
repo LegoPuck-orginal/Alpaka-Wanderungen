@@ -7,13 +7,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const res = await signIn("credentials", { email, password, redirect: false });
+  const res = await signIn("credentials", { email, password, token: token || undefined, redirect: false });
     if (!res || res.error) {
       setError("Login fehlgeschlagen");
     } else {
@@ -37,6 +38,11 @@ export default function LoginPage() {
               <input value={password} onChange={(e) => setPassword(e.target.value)} type={showPw ? 'text' : 'password'} className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" required />
               <button type="button" onClick={() => setShowPw(v => !v)} className="px-3 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10 text-sm">{showPw ? 'Verbergen' : 'Anzeigen'}</button>
             </div>
+          </div>
+          <div>
+            <label className="block text-sm mb-1">2FA-Code (optional)</label>
+            <input value={token} onChange={(e) => setToken(e.target.value)} inputMode="numeric" pattern="[0-9]*" maxLength={6} className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" placeholder="z. B. 123456" />
+            <p className="text-xs opacity-70 mt-1">Nur nötig, wenn für dein Konto 2FA aktiviert ist.</p>
           </div>
           {error && <div className="text-red-600 text-sm">{String(error).replace(/"/g, '&quot;')}</div>}
           <button type="submit" className="w-full px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Einloggen</button>

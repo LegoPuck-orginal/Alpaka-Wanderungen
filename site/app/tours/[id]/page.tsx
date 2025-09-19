@@ -73,7 +73,7 @@ export default async function TourDetail({ params, searchParams }: { params: Pro
         {tour.slots.length === 0 && (
           <div className="opacity-70">Derzeit keine Termine verfügbar.</div>
         )}
-  {tour.slots.map((s: SlotLite) => (
+      {tour.slots.map((s: SlotLite) => (
           <form key={s.id} action={async (formData: FormData) => {
             'use server';
             const slotId = String(formData.get('slotId'));
@@ -91,21 +91,22 @@ export default async function TourDetail({ params, searchParams }: { params: Pro
             if (!userId) {
               userId = (await ensureGuestUser()).id;
             }
-            const slot = await prisma.eventSlot.findUnique({ where: { id: slotId }, include: { tour: true } });
-            if (!slot) {
-              redirect(`/tours/${p.id}?error=${encodeURIComponent('Termin nicht gefunden')}`);
-            }
-            const booked = await prisma.booking.aggregate({
-              _sum: { persons: true },
-              where: { slotId, status: { in: ['pending','confirmed'] } },
-            });
-            const used = booked._sum.persons ?? 0;
-            if (used + persons > slot.capacity) {
-              redirect(`/tours/${p.id}?error=${encodeURIComponent('Leider nicht genug freie Plätze')}`);
-            }
-            const booking = await prisma.booking.create({ data: { userId, slotId, persons, contactEmail: email, status: 'pending' } });
-            const amountCents = (slot.tour?.priceCents ?? 0) * persons;
-            await prisma.payment.create({ data: { bookingId: booking.id, amountCents, currency: 'EUR', status: 'init' } });
+                const result = await prisma.$transaction(async (tx) => {
+                  const slot = await tx.eventSlot.findUnique({ where: { id: slotId }, include: { tour: true } });
+                  if (!slot) return { err: 'Termin nicht gefunden' } as const;
+                  const booked = await tx.booking.aggregate({ _sum: { persons: true }, where: { slotId, status: { in: ['pending','confirmed'] } } });
+                  const used = booked._sum.persons ?? 0;
+                  if (used + persons > slot.capacity) return { err: 'Leider nicht genug freie Plätze' } as const;
+                  const booking = await tx.booking.create({ data: { userId: userId!, slotId, persons, contactEmail: email, status: 'pending' } });
+                  const amountCents = (slot.tour?.priceCents ?? 0) * persons;
+                  await tx.payment.create({ data: { bookingId: booking.id, amountCents, currency: 'EUR', status: 'init' } });
+                  return { ok: booking } as const;
+                });
+                if ('err' in result) {
+                  const msg = result.err ?? 'Fehler bei der Reservierung';
+                  redirect(`/tours/${p.id}?error=${encodeURIComponent(msg)}`);
+                }
+                const booking = result.ok;
             await sendMail({ to: 'admin@example.com', subject: 'Neue Buchung', text: `Buchung ${booking.id} für ${persons} Person(en) · Kontakt: ${email}` });
             revalidatePath(`/tours/${p.id}`);
             redirect(`/tours/${p.id}?success=${encodeURIComponent('Reservierung eingegangen')}`);
@@ -113,7 +114,9 @@ export default async function TourDetail({ params, searchParams }: { params: Pro
             <input type="hidden" name="slotId" value={s.id} />
             <div>
               <div className="font-medium">{new Date(s.start).toLocaleString()}</div>
-              <div className="text-sm opacity-80">bis {new Date(s.end).toLocaleTimeString()}</div>
+                  <div className="text-sm opacity-80">bis {new Date(s.end).toLocaleTimeString()}</div>
+                  {/* Freie Plätze Anzeige */}
+                  <SlotFreeSeats slotId={s.id} capacity={s.capacity} />
             </div>
             <div className="flex items-center gap-2">
               <label className="text-sm" htmlFor={`email-${s.id}`}>E-Mail</label>
@@ -135,4 +138,11 @@ async function ensureGuestUser() {
   if (user) return user;
   const hash = await bcrypt.hash('guest', 10);
   return prisma.user.create({ data: { email, name: 'Gast', role: 'user', passwordHash: hash } });
+}
+
+async function SlotFreeSeats({ slotId, capacity }: { slotId: string; capacity: number }) {
+  const agg = await prisma.booking.aggregate({ _sum: { persons: true }, where: { slotId, status: { in: ['pending','confirmed'] } } });
+  const used = agg._sum.persons ?? 0;
+  const free = Math.max(capacity - used, 0);
+  return <div className="text-xs opacity-70">Freie Plätze: {free}/{capacity}</div>;
 }

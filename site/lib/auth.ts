@@ -3,10 +3,12 @@ import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import { authenticator } from "otplib";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(4),
+  token: z.string().optional(),
 });
 
 export const authOptions: NextAuthOptions = {
@@ -24,11 +26,19 @@ export const authOptions: NextAuthOptions = {
         try {
           const parsed = credentialsSchema.safeParse(credentials);
           if (!parsed.success) return null;
-          const { email, password } = parsed.data;
+          const { email, password, token } = parsed.data;
           const user = await prisma.user.findUnique({ where: { email } });
           if (!user) return null;
           const ok = await bcrypt.compare(password, user.passwordHash);
           if (!ok) return null;
+          // Wenn 2FA aktiv, muss ein gültiger TOTP-Token mitgeschickt werden
+          const u2 = user as typeof user & { twoFactorEnabled?: boolean; twoFactorSecret?: string | null };
+          if (u2.twoFactorEnabled) {
+            if (!u2.twoFactorSecret) return null;
+            if (!token) return null;
+            const valid = authenticator.verify({ token, secret: u2.twoFactorSecret });
+            if (!valid) return null;
+          }
           return { id: user.id, name: user.name, email: user.email, role: user.role as "admin" | "user" };
         } catch (e) {
           console.error("authorize error", e);

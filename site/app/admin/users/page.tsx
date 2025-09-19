@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { UserCreateSchema, UserRoleSchema, UserPasswordSchema } from "@/lib/schemas";
 import bcrypt from "bcryptjs";
+import { authenticator } from "otplib";
+import QRCode from "qrcode";
 
 async function createUser(formData: FormData) {
   'use server';
@@ -131,7 +133,7 @@ export default async function UsersAdminPage({ searchParams }: { searchParams: P
                 <div className="font-semibold">{u.name || '—'} <span className="opacity-70">&lt;{u.email}&gt;</span></div>
                 <div className="text-sm opacity-80">Rolle: {u.role}</div>
               </div>
-              <div className="flex flex-wrap gap-3 items-center">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <form action={updateRole} className="flex items-center gap-2">
                   <input type="hidden" name="id" value={u.id} />
                   <select name="role" defaultValue={u.role} className="px-3 py-2 rounded border border-[var(--border)] bg-transparent">
@@ -145,6 +147,8 @@ export default async function UsersAdminPage({ searchParams }: { searchParams: P
                   <input name="password" type="password" placeholder="Neues Passwort" className="px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
                   <button className="px-3 py-2 rounded border border-[var(--border)] hover:bg-[var(--accent)]/10">Passwort setzen</button>
                 </form>
+                {/* 2FA Bereich */}
+                <TwoFactorBlock userId={u.id} email={u.email} twoFactorEnabled={(u as any).twoFactorEnabled} />
                 <form action={deleteUser}>
                   <input type="hidden" name="id" value={u.id} />
                   <button className="px-3 py-2 rounded border border-[var(--border)] hover:bg-red-500/10">Löschen</button>
@@ -154,6 +158,79 @@ export default async function UsersAdminPage({ searchParams }: { searchParams: P
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+async function enable2FA(formData: FormData) {
+  'use server';
+  const id = String(formData.get('id'));
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) redirect('/admin/users?error=Benutzer+nicht+gefunden');
+  const secret = authenticator.generateSecret();
+  await prisma.user.update({ where: { id }, data: { twoFactorSecret: secret } });
+  revalidatePath('/admin/users');
+}
+
+async function verify2FA(formData: FormData) {
+  'use server';
+  const id = String(formData.get('id'));
+  const token = String(formData.get('token'));
+  const u = await prisma.user.findUnique({ where: { id } });
+  if (!u?.twoFactorSecret) redirect('/admin/users?error=Kein+2FA-Secret+gesetzt');
+  const valid = authenticator.verify({ token, secret: u.twoFactorSecret });
+  if (!valid) redirect('/admin/users?error=Code+ungültig');
+  await prisma.user.update({ where: { id }, data: { twoFactorEnabled: true } });
+  revalidatePath('/admin/users');
+  redirect('/admin/users?success=2FA+aktiviert');
+}
+
+async function disable2FA(formData: FormData) {
+  'use server';
+  const id = String(formData.get('id'));
+  await prisma.user.update({ where: { id }, data: { twoFactorEnabled: false, twoFactorSecret: null } });
+  revalidatePath('/admin/users');
+  redirect('/admin/users?success=2FA+deaktiviert');
+}
+
+async function TwoFactorBlock({ userId, email, twoFactorEnabled }: { userId: string; email: string; twoFactorEnabled: boolean }) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const secret = user?.twoFactorSecret ?? null;
+  const label = encodeURIComponent(`AlpakaWanderungen:${email}`);
+  const issuer = encodeURIComponent('AlpakaWanderungen');
+  const otpauth = secret ? `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}` : null;
+  const qr = otpauth ? await QRCode.toDataURL(otpauth) : null;
+  return (
+    <div className="border border-[var(--border)] rounded-md p-3">
+      <div className="text-sm font-medium mb-2">Zwei-Faktor-Auth</div>
+      {twoFactorEnabled ? (
+        <form action={disable2FA} className="flex items-center gap-2">
+          <input type="hidden" name="id" value={userId} />
+          <button className="btn-secondary">2FA deaktivieren</button>
+        </form>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {!secret ? (
+            <form action={enable2FA}>
+              <input type="hidden" name="id" value={userId} />
+              <button className="btn-secondary">2FA einrichten</button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-3">
+              {qr && <img src={qr} alt="2FA QR Code" className="h-24 w-24 border border-[var(--border)] rounded" />}
+              <div className="text-xs opacity-80 break-all">
+                <div>Secret: <code>{secret}</code></div>
+                <div>Scanne den QR-Code mit deiner Authenticator-App und gib den 6-stelligen Code ein.</div>
+                <form action={verify2FA} className="mt-2 flex items-center gap-2">
+                  <input type="hidden" name="id" value={userId} />
+                  <input name="token" inputMode="numeric" pattern="[0-9]*" maxLength={6} placeholder="123456" className="px-2 py-1 rounded border border-[var(--border)] bg-transparent" />
+                  <button className="btn-primary">Aktivieren</button>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

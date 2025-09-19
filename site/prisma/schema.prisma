@@ -27,6 +27,8 @@ model User {
   // Note: SQLite unterstützt keine Prisma-Enums. Wir nutzen Strings mit Default.
   role          String   @default("user")
   passwordHash  String
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   bookings      Booking[]
