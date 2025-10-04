@@ -1,0 +1,19 @@
+Protokoll (3. Oktober 2025)
+
+1. `npm run lint`
+   → Keine Probleme gefunden.
+
+2. `npm run build`
+   → Build erfolgreich abgeschlossen, alle Seiten/Routes generiert.
+
+3. `npm run lint`
+   → Nach den Farb-Anpassungen weiterhin keine linting-Fehler.
+
+4. `npm run build`
+   → Build erneut erfolgreich; Produktion bleibt lauffähig.
+
+5. `npx eslint .`
+   → Lint erneut ohne Beanstandungen (Workaround, da `npm run lint` ein Dev-Server-Script startet).
+
+6. `npm run build`
+   → Aktueller Produktionsbuild erfolgreich durchgelaufen.

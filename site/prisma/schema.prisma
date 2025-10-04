@@ -1,0 +1,135 @@
+// Prisma schema for Alpaka-Wanderungen
+// Assumptions: SQLite for local dev
+// Roles: 'admin' | 'user'
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Einfache Key-Value-Content-Tabelle für CMS-Texte
+model Content {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  // Note: SQLite unterstützt keine Prisma-Enums. Wir nutzen Strings mit Default.
+  role          String   @default("user")
+  passwordHash  String
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  bookings      Booking[]
+}
+
+model Tour {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  durationMin Int
+  priceCents  Int
+  capacity    Int
+  imageUrl    String?
+  imageAlt    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  slots       EventSlot[]
+  images      TourImage[]
+}
+
+model EventSlot {
+  id        String   @id @default(cuid())
+  tourId    String
+  start     DateTime
+  end       DateTime
+  capacity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tour      Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+
+  @@index([tourId, start])
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  code       String?  @unique
+  userId     String
+  slotId     String
+  persons    Int      @default(1)
+  contactEmail String?
+  // pending | confirmed | canceled
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slot       EventSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  payment    Payment?
+
+  @@index([userId])
+  @@index([slotId])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  sessionId String
+  referrer  String?
+  userAgent String?
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  amountCents Int
+  currency    String   @default("EUR")
+  // init | paid | failed
+  status      String   @default("init")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model TourImage {
+  id        String   @id @default(cuid())
+  tourId    String
+  url       String
+  alt       String?
+  width     Int?
+  height    Int?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  tour      Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@index([tourId, position])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  text      String
+  rating    Int      @default(5)
+  position  Int      @default(0)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+}
