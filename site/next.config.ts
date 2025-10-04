@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import type { RemotePattern } from "next/dist/shared/lib/image-config";
 
 function computeAllowedOrigins() {
   const origins = new Set<string>();
@@ -24,7 +25,7 @@ function computeAllowedOrigins() {
 }
 
 const images = (() => {
-  const patterns: { protocol: 'http' | 'https'; hostname: string; port?: string; pathname: string }[] = [];
+  const patterns: RemotePattern[] = [];
   if (process.env.STORAGE_BACKEND === 's3' && process.env.S3_PUBLIC_BASE) {
     try {
       const u = new URL(process.env.S3_PUBLIC_BASE);
@@ -35,7 +36,7 @@ const images = (() => {
   if (process.env.STORAGE_BACKEND === 'cloudinary') {
     patterns.push({ protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' });
   }
-  return patterns.length ? { remotePatterns: patterns as any } : undefined;
+  return patterns.length ? { remotePatterns: patterns } : undefined;
 })();
 
 const nextConfig: NextConfig = {

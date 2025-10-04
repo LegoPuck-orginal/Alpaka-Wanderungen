@@ -28,7 +28,11 @@ export default function ThemeSwitcher() {
   }
 
   return (
-    <select value={theme} onChange={onChange} className="px-2 py-1 rounded border border-[var(--border)] bg-transparent text-sm">
+    <select
+      value={theme}
+      onChange={onChange}
+      className="min-w-[120px] bg-transparent text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)]/65 hover:text-[color:var(--foreground)]"
+    >
       {THEMES.map((t) => (
         <option key={t.id} value={t.id}>{t.label}</option>
       ))}

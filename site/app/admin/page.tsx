@@ -17,8 +17,6 @@ async function createTour(formData: FormData): Promise<void> {
     durationMin: data.durationMin,
     priceCents,
     capacity: data.capacity,
-    minPersonsPerBooking: data.minPersonsPerBooking ?? 1,
-    maxPersonsPerBooking: data.maxPersonsPerBooking ?? 6,
   });
   if (!parsed.success) {
     redirect(`/admin?error=${encodeURIComponent(parsed.error.issues[0]?.message ?? 'Ungültige Eingaben')}`);
@@ -198,6 +196,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <div className="font-semibold">Kalender</div>
           <div className="text-sm opacity-80">Buchungen pro Tag</div>
         </a>
+        <a href="/admin/reviews" className="block card p-4 hover:bg-[var(--accent)]/10">
+          <div className="font-semibold">Bewertungen</div>
+          <div className="text-sm opacity-80">Kundenfeedback verwalten</div>
+        </a>
       </div>
 
   <form action={createTour} className="card p-4 grid sm:grid-cols-2 gap-4 mb-8">
@@ -220,14 +222,6 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <div>
           <label className="block text-sm mb-1">Kapazität</label>
           <input name="capacity" type="number" min={1} required className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Min. Personen pro Buchung</label>
-          <input name="minPersonsPerBooking" type="number" min={1} defaultValue={1} className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Max. Personen pro Buchung</label>
-          <input name="maxPersonsPerBooking" type="number" min={1} defaultValue={6} className="w-full px-3 py-2 rounded border border-[var(--border)] bg-transparent" />
         </div>
         <div className="sm:col-span-2">
           <button className="px-4 py-2 rounded bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-dark)]">Tour anlegen</button>

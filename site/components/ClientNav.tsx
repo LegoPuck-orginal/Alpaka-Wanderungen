@@ -6,7 +6,14 @@ import { useEffect, useState } from "react";
 
 type SessionUser = { role?: string } | null;
 
-export default function ClientNav() {
+type NavLabels = {
+  tours: string;
+  calendar: string;
+  admin: string;
+  logout: string;
+};
+
+export default function ClientNav({ labels }: { labels: NavLabels }) {
   const [user, setUser] = useState<SessionUser>(null);
 
   useEffect(() => {
@@ -25,13 +32,14 @@ export default function ClientNav() {
   }, []);
 
   return (
-    <nav className="flex gap-4 text-sm items-center">
-      <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/tours">Touren</Link>
+    <nav className="flex items-center gap-2 text-sm">
+      <Link className="rounded-full px-3 py-1.5 font-medium text-[color:var(--foreground)]/85 transition hover:text-[color:var(--foreground)] hover:bg-[color:var(--surface-muted)]/80" href="/tours">{labels.tours}</Link>
+      <Link className="rounded-full px-3 py-1.5 font-medium text-[color:var(--foreground)]/85 transition hover:text-[color:var(--foreground)] hover:bg-[color:var(--surface-muted)]/80" href="/calendar">{labels.calendar}</Link>
       {user?.role === 'admin' && (
-        <Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/admin">Admin</Link>
+        <Link className="rounded-full px-3 py-1.5 font-medium text-[color:var(--foreground)]/85 transition hover:text-[color:var(--foreground)] hover:bg-[color:var(--surface-muted)]/80" href="/admin">{labels.admin}</Link>
       )}
       <ThemeSwitcher />
-      {user ? <SignOutButton /> : null}
+      {user ? <SignOutButton label={labels.logout} /> : null}
     </nav>
   );
 }

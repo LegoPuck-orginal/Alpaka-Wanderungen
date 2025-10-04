@@ -7,6 +7,8 @@ import ThemeSwitcher from "../components/ThemeSwitcher";
 import Tracker from "../components/Tracker";
 import { Suspense } from "react";
 import ClientNav from "../components/ClientNav";
+import { getManyContent } from "@/lib/content";
+import { getContentDefaultsForSections } from "@/lib/contentRegistry";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,32 +30,74 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const content = await getManyContent(
+    getContentDefaultsForSections(["layout.navigation", "layout.footer"])
+  );
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <header className="w-full sticky top-0 backdrop-blur bg-[color:var(--background)]/80 border-b border-[color:var(--accent-dark)]/10 z-10">
-          <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2" aria-label="Startseite">
-              <Image src="/logo.svg" alt="Alpaka Wanderungen" width={128} height={32} className="h-7 w-auto" />
-            </Link>
-            <Suspense fallback={<nav className="flex gap-4 text-sm items-center"><Link className="text-[var(--foreground)] hover:underline underline-offset-4" href="/tours">Touren</Link><ThemeSwitcher /></nav>}>
-              <ClientNav />
-            </Suspense>
-          </div>
-        </header>
-
-  <main className="min-h-[calc(100vh-120px)]">{children}</main>
-  <Tracker />
-
-        <footer className="w-full border-t border-[color:var(--accent-dark)]/10">
-          <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-[color:var(--foreground)]/80 flex items-center justify-between">
-            <span>© {new Date().getFullYear()} Alpaka Wanderungen</span>
-            <div className="flex items-center gap-4">
-              <a className="opacity-80 hover:underline" href="/datenschutz">Datenschutz</a>
-              <span className="opacity-80">Entspannt unterwegs im Grünen</span>
+        <div className="relative flex min-h-screen flex-col">
+          <header className="sticky top-0 z-30 px-4 pt-6">
+            <div className="mx-auto max-w-6xl">
+              <div className="glass-panel flex items-center justify-between gap-4 px-5 py-3">
+                <Link href="/" className="flex items-center gap-3" aria-label="Startseite">
+                  <Image src="/logo.svg" alt="Alpaka Wanderungen" width={140} height={38} className="h-8 w-auto drop-shadow" />
+                  <span className="hidden text-sm font-semibold tracking-tight text-[color:var(--foreground)]/70 sm:inline">{content["layout.nav.tagline"]}</span>
+                </Link>
+                <div className="flex items-center gap-3">
+                  <Suspense
+                    fallback={
+                      <nav className="flex items-center gap-2 text-sm">
+                        <Link className="rounded-full px-3 py-1.5 font-medium text-[color:var(--foreground)]/85 transition hover:text-[color:var(--foreground)] hover:bg-[color:var(--surface-muted)]/80" href="/tours">
+                          {content["layout.nav.tours"]}
+                        </Link>
+                        <ThemeSwitcher />
+                      </nav>
+                    }
+                  >
+                    <ClientNav
+                      labels={{
+                        tours: content["layout.nav.tours"],
+                        calendar: content["layout.nav.calendar"],
+                        admin: content["layout.nav.admin"],
+                        logout: content["layout.nav.logout"],
+                      }}
+                    />
+                  </Suspense>
+                  <Link href="/tours" className="hidden text-sm font-semibold uppercase tracking-wide text-[color:var(--foreground)]/65 transition hover:text-[color:var(--foreground)]/90 lg:block">
+                    {content["layout.nav.cta"]}
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
-        </footer>
+          </header>
+
+          <main className="flex-1">
+            {children}
+          </main>
+          <Tracker />
+
+          <footer className="px-4 pb-10 pt-12">
+            <div className="mx-auto flex max-w-6xl flex-col gap-8 rounded-3xl border border-[color:var(--border)]/60 bg-[color:var(--surface-muted)]/60 px-6 py-8 text-sm text-[color:var(--foreground)]/80 backdrop-blur md:flex-row md:items-center md:justify-between">
+              <div className="space-y-2">
+                <span className="text-base font-semibold text-[color:var(--foreground)]">{content["layout.footer.ctaTitle"]}</span>
+                <p className="max-w-sm">{content["layout.footer.ctaText"]}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href="/tours" className="btn-primary">{content["layout.footer.primaryCta"]}</Link>
+                <Link href="/calendar" className="btn-secondary">{content["layout.footer.secondaryCta"]}</Link>
+              </div>
+            </div>
+            <div className="mx-auto mt-8 flex max-w-6xl flex-col items-start justify-between gap-4 text-xs text-[color:var(--foreground)]/60 sm:flex-row sm:items-center">
+              <p>© {new Date().getFullYear()} Alpaka Wanderungen</p>
+              <div className="flex flex-wrap items-center gap-4">
+                <a className="hover:text-[color:var(--foreground)]/90" href="/datenschutz">{content["layout.footer.privacy"]}</a>
+                <Link className="hover:text-[color:var(--foreground)]/90" href="/admin">{content["layout.footer.admin"]}</Link>
+                <span>{content["layout.footer.signature"]}</span>
+              </div>
+            </div>
+          </footer>
+        </div>
       </body>
     </html>
   );

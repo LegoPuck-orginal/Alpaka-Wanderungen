@@ -22,11 +22,13 @@ Inhalt
 - Wartung & Updates
 
 ## Überblick & Features
-- Touren mit Terminslots (Kapazität, Personen pro Buchung min/max)
+- Touren mit Terminslots (Kapazität pro Slot)
+- Intelligente Buchungswarnungen basierend auf Alpaka-Verfügbarkeit
 - Buchung pro Slot inkl. Personenanzahl, Status (pending/confirmed/canceled)
 - Eindeutiger Buchungscode pro Bestellung
-- Admin‑Bereich: Touren/Slots/Buchungen/Benutzer/Content/Stats
-- Login via E‑Mail+Passwort, optional TOTP‑2FA (geplant/teilweise vorhanden)
+- Kundenbewertungen (bis zu 5 sichtbare, horizontal scrollbar auf Homepage)
+- Admin‑Bereich: Touren/Slots/Buchungen/Bewertungen/Benutzer/Content/Stats
+- Login via E‑Mail+Passwort, optional TOTP‑2FA
 - CMS‑artige Content‑Keys (Hero‑Texte etc.)
 - Bild‑Uploads (lokal oder optional S3/Cloudinary) mit Resize/WebP
 
@@ -51,11 +53,12 @@ site/
 
 ## Datenmodell (vereinfacht)
 - `User`: { id, email, name?, role, passwordHash, twoFactorEnabled, twoFactorSecret?, createdAt, updatedAt }
-- `Tour`: { id, title, description, durationMin, priceCents, capacity, minPersonsPerBooking, maxPersonsPerBooking, imageUrl?, imageAlt?, ... }
+- `Tour`: { id, title, description, durationMin, priceCents, capacity, imageUrl?, imageAlt?, ... }
 - `EventSlot`: { id, tourId → Tour, start, end, capacity }
 - `Booking`: { id, code?, userId → User, slotId → EventSlot, persons, contactEmail?, status, payment? }
 - `Payment`: { id, bookingId → Booking, amountCents, currency, status }
 - `Content`: { id, key, value }
+- `Review`: { id, name, text, rating, position, isVisible, createdAt, updatedAt }
 - `TourImage`: { id, tourId → Tour, url, alt?, width?, height?, position }
 - `PageView`: { id, path, sessionId, ... }
 

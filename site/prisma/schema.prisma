@@ -41,8 +41,6 @@ model Tour {
   durationMin Int
   priceCents  Int
   capacity    Int
-  minPersonsPerBooking Int @default(1)
-  maxPersonsPerBooking Int @default(6)
   imageUrl    String?
   imageAlt    String?
   createdAt   DateTime @default(now())
@@ -123,3 +121,15 @@ model TourImage {
   @@index([tourId, position])
 }
 
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  text      String
+  rating    Int      @default(5)
+  position  Int      @default(0)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position])
+}
