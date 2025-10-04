@@ -1,268 +1,317 @@
+# Alpaka‑Wanderungen
 
-# Alpaka‑Wanderungen – Vollständige Dokumentation
+> Moderne Plattform für Alpaka-Touren mit Komplett-Admin, automatischer Terminlogik und angenehmem Dark-Design.
 
-Next.js 15 (App Router) · TypeScript · Prisma (SQLite) · NextAuth (Credentials) · Tailwind‑Utilities · Bildspeicher lokal/S3/Cloudinary.
+<p align="center">
+  <strong>Next.js 15 · TypeScript · Prisma · NextAuth · Tailwind Utilities · SQLite</strong>
+</p>
 
-Inhalt
-- Überblick & Features
-- Systemarchitektur & Projektstruktur
-- Datenmodell (Prisma)
-- Konfiguration (.env) und Secrets
-- Quickstart (2–3 Befehle)
-- Entwicklung (Dev)
-- Betrieb (Prod): LAN, Nginx/Proxy, Cloudflare Tunnel
-- Datenbank & Migrations
-- Admin‑Anleitung (Benutzer, 2FA, Inhalte, Touren/Slots, Buchungen)
-- API‑Endpunkte (Kurzreferenz)
-- Medien‑Storage (lokal, S3, Cloudinary)
-- Sicherheit (Passwörter, 2FA, Session/Cookies, CORS)
-- Logging, Monitoring, Health‑Checks
-- Backups & Wiederherstellung
-- Troubleshooting (häufige Fehler)
-- Wartung & Updates
+---
 
-## Überblick & Features
-- Touren mit Terminslots (Kapazität pro Slot)
-- Intelligente Buchungswarnungen basierend auf Alpaka-Verfügbarkeit
-- Buchung pro Slot inkl. Personenanzahl, Status (pending/confirmed/canceled)
-- Eindeutiger Buchungscode pro Bestellung
-- Kundenbewertungen (bis zu 5 sichtbare, horizontal scrollbar auf Homepage)
-- Admin‑Bereich: Touren/Slots/Buchungen/Bewertungen/Benutzer/Content/Stats
-- Login via E‑Mail+Passwort, optional TOTP‑2FA
-- CMS‑artige Content‑Keys (Hero‑Texte etc.)
-- Bild‑Uploads (lokal oder optional S3/Cloudinary) mit Resize/WebP
+## 📚 Inhaltsverzeichnis
 
-## Systemarchitektur & Projektstruktur
-- App Router (`/app`): Seiten, API‑Routes
-- Server Actions für Admin‑Formulare (CRUD)
-- `lib/prisma.ts` Single Prisma Client Instance
-- `lib/auth.ts` NextAuth Credentials‑Flow
-- `lib/content.ts` Key‑Value‑Inhalte
-- `lib/storage.ts` Medien‑Storage Provider (local/s3/cloudinary)
+1. [Projektüberblick](#-projektüberblick)
+2. [Technologie-Stack & Architektur](#-technologie-stack--architektur)
+3. [Installation & Setup](#-installation--setup)
+4. [Alltagsaufgaben & Admin](#-alltagsaufgaben--admin)
+5. [Bugfix-Playbook](#-bugfix-playbook)
+6. [Betrieb & Wartung](#-betrieb--wartung)
+7. [Sicherheit & Compliance](#-sicherheit--compliance)
+8. [Datenmodell](#-datenmodell)
+9. [API-Kurzreferenz](#-api-kurzreferenz)
+10. [Medien- & Speicheroptionen](#-medien--speicheroptionen)
+11. [Troubleshooting-Lexikon](#-troubleshooting-lexikon)
+12. [Anhang](#-anhang)
 
-Verzeichnisbaum (auszug):
+---
+
+## 🐾 Projektüberblick
+
+### Highlights
+- Dauerhaft buchbare Touren – Termine generieren sich automatisch (Vormittag/Nachmittag)
+- Live-Verfügbarkeiten mit deutlichem Farbcode (weiß/gelb/rot)
+- Mehrstufiges Buchungssystem inkl. Buchungscode, Personenanzahl und Statusverwaltung
+- Vollständiges Admin-Backoffice: Touren, Buchungen, Bewertungen, Benutzer, Inhalte
+- CMS-gestützte Texte für alle öffentlichen Seiten
+- Flexible Bildspeicherung (lokal, S3, Cloudinary) mit automatischer Optimierung
+
+### Zielgruppen
+- **Besitzer:innen / Admins** – verwalten Touren, Inhalte und Buchungen
+- **Gäste** – informieren sich, buchen Termine, lassen Bewertungen da
+- **Entwickler:innen** – erweitern Features, pflegen Betrieb, beheben Bugs
+
+---
+
+## 🧭 Technologie-Stack & Architektur
+
+| Ebene | Technologien | Notizen |
+| --- | --- | --- |
+| Frontend | Next.js App Router, React Server Components, Tailwind Utilities | Dark Default Theme, modulare Komponenten |
+| Backend | Next.js API Routes, Server Actions, NextAuth Credentials | TOTP-fähige Auth, Session Cookies |
+| Datenhaltung | Prisma Client, SQLite | Einfache Migration/Backup, lokal eingebettet |
+| Storage | Datei-System · S3 · Cloudinary | via `STORAGE_BACKEND` umschaltbar |
+
+### Projektstruktur (Auszug)
 ```
 site/
-  app/                # Seiten & API
-  lib/                # Prisma, Auth, Content, Storage
-  prisma/             # schema.prisma, migrations, seed.js
-  public/             # statische Assets (uploads/)
-  scripts/            # quickstart.cjs
-  next.config.ts, tsconfig.json, package.json
+  app/                # Seiten, Layouts, API-Routen
+  components/         # UI-Komponenten (Kalender, Inputs, Navigation)
+  lib/                # Prisma, Auth, Content-Registry, Default-Slots
+  prisma/             # schema.prisma, seed, Migrationen
+  public/             # statische Assets & Uploads
+  scripts/            # Automation & Quickstart
 ```
 
-## Datenmodell (vereinfacht)
-- `User`: { id, email, name?, role, passwordHash, twoFactorEnabled, twoFactorSecret?, createdAt, updatedAt }
-- `Tour`: { id, title, description, durationMin, priceCents, capacity, imageUrl?, imageAlt?, ... }
-- `EventSlot`: { id, tourId → Tour, start, end, capacity }
-- `Booking`: { id, code?, userId → User, slotId → EventSlot, persons, contactEmail?, status, payment? }
-- `Payment`: { id, bookingId → Booking, amountCents, currency, status }
-- `Content`: { id, key, value }
-- `Review`: { id, name, text, rating, position, isVisible, createdAt, updatedAt }
-- `TourImage`: { id, tourId → Tour, url, alt?, width?, height?, position }
-- `PageView`: { id, path, sessionId, ... }
+---
 
-## Konfiguration (.env)
-Minimal (LAN‑Beispiel):
-```env
-NODE_ENV=production
-DATABASE_URL="file:/absoluter/pfad/zur/dev.db"   # absolut empfohlen
-NEXTAUTH_URL=http://<SERVER_IP>:3000
-NEXTAUTH_SECRET=<BASE64_32_BYTES>
-```
-Weitere optionale Variablen (Storage):
-```env
-STORAGE_BACKEND=local|s3|cloudinary
-# S3
-S3_BUCKET=...
-S3_REGION=...
-S3_PUBLIC_BASE=https://<bucket>.s3.<region>.amazonaws.com
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
-```
+## ⚙️ Installation & Setup
 
-## Quickstart (2–3 Befehle)
+### Voraussetzungen
+- Node.js ≥ 20
+- npm ≥ 10
+- (optional) `sqlite3` CLI, `cloudflared`, `nginx`
+
+### Quickstart (3 Schritte)
 ```bash
 cd /pfad/zu/Alpaka-Wanderungen/site
 npm ci
 npm run quickstart
 ```
-Das Script:
-- erzeugt `.env` falls nötig (inkl. absolutem `DATABASE_URL`)
-- `prisma generate` + `prisma db push`
-- seedet Admin (`admin@example.com` / `admin123`)
-- baut und startet Next auf `0.0.0.0:3000`
+> Erststart legt `.env` an, führt Prisma-Befehle aus, erstellt einen Admin-User (`admin@example.com` / `admin123`) und startet die App auf `http://0.0.0.0:3000`.
 
-Zugriff: `http://<SERVER_IP>:3000` · Login: `/login` · Admin: `/admin`
-
-## Entwicklung (Dev)
+### Lokale Entwicklung
 ```bash
 npm ci
 npm run dev
-# http://localhost:3000
+# erreichbar unter http://localhost:3000
 ```
 
-## Betrieb (Prod)
-Manuell:
+### Production Build & Start
 ```bash
 npm run build
 npx next start -p 3000 -H 0.0.0.0
 ```
-Nginx (optional Reverse Proxy mit TLS):
-- Nginx vhost → Upstream `http://127.0.0.1:3000`
-- TLS via Let’s Encrypt/Certbot
 
-Cloudflare Tunnel (ohne offenen Port):
-- `cloudflared` → Route öffentliche Domain → `http://127.0.0.1:3000`
-- `NEXTAUTH_URL` auf die öffentliche URL setzen
+### Konfiguration (.env)
+```env
+NODE_ENV=production
+DATABASE_URL="file:/absoluter/pfad/zur/dev.db"
+NEXTAUTH_URL=http://<SERVER_ODER_DOMAIN>:3000
+NEXTAUTH_SECRET=<BASE64_32_BYTES>
 
-## Datenbank & Migrationen
-```bash
-npx prisma generate
-npx prisma db push
-# Studio (optional):
-npx prisma studio
+# optionaler Medien-Storage
+STORAGE_BACKEND=local|s3|cloudinary
+S3_BUCKET=...
+S3_REGION=...
+S3_PUBLIC_BASE=https://<bucket>.s3.<region>.amazonaws.com
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
 ```
 
-## Admin‑Anleitung
-- Benutzer: `/admin/users` (Rolle, Passwort setzen, 2FA verwalten)
-- Sicherheit/2FA: `/admin/security` (Platzhalter; 2FA Logik in Users)
-- Inhalte (Hero‑Texte): `/admin/content`
-- Touren/Slots: `/admin` (Anlegen/Bearbeiten/Löschen, Uploads)
-- Buchungen: `/admin/bookings` (Status/Payment)
+### Netzwerk-Varianten
+- **LAN / Heimnetz:** Direktzugriff über `http://<IP>:3000`, ggf. UFW-Port freigeben
+- **Reverse Proxy (nginx):** Upstream `http://127.0.0.1:3000`, TLS mit Let’s Encrypt
+- **Cloudflare Tunnel:** `cloudflared` → öffentliche Domain, `NEXTAUTH_URL` anpassen
 
-Standard‑Login: `admin@example.com` · `admin123` (nach Start ändern!)
-Passwort setzen per Einzeiler:
+---
+
+## 🛠️ Alltagsaufgaben & Admin
+
+| Bereich | Route | Aufgaben |
+| --- | --- | --- |
+| Inhalte | `/admin/content` | CMS-Keys pflegen (Hero, Kalendertexte, etc.) |
+| Touren & Slots | `/admin` | Tourdaten, Bilder, Kapazitäten – Slots generieren sich automatisch |
+| Buchungen | `/admin/bookings` | Status verwalten (pending/confirmed/canceled), Zahlungen überblicken |
+| Bewertungen | `/admin/reviews` | Sichtbare Testimonials kuratieren |
+| Benutzer & 2FA | `/admin/users` | Rollen setzen, 2FA aktivieren, Passwörter zurücksetzen |
+
+**Standard-Admin:** `admin@example.com` / `admin123` → nach dem ersten Login Kennwort ändern!  
+Passwort-Reset per Einzeiler:
 ```bash
 node -e "const{PrismaClient}=require('@prisma/client');(async()=>{const p=new PrismaClient();await p.user.update({where:{email:'admin@example.com'},data:{passwordHash:require('bcryptjs').hashSync('NEUESPASSWORT',10)}});console.log('Passwort geändert');await p.$disconnect()})().catch(e=>{console.error(e);process.exit(1)})"
 ```
 
-## API‑Endpunkte (Kurz)
-- `GET /api/health` → { ok, db, users }
-- `GET /api/tours` → Tourliste
-- `GET /api/tours/[id]` → Tourdetails
-- `POST /api/bookings` → Buchung anlegen (Gast/registriert)
-- `GET/POST /api/auth/[...nextauth]` → NextAuth
+---
 
-## Medien‑Storage
-Konfiguriert über `STORAGE_BACKEND` (siehe `.env`). Lokal speichert unter `public/uploads/` (mit Resize/WebP). S3/Cloudinary optional.
+## 🐛 Bugfix-Playbook
 
-## Sicherheit
-- Starke Passwörter; Admin‑Passwort direkt ändern
-- `NEXTAUTH_URL` korrekt setzen (LAN/Domain)
-- Optional 2FA per TOTP (Implementierung in `app/admin/users`)
-- Firewall/UFW: nur notwendige Ports (3000 oder 80/443 via Proxy)
+### Schnelle Checkliste
+1. **Fehlermeldung sammeln** – Log, Browser-Konsole, Terminalausgabe dokumentieren
+2. **Status prüfen** – `npm run lint`, `npm run build`, `GET /api/health`
+3. **Reproduktion** – minimalen Testfall aufsetzen (URL, Input, Konto)
+4. **Fix umsetzen** – Tests/Checks aktualisieren, Code-Style einhalten
+5. **Regression vermeiden** – relevante Seiten im Browser abklopfen, ggf. `npm run test`
 
-## Logging, Monitoring, Health
-- Health: `GET /api/health`
-- Next.js Logs im Prozess/PM2/Journalctl
-- Optional: Nginx/Cloudflare Logs
+### Diagnose-Tools
+- **Health-Check:** `curl http://localhost:3000/api/health`
+- **Prisma Studio:** `npx prisma studio`
+- **Slot-Verfügbarkeit:** `curl "http://localhost:3000/api/slots/calendar?start=...&end=..."`
+- **Lint/Test:** `npm run lint`, `npm run test`
 
-## Backups
-- SQLite‑Datei sichern (in `.env`: `DATABASE_URL`) – am besten Service vorher stoppen
-- Uploads: `public/uploads/` mitsichern
+### Typische Fehlerbilder & Sofortmaßnahmen
 
-## Troubleshooting
-Nach Themen gruppiert – jeweils mit Symptomen, Ursache, Diagnose und Fix.
+| Symptom | Ursache | Diagnose | Fix |
+| --- | --- | --- | --- |
+| Login schlägt kommentarlos fehl | `NEXTAUTH_URL` falsch | `echo $NEXTAUTH_URL` | `.env` aktualisieren, Server neu starten |
+| „Environment variable not found: DATABASE_URL“ | `.env` fehlt | `ls -a` im Projekt | `.env` anlegen, absolute DB-Pfade nutzen |
+| Slot wirkt überbucht | Alte Slot-Daten | `npx prisma studio` (Bookings) | Buchung anpassen, automatische Slots regenerieren lassen |
+| Upload landet nicht | MIME/Size unzulässig | Server-Log, Browser-DevTools | Bildgröße <5MB, erlaubte Typen (JPG/PNG/WebP) nutzen |
 
-### 1) Environment/Config
-- Symptom: „Environment variable not found: DATABASE_URL“
-  - Ursache: `.env` fehlt oder key fehlt
-  - Diagnose: `grep -n DATABASE_URL .env*`; `npx prisma generate`
-  - Fix: `.env` anlegen; `DATABASE_URL` setzen; `npx prisma db push`
-- Symptom: Login schlägt ohne Fehler fehl
-  - Ursache: Falsche `NEXTAUTH_URL` (LAN vs Domain); Cookies „falsch“
-  - Diagnose: `echo $NEXTAUTH_URL`; `curl -I http://IP:3000/api/auth/csrf`
-  - Fix: `NEXTAUTH_URL` korrekt setzen; Browser‑Cookies löschen; neu anmelden
-- Symptom: Server Actions blockiert (CORS/Origin)
-  - Ursache: forwarded Host nicht whitelisted
-  - Diagnose: Browser‑Netzwerk‑Tab; 403/400 bei Action
-  - Fix: In `next.config.ts` Origins erweitern oder App hinter korrektem Host betreiben
+### Checkliste nach dem Fix
+- [ ] `npm run lint` erfolgreich
+- [ ] Relevante Seite manuell getestet
+- [ ] README/Docs aktualisiert (falls Verhalten geändert)
+- [ ] Deployment-Anweisungen beachtet
 
-### 2) Datenbank (SQLite/Prisma)
-- Symptom: „Unable to open the database file“
-  - Ursache: relative `DATABASE_URL`, Verzeichnis nicht existent, Rechte fehlen
-  - Diagnose: `echo $DATABASE_URL`; `ls -l $(dirname <sqlite-path>)`
-  - Fix: absoluten Pfad setzen; Verzeichnis anlegen; Rechte prüfen; `npx prisma db push`
-- Symptom: Migration/Schema passt nicht zur DB
-  - Ursache: Schema geändert, DB nicht aktualisiert
-  - Diagnose: `npx prisma generate` Meldungen; App‑Fehler bei Abfragen
-  - Fix: `npx prisma db push`; ggf. Backup und Neuaufbau
+---
 
-### 3) Build/Next.js
-- Symptom: Build bricht bei Admin‑Seiten/SSR ab
-  - Ursache: DB‑Zugriff zur Build‑Zeit
-  - Diagnose: Build‑Logs; Stacktrace zeigt Prisma im Build
-  - Fix: `app/admin/layout.tsx` setzt `dynamic='force-dynamic'` und `revalidate=0`
-- Symptom: Startfehler „required-server-files.json“/Manifest fehlt
-  - Ursache: Server vor Build gestartet oder Output gelöscht
-  - Diagnose: prüfen: `.next/` existiert?
-  - Fix: `npm run build` erneut; dann `npx next start`
+## 🧭 Betrieb & Wartung
 
-### 4) Auth/NextAuth
-- Symptom: „CSRF token mismatch“/„Callback URL mismatch“
-  - Ursache: Falsche `NEXTAUTH_URL`/Proxy‑Header
-  - Diagnose: `curl -I http://IP:3000/api/auth/csrf`
-  - Fix: `NEXTAUTH_URL` korrigieren; bei Proxy `X-Forwarded-*` setzen
-- Symptom: Passwort korrekt, dennoch kein Login
-  - Ursache: Admin nicht vorhanden oder Hash anders
-  - Diagnose: `node -e` Prisma‑Einzeiler (User prüfen)
-  - Fix: Admin via Seed/Einzeiler upserten; Passwort neu setzen
+### Deployment-Strategie
+- **Manuell:** Build → Start (siehe [Installation & Setup](#-installation--setup))
+- **Process Manager:** `pm2 start npm --name alpaka -- run start`
+- **Zero-Downtime:** Zweite Instanz starten, Proxy umswitchen, alte Instanz schließen
 
-### 5) Uploads/Bilder
-- Symptom: Upload schlägt leise fehl
-  - Ursache: MIME nicht erlaubt; >5MB; fehlende Storage‑ENV
-  - Diagnose: Admin‑Form Rückmeldung; Server‑Logs
-  - Fix: erlaubten Typ/JPG/PNG/WebP nutzen; <5MB; Storage‑ENV setzen (S3/Cloudinary)
-- Symptom: Bilder werden nicht angezeigt
-  - Ursache: Next Image remotePatterns fehlen
-  - Diagnose: `next.config.ts` images‑Konfig prüfen
-  - Fix: passende `remotePatterns` ergänzen
+### Datenbank & Migrationen
+```bash
+npx prisma generate
+npx prisma db push
+npx prisma migrate dev --name <beschreibung>
+# optional: npx prisma studio
+```
 
-### 6) Netzwerk/Firewall/Proxy
-- Symptom: LAN‑Clients erreichen Seite nicht
-  - Ursache: Server bindet auf 127.0.0.1; UFW blockt Port
-  - Diagnose: `ss -tulpn | grep 3000`; `sudo ufw status`
-  - Fix: `-H 0.0.0.0` starten; UFW Port 3000 freigeben
-- Symptom: Hinter Nginx 502/404
-  - Ursache: falscher upstream/host header
-  - Diagnose: Nginx‑Logs; Upstream Check
-  - Fix: proxy_pass auf `http://127.0.0.1:3000`; `proxy_set_header Host $host;`
+### Backups & Restore
+- SQLite-Datei aus `DATABASE_URL` sichern (Dienst kurz stoppen!)
+- Uploads in `public/uploads/` kopieren
+- Restore: Datei zurückspielen → `npx prisma db push`
 
-### 7) OS/Dateirechte
-- Symptom: „EACCES: permission denied“ bei SQLite/Uploads
-  - Ursache: falsche Owner/Rechte
-  - Diagnose: `ls -la prisma/ public/uploads`
-  - Fix: `chown -R <user>:<group>`; `chmod` ausreichend
+### Monitoring & Logging
+- Next.js-Logs im Terminal/PM2/Journalctl
+- Health-Endpunkt für Uptime-Monitoring einsetzen
+- Proxy-/Tunnel-Logs (nginx, Cloudflare) zur Außensicht
 
-### 8) Performance
-- Symptom: Erste Anfrage langsam
-  - Ursache: Cold start, DB‑Warming
-  - Fix: Warmup‑Ping (Health‑Check), Caching (revalidate), Ressourcen prüfen
-- Symptom: Bilder groß/langsam
-  - Ursache: Originalgröße/keine Komprimierung
-  - Fix: Upload‑Resize aktiv; WebP; CDN/Proxy‑Cache nutzen
+### Updates
+- `npm outdated` prüfen → gezielt aktualisieren
+- Nach Dependency-Updates: `npm run lint`, `npm run build`
 
-### 9) Backups/Wiederherstellung
-- Symptom: DB korrupt
-  - Ursache: Crash beim Schreiben
-  - Diagnose: `sqlite3 dev.db "PRAGMA integrity_check;"`
-  - Fix: Restore aus Backup; Downtime‑Backup: Dienst stoppen, Datei kopieren
+---
 
-### 10) Sonstiges
-- Symptom: 404 auf `/api/health`
-  - Ursache: Build/Start nicht durchgelaufen
-  - Fix: `npm run build && npx next start`
-- Symptom: „Cannot specify encType…“ (React Warning)
-  - Ursache: encType bei Server Actions
-  - Fix: `encType` entfernen (bereits erledigt)
+## 🛡️ Sicherheit & Compliance
+- Starke Passwörter für alle Benutzer:innen, regelmäßig wechseln
+- Sofort nach Erststart Admin-Passwort ändern
+- Optional 2FA aktivieren (TOTP)
+- `NEXTAUTH_SECRET` 32 Bytes Base64, niemals committen
+- Firewall: nur Ports 80/443 (bzw. 3000 intern) freigeben
+- Datenschutz: Impressum/Datenschutzseiten unter `/datenschutz` etc. pflegen
 
-## Wartung & Updates
-- Dependencies aktualisieren (vorsichtig): `npm outdated`, dann selektiv `npm i <pkg>@latest`
-- Prisma: Schema ändern → `npx prisma db push`
-- App neu bauen/starten
+---
 
-## Lizenz
+## 🗃️ Datenmodell
+
+| Tabelle | Wichtigste Felder | Beschreibung |
+| --- | --- | --- |
+| `User` | E-Mail, Rolle, Passwort-Hash, 2FA-Status | Admins & Kund:innen |
+| `Tour` | Titel, Beschreibung, Preis, Kapazität | Grundlage jeder Buchung |
+| `EventSlot` | Start, Ende, Kapazität, tourId | Automatisch generierte Zeitfenster |
+| `Booking` | slotId, persons, status, code | Reservierung + Zahlungsvorbereitung |
+| `Payment` | bookingId, amountCents, status | Platzhalter für spätere Integration |
+| `Content` | key, value | CMS-ähnliche Textverwaltung |
+| `Review` | Name, Text, Rating, position | Öffentliche Kundenstimmen |
+| `TourImage` | URL, Alt-Text, Position | Zusatzbilder pro Tour |
+| `PageView` | Pfad, Session, Meta | Einfaches Tracking/Statistik |
+
+---
+
+## 🔌 API-Kurzreferenz
+
+| Endpoint | Methode | Beschreibung |
+| --- | --- | --- |
+| `/api/health` | GET | Health-Status (App, DB, Nutzerzahl) |
+| `/api/tours` | GET | Öffentliche Tourenliste |
+| `/api/tours/[id]` | GET | Detailinfos inkl. Slots |
+| `/api/bookings` | POST | Neue Buchung anlegen |
+| `/api/slots/calendar` | GET | Aggregierte Slots (inkl. Vormittag/Nachmittag) |
+| `/api/slots/[id]/availability` | GET | Live-Verfügbarkeit eines Slots |
+
+Authentifizierung via NextAuth (`/api/auth/[...nextauth]`).
+
+---
+
+## 🖼️ Medien- & Speicheroptionen
+
+| Backend | Einsatz | Besonderheiten |
+| --- | --- | --- |
+| `local` | Standard | Speicherung unter `public/uploads/`, ideal für kleine Setups |
+| `s3` | AWS-kompatible Buckets | `S3_*` Variablen setzen, `next.config.ts` remotePatterns erweitern |
+| `cloudinary` | CDNs & Optimierung | Cloudinary-Credentials eintragen, Upload über SDK |
+
+Uploads werden automatisch auf WebP/kleinere Varianten optimiert.
+
+---
+
+## 🧰 Troubleshooting-Lexikon
+
+> Nach Themen geordnet – jeweils Symptom → Ursache → Diagnose → Lösung.
+
+### Konfiguration & Environment
+- **Fehlende `DATABASE_URL`** → `.env` prüfen, absoluten Pfad setzen → `npx prisma db push`
+- **Falsche `NEXTAUTH_URL`** → Domain/LAN anpassen, Cookies löschen, erneut anmelden
+
+### Datenbank & Prisma
+- **„Unable to open the database file“** → Pfad/Permissions prüfen, Ordner anlegen, Rechte setzen
+- **Schema-Mismatch** → `npx prisma db push`, ggf. Migration neu ausführen
+
+### Build & Runtime
+- **Build bricht ab** → Prüfen, ob Server-Only Code in `generateStaticParams` o.ä. läuft → dynamisieren
+- **`.next` fehlt** → Build erneut starten, danach `next start`
+
+### Authentifizierung
+- **CSRF/Callback Fehler** → `NEXTAUTH_URL`, Proxy-Header `X-Forwarded-*` setzen
+- **Passwort korrekt, Login scheitert** → Benutzer existiert? Prisma-Einzeiler ausführen
+
+### Uploads & Medien
+- **Uploads schlagen fehl** → Dateityp/Größe, Storage-ENV prüfen
+- **Bilder nicht sichtbar** → `next.config.ts` remotePatterns ergänzen
+
+### Netzwerk & Proxy
+- **Kein Zugriff aus LAN** → Server auf `0.0.0.0` binden, Firewall-Port öffnen
+- **502 hinter Nginx** → Upstream-URL/Headers korrigieren
+
+### Betriebssystem & Rechte
+- **EACCES bei SQLite/Uploads** → `chown`/`chmod` anpassen
+
+### Performance
+- **Kalte Starts langsam** → Warmup-Requests, Caching, Ressourcen checken
+- **Große Bilder** → Optimierung aktiv lassen, ggf. CDN vorschalten
+
+---
+
+## 📎 Anhang
+
+### Befehls-Referenz
+```bash
+# Lint & Tests
+npm run lint
+npm run test
+
+# Prisma
+npx prisma generate
+npx prisma db push
+npx prisma studio
+
+# Produktionsstart
+npm run build
+npx next start -p 3000 -H 0.0.0.0
+```
+
+### Nützliche Ressourcen
+- [Next.js Docs](https://nextjs.org/docs)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [NextAuth.js](https://next-auth.js.org/)
+
+---
+
+## 📄 Lizenz
+
 MIT
