@@ -1,264 +1,126 @@
-# Alpaka‑Wanderungen – Vollständige Dokumentation
+<p align="center"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/1%20Stacked/2%20Red/laravel-logolockup-red.svg" alt="Laravel" width="320"></p>
 
-Next.js 15 (App Router) · TypeScript · Prisma (SQLite) · NextAuth (Credentials) · Tailwind‑Utilities · Bildspeicher lokal/S3/Cloudinary.
+# Alpaka‑Wanderungen – Laravel Neuaufbau
 
-Inhalt
-- Überblick & Features
-- Systemarchitektur & Projektstruktur
-- Datenmodell (Prisma)
-- Konfiguration (.env) und Secrets
-- Quickstart (2–3 Befehle)
-- Entwicklung (Dev)
-- Betrieb (Prod): LAN, Nginx/Proxy, Cloudflare Tunnel
-- Datenbank & Migrations
-- Admin‑Anleitung (Benutzer, 2FA, Inhalte, Touren/Slots, Buchungen)
-- API‑Endpunkte (Kurzreferenz)
-- Medien‑Storage (lokal, S3, Cloudinary)
-- Sicherheit (Passwörter, 2FA, Session/Cookies, CORS)
-- Logging, Monitoring, Health‑Checks
-- Backups & Wiederherstellung
-- Troubleshooting (häufige Fehler)
-- Wartung & Updates
+**Tourenverwaltung, Buchungssystem und Review-Workflow – komplett in Laravel 12 umgesetzt.**
 
-## Überblick & Features
-- Touren mit Terminslots (Kapazität, Personen pro Buchung min/max)
-- Buchung pro Slot inkl. Personenanzahl, Status (pending/confirmed/canceled)
-- Eindeutiger Buchungscode pro Bestellung
-- Admin‑Bereich: Touren/Slots/Buchungen/Benutzer/Content/Stats
-- Login via E‑Mail+Passwort, optional TOTP‑2FA (geplant/teilweise vorhanden)
-- CMS‑artige Content‑Keys (Hero‑Texte etc.)
-- Bild‑Uploads (lokal oder optional S3/Cloudinary) mit Resize/WebP
+## Überblick
+- ✨ Geführte Alpaka-Touren mit Slots, Kapazitäten und Preisangaben
+- 🧾 Buchungen mit eindeutigen Codes, Statusverwaltung und Zahlungsbelegen
+- 🛡️ Authentifizierung via Laravel Breeze (Blade + Tailwind)
+- 🐾 Admin-Backend für Touren, Buchungen und Reviews
+- 💬 Automatisierte Review-Anfragen inkl. E-Mail-Template & Artisan-Command
+- 📅 Öffentlicher Kalender mit Verfügbarkeiten und Warnhinweisen
 
-## Systemarchitektur & Projektstruktur
-- App Router (`/app`): Seiten, API‑Routes
-- Server Actions für Admin‑Formulare (CRUD)
-- `lib/prisma.ts` Single Prisma Client Instance
-- `lib/auth.ts` NextAuth Credentials‑Flow
-- `lib/content.ts` Key‑Value‑Inhalte
-- `lib/storage.ts` Medien‑Storage Provider (local/s3/cloudinary)
+Der frühere Next.js-Stack wurde ins Verzeichnis `legacy/` verschoben und dient nur noch als Referenz für das ursprüngliche Prisma-Schema.
 
-Verzeichnisbaum (auszug):
+## Technischer Stack
+- **Backend:** PHP 8.3 · Laravel 12 · Eloquent (SQLite)
+- **Frontend:** Blade, Tailwind CSS, Alpine.js, Vite
+- **Auth:** Laravel Breeze mit Session-Login, optionale 2FA-Felder vorbereitet
+- **Queue & Mail:** Datenbank-Queue, Mailable `ReviewRequestMail`, Log-Mailer als Default
+- **Tests:** PHPUnit (`php artisan test`) + dedizierter Capacity-Service-Test
+
+## Projektstruktur (Auszug)
 ```
 site/
-  app/                # Seiten & API
-  lib/                # Prisma, Auth, Content, Storage
-  prisma/             # schema.prisma, migrations, seed.js
-  public/             # statische Assets (uploads/)
-  scripts/            # quickstart.cjs
-  next.config.ts, tsconfig.json, package.json
+  app/
+    Console/Commands/SendReviewRequests.php
+    Http/Controllers/{Home,Tour,Booking,Calendar,Review}.php
+    Http/Controllers/Admin/{Dashboard,Booking,Review,Tour}Controller.php
+    Mail/ReviewRequestMail.php
+    Models/{User,Tour,EventSlot,Booking,Payment,Review,Content,PageView}.php
+    Services/CapacityService.php
+  database/
+    factories/*.php
+    migrations/*.php
+    seeders/DatabaseSeeder.php
+  resources/views/
+    home.blade.php, calendar/, tours/, reviews/, admin/, emails/
+  routes/web.php, routes/console.php, routes/auth.php
+  tests/Unit/CapacityServiceTest.php
+  composer.json, package.json, vite.config.js
 ```
 
-## Datenmodell (vereinfacht)
-- `User`: { id, email, name?, role, passwordHash, twoFactorEnabled, twoFactorSecret?, createdAt, updatedAt }
-- `Tour`: { id, title, description, durationMin, priceCents, capacity, minPersonsPerBooking, maxPersonsPerBooking, imageUrl?, imageAlt?, ... }
-- `EventSlot`: { id, tourId → Tour, start, end, capacity }
-- `Booking`: { id, code?, userId → User, slotId → EventSlot, persons, contactEmail?, status, payment? }
-- `Payment`: { id, bookingId → Booking, amountCents, currency, status }
-- `Content`: { id, key, value }
-- `TourImage`: { id, tourId → Tour, url, alt?, width?, height?, position }
-- `PageView`: { id, path, sessionId, ... }
-
-## Konfiguration (.env)
-Minimal (LAN‑Beispiel):
-```env
-NODE_ENV=production
-DATABASE_URL="file:/absoluter/pfad/zur/dev.db"   # absolut empfohlen
-NEXTAUTH_URL=http://<SERVER_IP>:3000
-NEXTAUTH_SECRET=<BASE64_32_BYTES>
-```
-Weitere optionale Variablen (Storage):
-```env
-STORAGE_BACKEND=local|s3|cloudinary
-# S3
-S3_BUCKET=...
-S3_REGION=...
-S3_PUBLIC_BASE=https://<bucket>.s3.<region>.amazonaws.com
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
-```
-
-## Quickstart (2–3 Befehle)
+## Setup & Quickstart
 ```bash
-cd /pfad/zu/Alpaka-Wanderungen/site
-npm ci
-npm run quickstart
-```
-Das Script:
-- erzeugt `.env` falls nötig (inkl. absolutem `DATABASE_URL`)
-- `prisma generate` + `prisma db push`
-- seedet Admin (`admin@example.com` / `admin123`)
-- baut und startet Next auf `0.0.0.0:3000`
-
-Zugriff: `http://<SERVER_IP>:3000` · Login: `/login` · Admin: `/admin`
-
-## Entwicklung (Dev)
-```bash
-npm ci
-npm run dev
-# http://localhost:3000
+cd site
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm run dev   # oder: composer dev (parallel Server, Queue, Logs, Vite)
 ```
 
-## Betrieb (Prod)
-Manuell:
-```bash
-npm run build
-npx next start -p 3000 -H 0.0.0.0
-```
-Nginx (optional Reverse Proxy mit TLS):
-- Nginx vhost → Upstream `http://127.0.0.1:3000`
-- TLS via Let’s Encrypt/Certbot
+- Admin-Login aus Seeder: `admin@alpaka-wanderungen.de` / `password` (sofort ändern!)
+- Lokale Datenbank: `database/database.sqlite` (wird bei Migration erzeugt)
+- Testlauf: `php artisan test`
 
-Cloudflare Tunnel (ohne offenen Port):
-- `cloudflared` → Route öffentliche Domain → `http://127.0.0.1:3000`
-- `NEXTAUTH_URL` auf die öffentliche URL setzen
+## Wichtige Features im Detail
 
-## Datenbank & Migrationen
-```bash
-npx prisma generate
-npx prisma db push
-# Studio (optional):
-npx prisma studio
-```
+### Kapazitätslogik & Warnungen
+- `App\Services\CapacityService`: berechnet Restplätze eines Slots inklusive Alpakakapazität
+- Warnungen bei Überbuchung oder mehr Personen als Alpakas
+- Genutzt in `BookingController`, `TourController`, `CalendarController`
+- Unit-Test: `tests/Unit/CapacityServiceTest.php`
 
-## Admin‑Anleitung
-- Benutzer: `/admin/users` (Rolle, Passwort setzen, 2FA verwalten)
-- Sicherheit/2FA: `/admin/security` (Platzhalter; 2FA Logik in Users)
-- Inhalte (Hero‑Texte): `/admin/content`
-- Touren/Slots: `/admin` (Anlegen/Bearbeiten/Löschen, Uploads)
-- Buchungen: `/admin/bookings` (Status/Payment)
+### Review-Workflow
+- Öffentliche Seite `/review?code=ALP-XXXXX` (`ReviewController@create/store`)
+- Admin-Moderation unter `/admin/reviews` inkl. Sichtbarkeit & Reihenfolge-Umschaltung
+- Automatischer E-Mail-Versand nach Tourende: `php artisan reviews:send-requests`
+  - Dry-Run mit `--dry`
+  - Verwendet `App\Mail\ReviewRequestMail` und Markdown-Template `resources/views/emails/review-request.blade.php`
 
-Standard‑Login: `admin@example.com` · `admin123` (nach Start ändern!)
-Passwort setzen per Einzeiler:
-```bash
-node -e "const{PrismaClient}=require('@prisma/client');(async()=>{const p=new PrismaClient();await p.user.update({where:{email:'admin@example.com'},data:{passwordHash:require('bcryptjs').hashSync('NEUESPASSWORT',10)}});console.log('Passwort geändert');await p.$disconnect()})().catch(e=>{console.error(e);process.exit(1)})"
-```
+### Kalender & Buchungen
+- Kalenderseite `/calendar` mit AJAX-Daten (`CalendarController@data`)
+- Tourdetailseite `/tours/{tour}` zeigt Slots, Restplätze, Warnhinweise
+- Buchung (`BookingController@store`) prüft Restkapazität, erzeugt individuellen Buchungscode und optional Zahlungsbeleg
 
-## API‑Endpunkte (Kurz)
-- `GET /api/health` → { ok, db, users }
-- `GET /api/tours` → Tourliste
-- `GET /api/tours/[id]` → Tourdetails
-- `POST /api/bookings` → Buchung anlegen (Gast/registriert)
-- `GET/POST /api/auth/[...nextauth]` → NextAuth
+### Admin-Dashboard
+- Gate `access-admin` in `AppServiceProvider` (Rolle `admin`)
+- Geschützte Routen unter `/admin`
+- CRUD für Touren, Buchungen, Reviews (Blade-Formulare, Flash-Nachrichten)
 
-## Medien‑Storage
-Konfiguriert über `STORAGE_BACKEND` (siehe `.env`). Lokal speichert unter `public/uploads/` (mit Resize/WebP). S3/Cloudinary optional.
+### Content & Seed-Daten
+- Key-Value-Inhalte (`Content`-Modell) für Startseiten-Texte
+- Seeder erzeugt Demodaten (Touren, Slots, Buchungen, Reviews, PageViews) mit lokalisiertem Faker (`de_DE`)
 
-## Sicherheit
-- Starke Passwörter; Admin‑Passwort direkt ändern
-- `NEXTAUTH_URL` korrekt setzen (LAN/Domain)
-- Optional 2FA per TOTP (Implementierung in `app/admin/users`)
-- Firewall/UFW: nur notwendige Ports (3000 oder 80/443 via Proxy)
+## Konfiguration
+- `.env` basiert auf `.env.example` (deutsche Locale, Europe/Berlin, Log-Mailer)
+- Mail-Versand aktivieren: `MAIL_MAILER=smtp` + Zugangsdaten setzen
+- Queue: `QUEUE_CONNECTION=database` (Migration `php artisan queue:table` optional, für Testbetrieb genügt `database` mit vorhandener `jobs`-Tabelle)
+- Horizon/Worker optional, Standard-Setup nutzt `php artisan queue:listen`
 
-## Logging, Monitoring, Health
-- Health: `GET /api/health`
-- Next.js Logs im Prozess/PM2/Journalctl
-- Optional: Nginx/Cloudflare Logs
+## Betrieb
+- **Entwicklung:** `composer dev` startet PHP-Server, Queue, Log-Tail sowie Vite gleichzeitig
+- **Produktion:**
+  - `php artisan config:cache && php artisan route:cache`
+  - `php artisan migrate --force`
+  - PHP-FPM oder `php artisan serve --host=0.0.0.0 --port=8000`
+  - Vite-Build: `npm run build` und statische Assets via `public/build`
+- **Cron für Review-E-Mails:** `0 10 * * * php /pfad/zur/artisan reviews:send-requests`
 
-## Backups
-- SQLite‑Datei sichern (in `.env`: `DATABASE_URL`) – am besten Service vorher stoppen
-- Uploads: `public/uploads/` mitsichern
+## Tests & Qualitätssicherung
+- `php artisan test` – führt PHPUnit-Suite aus (inkl. Kapazitäts-Test)
+- `php artisan migrate:fresh --seed` – Reset der Demodaten (z. B. vor Demos)
+- `vendor/bin/pint` – Code-Style (optional)
 
-## Troubleshooting
-Nach Themen gruppiert – jeweils mit Symptomen, Ursache, Diagnose und Fix.
+## Backups & Migration von Alt-Daten
+- SQLite-Datei `database/database.sqlite` sichern (App zuvor stoppen)
+- Uploads liegen in `public/storage` (falls `php artisan storage:link` genutzt wird)
+- Altdaten aus der Next.js-Version sind in `legacy/prisma/` dokumentiert
 
-### 1) Environment/Config
-- Symptom: „Environment variable not found: DATABASE_URL“
-  - Ursache: `.env` fehlt oder key fehlt
-  - Diagnose: `grep -n DATABASE_URL .env*`; `npx prisma generate`
-  - Fix: `.env` anlegen; `DATABASE_URL` setzen; `npx prisma db push`
-- Symptom: Login schlägt ohne Fehler fehl
-  - Ursache: Falsche `NEXTAUTH_URL` (LAN vs Domain); Cookies „falsch“
-  - Diagnose: `echo $NEXTAUTH_URL`; `curl -I http://IP:3000/api/auth/csrf`
-  - Fix: `NEXTAUTH_URL` korrekt setzen; Browser‑Cookies löschen; neu anmelden
-- Symptom: Server Actions blockiert (CORS/Origin)
-  - Ursache: forwarded Host nicht whitelisted
-  - Diagnose: Browser‑Netzwerk‑Tab; 403/400 bei Action
-  - Fix: In `next.config.ts` Origins erweitern oder App hinter korrektem Host betreiben
-
-### 2) Datenbank (SQLite/Prisma)
-- Symptom: „Unable to open the database file“
-  - Ursache: relative `DATABASE_URL`, Verzeichnis nicht existent, Rechte fehlen
-  - Diagnose: `echo $DATABASE_URL`; `ls -l $(dirname <sqlite-path>)`
-  - Fix: absoluten Pfad setzen; Verzeichnis anlegen; Rechte prüfen; `npx prisma db push`
-- Symptom: Migration/Schema passt nicht zur DB
-  - Ursache: Schema geändert, DB nicht aktualisiert
-  - Diagnose: `npx prisma generate` Meldungen; App‑Fehler bei Abfragen
-  - Fix: `npx prisma db push`; ggf. Backup und Neuaufbau
-
-### 3) Build/Next.js
-- Symptom: Build bricht bei Admin‑Seiten/SSR ab
-  - Ursache: DB‑Zugriff zur Build‑Zeit
-  - Diagnose: Build‑Logs; Stacktrace zeigt Prisma im Build
-  - Fix: `app/admin/layout.tsx` setzt `dynamic='force-dynamic'` und `revalidate=0`
-- Symptom: Startfehler „required-server-files.json“/Manifest fehlt
-  - Ursache: Server vor Build gestartet oder Output gelöscht
-  - Diagnose: prüfen: `.next/` existiert?
-  - Fix: `npm run build` erneut; dann `npx next start`
-
-### 4) Auth/NextAuth
-- Symptom: „CSRF token mismatch“/„Callback URL mismatch“
-  - Ursache: Falsche `NEXTAUTH_URL`/Proxy‑Header
-  - Diagnose: `curl -I http://IP:3000/api/auth/csrf`
-  - Fix: `NEXTAUTH_URL` korrigieren; bei Proxy `X-Forwarded-*` setzen
-- Symptom: Passwort korrekt, dennoch kein Login
-  - Ursache: Admin nicht vorhanden oder Hash anders
-  - Diagnose: `node -e` Prisma‑Einzeiler (User prüfen)
-  - Fix: Admin via Seed/Einzeiler upserten; Passwort neu setzen
-
-### 5) Uploads/Bilder
-- Symptom: Upload schlägt leise fehl
-  - Ursache: MIME nicht erlaubt; >5MB; fehlende Storage‑ENV
-  - Diagnose: Admin‑Form Rückmeldung; Server‑Logs
-  - Fix: erlaubten Typ/JPG/PNG/WebP nutzen; <5MB; Storage‑ENV setzen (S3/Cloudinary)
-- Symptom: Bilder werden nicht angezeigt
-  - Ursache: Next Image remotePatterns fehlen
-  - Diagnose: `next.config.ts` images‑Konfig prüfen
-  - Fix: passende `remotePatterns` ergänzen
-
-### 6) Netzwerk/Firewall/Proxy
-- Symptom: LAN‑Clients erreichen Seite nicht
-  - Ursache: Server bindet auf 127.0.0.1; UFW blockt Port
-  - Diagnose: `ss -tulpn | grep 3000`; `sudo ufw status`
-  - Fix: `-H 0.0.0.0` starten; UFW Port 3000 freigeben
-- Symptom: Hinter Nginx 502/404
-  - Ursache: falscher upstream/host header
-  - Diagnose: Nginx‑Logs; Upstream Check
-  - Fix: proxy_pass auf `http://127.0.0.1:3000`; `proxy_set_header Host $host;`
-
-### 7) OS/Dateirechte
-- Symptom: „EACCES: permission denied“ bei SQLite/Uploads
-  - Ursache: falsche Owner/Rechte
-  - Diagnose: `ls -la prisma/ public/uploads`
-  - Fix: `chown -R <user>:<group>`; `chmod` ausreichend
-
-### 8) Performance
-- Symptom: Erste Anfrage langsam
-  - Ursache: Cold start, DB‑Warming
-  - Fix: Warmup‑Ping (Health‑Check), Caching (revalidate), Ressourcen prüfen
-- Symptom: Bilder groß/langsam
-  - Ursache: Originalgröße/keine Komprimierung
-  - Fix: Upload‑Resize aktiv; WebP; CDN/Proxy‑Cache nutzen
-
-### 9) Backups/Wiederherstellung
-- Symptom: DB korrupt
-  - Ursache: Crash beim Schreiben
-  - Diagnose: `sqlite3 dev.db "PRAGMA integrity_check;"`
-  - Fix: Restore aus Backup; Downtime‑Backup: Dienst stoppen, Datei kopieren
-
-### 10) Sonstiges
-- Symptom: 404 auf `/api/health`
-  - Ursache: Build/Start nicht durchgelaufen
-  - Fix: `npm run build && npx next start`
-- Symptom: „Cannot specify encType…“ (React Warning)
-  - Ursache: encType bei Server Actions
-  - Fix: `encType` entfernen (bereits erledigt)
+## Nützliche Artisan-Befehle
+- `php artisan make:model Tour -m` – Beispiel zum Erstellen neuer Module
+- `php artisan reviews:send-requests --dry` – zeigt anstehende Review-Mails ohne Versand
+- `php artisan queue:listen` – verarbeitet Queue-Jobs (Review-Mails, zukünftige Tasks)
 
 ## Wartung & Updates
-- Dependencies aktualisieren (vorsichtig): `npm outdated`, dann selektiv `npm i <pkg>@latest`
-- Prisma: Schema ändern → `npx prisma db push`
-- App neu bauen/starten
+- Composer-Updates: `composer outdated` → gezielt aktualisieren, anschließend `php artisan test`
+- Frontend-Abhängigkeiten: `npm outdated` → `npm upgrade`
+- Env-Änderungen unbedingt per `php artisan config:clear` übernehmen
 
-## Lizenz
-MIT
+---
+
+**Lizenz:** MIT · © Alpaka-Wanderungen

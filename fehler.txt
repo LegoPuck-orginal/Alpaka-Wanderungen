@@ -1,19 +1,10 @@
-Protokoll (3. Oktober 2025)
+Protokoll (4. Oktober 2025)
 
-1. `npm run lint`
-   → Keine Probleme gefunden.
+1. `php artisan migrate:fresh --seed`
+   → Alle Tabellen neu angelegt (SQLite) und Seed-Daten eingespielt.
 
-2. `npm run build`
-   → Build erfolgreich abgeschlossen, alle Seiten/Routes generiert.
+2. `php artisan test`
+   → 27 Tests, 65 Assertions – alle erfolgreich.
 
-3. `npm run lint`
-   → Nach den Farb-Anpassungen weiterhin keine linting-Fehler.
-
-4. `npm run build`
-   → Build erneut erfolgreich; Produktion bleibt lauffähig.
-
-5. `npx eslint .`
-   → Lint erneut ohne Beanstandungen (Workaround, da `npm run lint` ein Dev-Server-Script startet).
-
-6. `npm run build`
-   → Aktueller Produktionsbuild erfolgreich durchgelaufen.
+3. `composer dev`
+   → Hinweis: Startet lokalen Server, Queue-Listener, Log-Tail und Vite parallel (optional im Alltag verwenden).
